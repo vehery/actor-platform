@@ -34,7 +34,6 @@ public class GroupedDialogsActor extends ModuleActor {
     private static final String PREFERENCE_GROUPED = "dialogs.grouped";
     private static final String PREFERENCE_GROUPED_LOADED = "dialogs.grouped.loaded";
 
-    private boolean isLoaded = false;
     private GroupedStorage storage;
     private MVVMCollection<DialogSpec, DialogSpecVM> specs;
 
@@ -48,42 +47,51 @@ public class GroupedDialogsActor extends ModuleActor {
         specs = context().getMessagesModule().getDialogDescKeyValue();
         storage = new GroupedStorage();
 
-        byte[] data = preferences().getBytes(PREFERENCE_GROUPED);
-        if (data != null) {
-            try {
-                storage = new GroupedStorage(data);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (isPersistenceEnabled()) {
+            byte[] data = preferences().getBytes(PREFERENCE_GROUPED);
+            if (data != null) {
+                try {
+                    storage = new GroupedStorage(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-
-        isLoaded = preferences().getBool(PREFERENCE_GROUPED_LOADED, false);
-
-        if (!isLoaded) {
-            request(new RequestLoadGroupedDialogs(), new RpcCallback<ResponseLoadGroupedDialogs>() {
-                @Override
-                public void onResult(final ResponseLoadGroupedDialogs response) {
-                    updates().executeRelatedResponse(response.getUsers(), response.getGroups(),
-                            self(),
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    applyGroups(response.getDialogs());
-                                    isLoaded = true;
-                                    preferences().putBool(PREFERENCE_GROUPED_LOADED, true);
-                                }
-                            });
-                }
-
-                @Override
-                public void onError(RpcException e) {
-                    // Ignore
-                }
-            });
+            boolean isLoaded = preferences().getBool(PREFERENCE_GROUPED_LOADED, false);
+            if (!isLoaded) {
+                loadGroupedDialogs();
+            } else {
+                notifyVM();
+            }
         } else {
-            notifyVM();
+            loadGroupedDialogs();
         }
     }
+
+    private void loadGroupedDialogs() {
+        request(new RequestLoadGroupedDialogs(), new RpcCallback<ResponseLoadGroupedDialogs>() {
+            @Override
+            public void onResult(final ResponseLoadGroupedDialogs response) {
+                updates().executeRelatedResponse(response.getUsers(), response.getGroups(), self(), new Runnable() {
+                    @Override
+                    public void run() {
+                        applyGroups(response.getDialogs());
+                        if (isPersistenceEnabled()) {
+                            preferences().putBool(PREFERENCE_GROUPED_LOADED, true);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onError(RpcException e) {
+                // Ignore
+            }
+        });
+    }
+
+    //
+    //
+    //
 
     private void onCounterChanged(Peer peer, int counter) {
         DialogSpec spec = new DialogSpec(peer, false, counter);
@@ -100,12 +108,9 @@ public class GroupedDialogsActor extends ModuleActor {
     }
 
 
-    private void onChatArchived(ApiPeer peer) {
-
-    }
-
-
+    //
     // Tools
+    //
 
     private void notifyVM(Peer peer) {
         boolean found = false;
@@ -151,7 +156,6 @@ public class GroupedDialogsActor extends ModuleActor {
         context().getMessagesModule().getDialogGroupsVM().getGroupsValueModel().change(groups);
     }
 
-
     private void applyGroups(List<ApiDialogGroup> dialogGroups) {
 
         // Writing missing specs
@@ -178,12 +182,19 @@ public class GroupedDialogsActor extends ModuleActor {
             }
             storage.getGroups().add(new GroupedItem(g.getKey(), g.getTitle(), peers));
         }
-        preferences().putBytes(PREFERENCE_GROUPED, storage.toByteArray());
+        if (isPersistenceEnabled()) {
+            preferences().putBytes(PREFERENCE_GROUPED, storage.toByteArray());
+        }
 
         // Updating VM
 
         notifyVM();
     }
+
+
+    //
+    // Messages
+    //
 
     @Override
     public void onReceive(Object message) {
@@ -196,8 +207,6 @@ public class GroupedDialogsActor extends ModuleActor {
         } else if (message instanceof GroupedDialogsChanged) {
             GroupedDialogsChanged g = (GroupedDialogsChanged) message;
             onGroupedChanged(g.getItems());
-        } else if (message instanceof ChatArchived) {
-            onChatArchived(((ChatArchived) message).getPeer());
         } else {
             super.onReceive(message);
         }
@@ -245,17 +254,6 @@ public class GroupedDialogsActor extends ModuleActor {
 
         public int getCounter() {
             return counter;
-        }
-    }
-
-    public static class ChatArchived {
-        ApiPeer peer;
-        public ChatArchived(ApiPeer peer) {
-            this.peer = peer;
-        }
-
-        public ApiPeer getPeer() {
-            return peer;
         }
     }
 }

@@ -52,7 +52,6 @@ import im.actor.core.entity.content.VideoContent;
 import im.actor.core.entity.content.VoiceContent;
 import im.actor.core.entity.content.internal.Sticker;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.encryption.EncryptedMsgActor;
 import im.actor.core.modules.internal.file.UploadManager;
 import im.actor.core.modules.internal.messages.entity.PendingMessage;
 import im.actor.core.modules.internal.messages.entity.PendingMessagesStorage;
@@ -62,7 +61,6 @@ import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
 import im.actor.runtime.*;
 import im.actor.runtime.Runtime;
-import im.actor.runtime.actors.ask.AskCallback;
 import im.actor.runtime.power.WakeLock;
 
 public class SenderActor extends ModuleActor {
@@ -72,7 +70,7 @@ public class SenderActor extends ModuleActor {
     private PendingMessagesStorage pendingMessages;
 
     private long lastSendDate = 0;
-    private HashMap<Long, WakeLock> fileUplaodingWakeLocks = new HashMap<>();
+    private HashMap<Long, WakeLock> fileUploadingWakeLocks = new HashMap<>();
 
     public SenderActor(ModuleContext context) {
         super(context);
@@ -325,7 +323,7 @@ public class SenderActor extends ModuleActor {
     }
 
     private void performUploadFile(long rid, String descriptor, String fileName) {
-        fileUplaodingWakeLocks.put(rid, Runtime.makeWakeLock());
+        fileUploadingWakeLocks.put(rid, Runtime.makeWakeLock());
         context().getFilesModule().requestUpload(rid, descriptor, fileName, self());
     }
 
@@ -360,7 +358,7 @@ public class SenderActor extends ModuleActor {
         pendingMessages.getPendingMessages().add(new PendingMessage(msg.getPeer(), msg.getRid(), nContent));
         context().getMessagesModule().getConversationActor(msg.getPeer()).send(new ConversationActor.MessageContentUpdated(msg.getRid(), nContent));
         performSendContent(msg.getPeer(), rid, nContent);
-        fileUplaodingWakeLocks.remove(rid).releaseLock();
+        fileUploadingWakeLocks.remove(rid).releaseLock();
     }
 
     private void onFileUploadError(long rid) {
@@ -370,7 +368,7 @@ public class SenderActor extends ModuleActor {
         }
 
         self().send(new MessageError(msg.getPeer(), msg.getRid()));
-        fileUplaodingWakeLocks.remove(rid).releaseLock();
+        fileUploadingWakeLocks.remove(rid).releaseLock();
     }
 
     // Sending content

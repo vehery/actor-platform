@@ -30,34 +30,40 @@ public class MessageDeleteActor extends ModuleActor {
 
     public MessageDeleteActor(ModuleContext context) {
         super(context);
-        this.syncKeyValue = context.getMessagesModule().getCursorStorage();
+        if (isPersistenceEnabled()) {
+            this.syncKeyValue = context.getMessagesModule().getCursorStorage();
+        }
     }
 
     @Override
     public void preStart() {
         super.preStart();
-        byte[] data = syncKeyValue.get(CURSOR_DELETE);
-        if (data != null) {
-            try {
-                deleteStorage = DeleteStorage.fromBytes(data);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (isPersistenceEnabled()) {
+            byte[] data = syncKeyValue.get(CURSOR_DELETE);
+            if (data != null) {
+                try {
+                    deleteStorage = DeleteStorage.fromBytes(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    deleteStorage = new DeleteStorage();
+                }
+            } else {
                 deleteStorage = new DeleteStorage();
             }
-        } else {
-            deleteStorage = new DeleteStorage();
-        }
 
-        for (Peer peer : deleteStorage.getPendingDeletions().keySet()) {
-            Delete delete = deleteStorage.getPendingDeletions().get(peer);
-            if (delete.getRids().size() > 0) {
-                performDelete(peer, delete.getRids());
+            for (Peer peer : deleteStorage.getPendingDeletions().keySet()) {
+                Delete delete = deleteStorage.getPendingDeletions().get(peer);
+                if (delete.getRids().size() > 0) {
+                    performDelete(peer, delete.getRids());
+                }
             }
         }
     }
 
     void saveStorage() {
-        syncKeyValue.put(CURSOR_DELETE, deleteStorage.toByteArray());
+        if (isPersistenceEnabled()) {
+            syncKeyValue.put(CURSOR_DELETE, deleteStorage.toByteArray());
+        }
     }
 
     public void performDelete(final Peer peer, final List<Long> rids) {
@@ -67,13 +73,15 @@ public class MessageDeleteActor extends ModuleActor {
 
             @Override
             public void onResult(ResponseSeq response) {
-                if (deleteStorage.getPendingDeletions().containsKey(peer)) {
-                    deleteStorage.getPendingDeletions().get(peer).getRids().removeAll(rids);
-                    saveStorage();
+                if (isPersistenceEnabled()) {
+                    if (deleteStorage.getPendingDeletions().containsKey(peer)) {
+                        deleteStorage.getPendingDeletions().get(peer).getRids().removeAll(rids);
+                        saveStorage();
+                    }
                 }
 
-                updates().onUpdateReceived(new SeqUpdate(response.getSeq(),response.getState(),
-                        UpdateMessageDelete.HEADER,new UpdateMessageDelete(apiPeer, rids).toByteArray()));
+                updates().onUpdateReceived(new SeqUpdate(response.getSeq(), response.getState(),
+                        UpdateMessageDelete.HEADER, new UpdateMessageDelete(apiPeer, rids).toByteArray()));
             }
 
             @Override
@@ -84,12 +92,14 @@ public class MessageDeleteActor extends ModuleActor {
     }
 
     public void onDeleteMessage(Peer peer, List<Long> rids) {
-        // Add to storage
-        if (!deleteStorage.getPendingDeletions().containsKey(peer)) {
-            deleteStorage.getPendingDeletions().put(peer, new Delete(peer,new ArrayList<Long>()));
+        if (isPersistenceEnabled()) {
+            // Add to storage
+            if (!deleteStorage.getPendingDeletions().containsKey(peer)) {
+                deleteStorage.getPendingDeletions().put(peer, new Delete(peer, new ArrayList<Long>()));
+            }
+            deleteStorage.getPendingDeletions().get(peer).getRids().addAll(rids);
+            saveStorage();
         }
-        deleteStorage.getPendingDeletions().get(peer).getRids().addAll(rids);
-        saveStorage();
 
         // Perform deletion
         performDelete(peer, rids);

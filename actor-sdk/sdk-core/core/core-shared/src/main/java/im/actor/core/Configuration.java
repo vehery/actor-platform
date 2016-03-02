@@ -58,6 +58,8 @@ public class Configuration {
     private final CallsProvider callsProvider;
     @Property("readonly, nonatomic")
     private final boolean isEnabledGroupedChatList;
+    @Property("readonly, nonatomic")
+    private final boolean isEnablePersistence;
 
     Configuration(ConnectionEndpoint[] endpoints,
                   PhoneBookProvider phoneBookProvider,
@@ -78,7 +80,8 @@ public class Configuration {
                   boolean enablePhoneBookImport,
                   CallsProvider callsProvider,
                   boolean voiceCallsEnabled,
-                  boolean isEnabledGroupedChatList) {
+                  boolean isEnabledGroupedChatList,
+                  boolean isEnablePersistence) {
         this.endpoints = endpoints;
         this.phoneBookProvider = phoneBookProvider;
         this.enableContactsLogging = enableContactsLogging;
@@ -99,6 +102,7 @@ public class Configuration {
         this.callsProvider = callsProvider;
         this.voiceCallsEnabled = voiceCallsEnabled;
         this.isEnabledGroupedChatList = isEnabledGroupedChatList;
+        this.isEnablePersistence = isEnablePersistence;
     }
 
     /**
@@ -279,5 +283,14 @@ public class Configuration {
      */
     public boolean isEnabledGroupedChatList() {
         return isEnabledGroupedChatList;
+    }
+
+    /**
+     * Get If message persistence enabled
+     *
+     * @return is message persistence enabled
+     */
+    public boolean isEnablePersistence() {
+        return isEnablePersistence;
     }
 }

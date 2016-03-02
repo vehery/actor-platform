@@ -57,7 +57,6 @@ import im.actor.core.modules.internal.messages.DialogsActor;
 import im.actor.core.modules.internal.messages.DialogsHistoryActor;
 import im.actor.core.modules.internal.messages.GroupedDialogsActor;
 import im.actor.core.modules.internal.messages.MessageDeleteActor;
-import im.actor.core.modules.internal.messages.MessageShownActor;
 import im.actor.core.modules.internal.messages.OwnReadActor;
 import im.actor.core.modules.internal.messages.SenderActor;
 import im.actor.core.modules.updates.internal.ChangeContent;
@@ -68,9 +67,9 @@ import im.actor.core.viewmodel.Command;
 import im.actor.core.viewmodel.CommandCallback;
 import im.actor.core.viewmodel.ConversationVM;
 import im.actor.core.viewmodel.DialogGroupsVM;
-import im.actor.core.viewmodel.DialogSmall;
 import im.actor.core.viewmodel.DialogSpecVM;
 import im.actor.runtime.Storage;
+import im.actor.runtime.actors.Actor;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.actors.Props;
@@ -97,10 +96,10 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     private ActorRef sendMessageActor;
     private ActorRef deletionsActor;
 
-    private final HashMap<Peer, ListEngine<Message>> conversationEngines = new HashMap<Peer, ListEngine<Message>>();
-    private final HashMap<Peer, ListEngine<Message>> conversationDocsEngines = new HashMap<Peer, ListEngine<Message>>();
-    private final HashMap<Peer, ActorRef> conversationActors = new HashMap<Peer, ActorRef>();
-    private final HashMap<Peer, ActorRef> conversationHistoryActors = new HashMap<Peer, ActorRef>();
+    private final HashMap<Peer, ListEngine<Message>> conversationEngines = new HashMap<>();
+    private final HashMap<Peer, ListEngine<Message>> conversationDocsEngines = new HashMap<>();
+    private final HashMap<Peer, ActorRef> conversationActors = new HashMap<>();
+    private final HashMap<Peer, ActorRef> conversationHistoryActors = new HashMap<>();
 
     private final SyncKeyValue cursorStorage;
 
@@ -117,65 +116,65 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     }
 
     public void run() {
-        this.dialogsActor = system().actorOf(Props.create(new ActorCreator() {
+        this.dialogsActor = system().actorOf("actor/dialogs", new ActorCreator() {
             @Override
-            public DialogsActor create() {
+            public Actor create() {
                 return new DialogsActor(context());
             }
-        }), "actor/dialogs");
-        this.dialogsHistoryActor = system().actorOf(Props.create(new ActorCreator() {
+        });
+        this.dialogsHistoryActor = system().actorOf("actor/dialogs/history", new ActorCreator() {
             @Override
             public DialogsHistoryActor create() {
                 return new DialogsHistoryActor(context());
             }
-        }), "actor/dialogs/history");
+        });
 
-        this.archivedDialogsActor = system().actorOf(Props.create(new ActorCreator() {
+        this.archivedDialogsActor = system().actorOf("actor/dialogs/archived", new ActorCreator() {
             @Override
             public ArchivedDialogsActor create() {
                 return new ArchivedDialogsActor(context());
             }
-        }), "actor/dialogs/archived");
+        });
 
         if (context().getConfiguration().isEnabledGroupedChatList()) {
-            this.dialogsGroupedActor = system().actorOf(Props.create(new ActorCreator() {
+            this.dialogsGroupedActor = system().actorOf("actor/dialogs/grouped", new ActorCreator() {
                 @Override
                 public GroupedDialogsActor create() {
                     return new GroupedDialogsActor(context());
                 }
-            }), "actor/dialogs/grouped");
+            });
         }
 
-        this.ownReadActor = system().actorOf(Props.create(new ActorCreator() {
+        this.ownReadActor = system().actorOf("actor/read/own", new ActorCreator() {
             @Override
             public OwnReadActor create() {
                 return new OwnReadActor(context());
             }
-        }), "actor/read/own");
-        this.plainReadActor = system().actorOf(Props.create(new ActorCreator() {
+        });
+        this.plainReadActor = system().actorOf("actor/plain/read", "heavy", new ActorCreator() {
             @Override
             public CursorReaderActor create() {
                 return new CursorReaderActor(context());
             }
-        }).changeDispatcher("heavy"), "actor/plain/read");
-        this.plainReceiverActor = system().actorOf(Props.create(new ActorCreator() {
+        });
+        this.plainReceiverActor = system().actorOf("actor/plain/receive", "heavy", new ActorCreator() {
             @Override
             public CursorReceiverActor create() {
                 return new CursorReceiverActor(context());
             }
-        }).changeDispatcher("heavy"), "actor/plain/receive");
-        this.sendMessageActor = system().actorOf(Props.create(new ActorCreator() {
+        });
+        this.sendMessageActor = system().actorOf("actor/sender/small", new ActorCreator() {
             @Override
             public SenderActor create() {
                 return new SenderActor(context());
             }
-        }), "actor/sender/small");
-        this.deletionsActor = system().actorOf(Props.create(new ActorCreator() {
+        });
+        this.deletionsActor = system().actorOf("actor/deletions", new ActorCreator() {
             @Override
             public MessageDeleteActor create() {
                 return new MessageDeleteActor(context());
             }
-        }), "actor/deletions");
+        });
 
         context().getEvents().subscribe(this, PeerChatOpened.EVENT);
         context().getEvents().subscribe(this, PeerChatClosed.EVENT);

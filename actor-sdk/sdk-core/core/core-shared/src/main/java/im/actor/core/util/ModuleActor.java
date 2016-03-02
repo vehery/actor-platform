@@ -121,6 +121,10 @@ public class ModuleActor extends AskcableActor implements BusSubscriber {
         return context.getConfiguration();
     }
 
+    public boolean isPersistenceEnabled() {
+        return config().isEnablePersistence();
+    }
+
     public Updates updates() {
         return context.getUpdatesModule();
     }

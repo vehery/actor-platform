@@ -60,6 +60,21 @@ public class ConfigurationBuilder {
 
     private boolean isEnabledGroupedChatList = true;
 
+    private boolean isEnablePersistence = true;
+
+
+    /**
+     * Is persisting messages on disk enabled
+     *
+     * @param isEnablePersistence if persistence is required
+     * @return this
+     */
+    @ObjectiveCName("setIsEnablePersistence:")
+    public ConfigurationBuilder setIsEnablePersistence(boolean isEnablePersistence) {
+        this.isEnablePersistence = isEnablePersistence;
+        return this;
+    }
+
     /**
      * Setting if grouped chat list support enabled
      *
@@ -395,6 +410,7 @@ public class ConfigurationBuilder {
                 isPhoneBookImportEnabled,
                 callsProvider,
                 voiceCallsEnabled,
-                isEnabledGroupedChatList);
+                isEnabledGroupedChatList,
+                isEnablePersistence);
     }
 }

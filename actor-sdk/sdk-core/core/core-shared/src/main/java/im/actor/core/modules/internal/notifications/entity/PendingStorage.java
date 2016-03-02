@@ -22,7 +22,7 @@ public class PendingStorage extends BserObject {
     private List<PendingNotification> notifications;
 
     public PendingStorage() {
-        notifications = new ArrayList<PendingNotification>();
+        notifications = new ArrayList<>();
     }
 
     public List<PendingNotification> getNotifications() {
