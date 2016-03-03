@@ -59,13 +59,13 @@ public class ConversationActor extends ModuleActor {
 
     private final Peer peer;
     private final DialogsInt dialogs;
-
     private final boolean isHiddenPeer;
+
     private ListEngine<Message> messages;
     private ListEngine<Message> docs;
     private IndexStorage outPendingIndex;
     private IndexStorage inPendingIndex;
-    // private ActorRef dialogsGroupedActor;
+
     private ActorRef readerActor;
     private long inReadStateNew;
     private long inReadState;
@@ -110,7 +110,6 @@ public class ConversationActor extends ModuleActor {
     // Visibility state
 
     private void onConversationVisible() {
-        // Log.d("ConversationActor", "onConversationVisible");
         isConversationVisible = true;
 
         if (isConversationAutoRead()) {
@@ -119,12 +118,10 @@ public class ConversationActor extends ModuleActor {
     }
 
     private void onConversationHidden() {
-        // Log.d("ConversationActor", "onConversationHidden");
         isConversationVisible = false;
     }
 
     private void onAppVisible() {
-        // Log.d("ConversationActor", "onAppVisible");
         isAppVisible = true;
 
         if (isConversationAutoRead()) {
@@ -133,7 +130,6 @@ public class ConversationActor extends ModuleActor {
     }
 
     private void onAppHidden() {
-        // Log.d("ConversationActor", "onAppHidden");
         isAppVisible = false;
     }
 
@@ -472,9 +468,7 @@ public class ConversationActor extends ModuleActor {
     }
 
     private void checkReadState(boolean updateDialogs) {
-        //Log.d("ConversationActor", "checkReadState");
         if (inReadStateNew > inReadState) {
-            //  Log.d("ConversationActor", "reading");
             inReadState = inReadStateNew;
             preferences().putLong(IN_READ_STATE_PREF, inReadState);
             boolean wasNotNull = inPendingIndex.getCount() != 0;

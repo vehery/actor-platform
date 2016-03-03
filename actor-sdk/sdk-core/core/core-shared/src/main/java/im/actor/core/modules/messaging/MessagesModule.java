@@ -927,7 +927,7 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
         if (event instanceof PeerChatOpened) {
             Peer peer = ((PeerChatOpened) event).getPeer();
             assumeConvActor(peer);
-            conversationActors.get(peer).onConverstionVisible();
+            conversationActors.get(peer).onConversationVisible();
         } else if (event instanceof PeerChatClosed) {
             Peer peer = ((PeerChatClosed) event).getPeer();
             assumeConvActor(peer);

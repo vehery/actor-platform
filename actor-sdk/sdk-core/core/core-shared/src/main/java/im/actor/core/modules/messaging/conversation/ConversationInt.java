@@ -68,7 +68,7 @@ public class ConversationInt extends ActorInterface {
         send(new MessageReactionsChanged(rid, reactions));
     }
 
-    public void onConverstionVisible() {
+    public void onConversationVisible() {
         send(new ConversationVisible());
     }
 
