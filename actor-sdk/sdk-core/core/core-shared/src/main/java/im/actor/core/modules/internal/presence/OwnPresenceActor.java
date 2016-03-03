@@ -61,18 +61,7 @@ public class OwnPresenceActor extends ModuleActor implements BusSubscriber {
             prevRid = 0;
         }
         boolean isOnline = isVisible || isAlwaysOnline;
-        prevRid = request(new RequestSetOnline(isOnline, TIMEOUT, null, null),
-                new RpcCallback<ResponseVoid>() {
-                    @Override
-                    public void onResult(ResponseVoid response) {
-
-                    }
-
-                    @Override
-                    public void onError(RpcException e) {
-
-                    }
-                });
+        prevRid = request(new RequestSetOnline(isOnline, TIMEOUT, null, null));
         if (isOnline) {
             schedulePerform(RESEND_TIMEOUT);
         }

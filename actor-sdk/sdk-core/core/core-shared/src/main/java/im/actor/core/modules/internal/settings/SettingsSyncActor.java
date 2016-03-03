@@ -19,6 +19,7 @@ import im.actor.core.modules.internal.settings.entity.SettingsSyncState;
 import im.actor.core.util.ModuleActor;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
+import im.actor.runtime.function.Consumer;
 
 public class SettingsSyncActor extends ModuleActor {
 
@@ -49,39 +50,30 @@ public class SettingsSyncActor extends ModuleActor {
         }
 
         if (!preferences().getBool(SYNC_STATE_LOADED, false)) {
+
             // TODO: Avoid race conditions
-            request(new RequestGetParameters(), new RpcCallback<ResponseGetParameters>() {
+            api(new RequestGetParameters()).then(new Consumer<ResponseGetParameters>() {
                 @Override
-                public void onResult(ResponseGetParameters response) {
-                    for (ApiParameter p : response.getParameters()) {
+                public void apply(ResponseGetParameters responseGetParameters) {
+                    for (ApiParameter p : responseGetParameters.getParameters()) {
                         context().getSettingsModule().onUpdatedSetting(p.getKey(), p.getValue());
                     }
                     preferences().putBool(SYNC_STATE_LOADED, true);
                 }
-
-                @Override
-                public void onError(RpcException e) {
-                    // Ignore
-                }
-            });
+            }).done(self());
         }
     }
 
     private void performSync(final SettingsSyncAction action) {
-        request(new RequestEditParameter(action.getKey(), action.getValue()), new RpcCallback<ResponseSeq>() {
+        api(new RequestEditParameter(action.getKey(), action.getValue())).then(new Consumer<ResponseSeq>() {
             @Override
-            public void onResult(ResponseSeq response) {
+            public void apply(ResponseSeq responseSeq) {
                 syncState.getPendingActions().remove(action);
                 saveState();
-                updates().onUpdateReceived(new SeqUpdate(response.getSeq(), response.getState(),
+                updates().onUpdateReceived(new SeqUpdate(responseSeq.getSeq(), responseSeq.getState(),
                         UpdateParameterChanged.HEADER, new UpdateParameterChanged(action.getKey(), action.getValue()).toByteArray()));
             }
-
-            @Override
-            public void onError(RpcException e) {
-                // Ignore
-            }
-        });
+        }).done(self());
     }
 
     private void saveState() {

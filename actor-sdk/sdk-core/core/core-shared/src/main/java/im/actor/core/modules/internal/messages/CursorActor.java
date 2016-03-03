@@ -17,7 +17,7 @@ import im.actor.runtime.storage.SyncKeyValue;
 public abstract class CursorActor extends ModuleActor {
 
     private PlainCursorsStorage plainCursorsStorage;
-    private HashSet<Peer> inProgress = new HashSet<Peer>();
+    private HashSet<Peer> inProgress = new HashSet<>();
     private long cursorId;
     private SyncKeyValue keyValue;
 

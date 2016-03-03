@@ -135,8 +135,8 @@ public class ConversationActor extends ModuleActor {
 
         // Prepare messages
         Message topMessage = null;
-        ArrayList<Message> updated = new ArrayList<Message>();
-        ArrayList<Message> updatedDocs = new ArrayList<Message>();
+        ArrayList<Message> updated = new ArrayList<>();
+        ArrayList<Message> updatedDocs = new ArrayList<>();
         for (Message m : inMessages) {
             if (m.getSenderId() == myUid()) {
                 // Force set message state if server out message
@@ -548,8 +548,8 @@ public class ConversationActor extends ModuleActor {
     @Verified
     private void onHistoryLoaded(List<Message> history) {
 
-        ArrayList<Message> updated = new ArrayList<Message>();
-        ArrayList<Message> updatedDocs = new ArrayList<Message>();
+        ArrayList<Message> updated = new ArrayList<>();
+        ArrayList<Message> updatedDocs = new ArrayList<>();
 
         long maxReadMessage = 0;
 

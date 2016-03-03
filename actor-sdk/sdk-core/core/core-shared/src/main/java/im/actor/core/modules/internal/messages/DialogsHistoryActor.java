@@ -12,6 +12,7 @@ import im.actor.core.util.ModuleActor;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
 import im.actor.runtime.Log;
+import im.actor.runtime.function.Consumer;
 
 public class DialogsHistoryActor extends ModuleActor {
 
@@ -60,21 +61,12 @@ public class DialogsHistoryActor extends ModuleActor {
 
         Log.d(TAG, "Loading history... after " + historyMaxDate);
 
-        request(new RequestLoadDialogs(historyMaxDate, LIMIT),
-                new RpcCallback<ResponseLoadDialogs>() {
-                    @Override
-                    public void onResult(ResponseLoadDialogs response) {
-
-                        // Invoke on sequence actor
-                        updates().onUpdateReceived(new DialogHistoryLoaded(response));
-                    }
-
-                    @Override
-                    public void onError(RpcException e) {
-                        e.printStackTrace();
-                        // Never happens
-                    }
-                });
+        api(new RequestLoadDialogs(historyMaxDate, LIMIT)).then(new Consumer<ResponseLoadDialogs>() {
+            @Override
+            public void apply(ResponseLoadDialogs responseLoadDialogs) {
+                updates().onUpdateReceived(new DialogHistoryLoaded(responseLoadDialogs));
+            }
+        }).done(self());
     }
 
     private void onLoadedMore(int loaded, long maxLoadedDate) {

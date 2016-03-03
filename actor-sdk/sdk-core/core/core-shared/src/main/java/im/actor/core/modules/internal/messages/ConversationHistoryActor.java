@@ -12,6 +12,7 @@ import im.actor.core.modules.updates.internal.MessagesHistoryLoaded;
 import im.actor.core.util.ModuleActor;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
+import im.actor.runtime.function.Consumer;
 
 public class ConversationHistoryActor extends ModuleActor {
 
@@ -60,20 +61,12 @@ public class ConversationHistoryActor extends ModuleActor {
         }
         isLoading = true;
 
-        request(new RequestLoadHistory(buidOutPeer(peer), historyMaxDate, LIMIT),
-                new RpcCallback<ResponseLoadHistory>() {
-                    @Override
-                    public void onResult(ResponseLoadHistory response) {
-                        // Invoke on sequence actor
-                        updates().onUpdateReceived(new MessagesHistoryLoaded(peer, response));
-                    }
-
-                    @Override
-                    public void onError(RpcException e) {
-                        e.printStackTrace();
-                        // Never happens
-                    }
-                });
+        api(new RequestLoadHistory(buidOutPeer(peer), historyMaxDate, LIMIT)).then(new Consumer<ResponseLoadHistory>() {
+            @Override
+            public void apply(ResponseLoadHistory responseLoadHistory) {
+                updates().onUpdateReceived(new MessagesHistoryLoaded(peer, responseLoadHistory));
+            }
+        }).done(self());
     }
 
     private void onLoadedMore(int loaded, long maxLoadedDate) {
