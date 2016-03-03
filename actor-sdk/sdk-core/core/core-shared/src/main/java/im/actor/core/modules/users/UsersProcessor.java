@@ -50,7 +50,10 @@ public class UsersProcessor extends AbsModule implements Processor {
 
             if (saved != null) {
                 if (saved.getAccessHash() != u.getAccessHash()) {
-                    Log.w("UsersProcessor", "User's Access Hash changed!");
+                    String message = "User's #" + saved.getUid() + " Access Hash changed! Old: " + saved.getAccessHash() + ", " +
+                            "new: " + u.getAccessHash();
+                    Log.w("UsersProcessor", message);
+                    throw new RuntimeException(message);
                 }
             }
         }

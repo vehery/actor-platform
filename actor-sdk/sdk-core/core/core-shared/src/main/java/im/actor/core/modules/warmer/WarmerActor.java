@@ -49,7 +49,6 @@ public class WarmerActor extends ModuleActor {
     }
 
     private void onAllDialogsLoaded() {
-        Log.d(TAG, "onAllDialogsLoaded");
         context().getContactsModule().getContactSyncActor().send(new ContactsSyncActor.StartSync());
     }
 
