@@ -4372,106 +4372,6 @@
         {
           "type": "struct",
           "content": {
-            "name": "DialogShort",
-            "doc": [
-              "Short Dialog from grouped conversation list",
-              {
-                "type": "reference",
-                "argument": "peer",
-                "category": "full",
-                "description": "  Peer of conversation"
-              },
-              {
-                "type": "reference",
-                "argument": "counter",
-                "category": "full",
-                "description": "  Conversation unread count"
-              },
-              {
-                "type": "reference",
-                "argument": "date",
-                "category": "full",
-                "description": "  Conversation top message date"
-              }
-            ],
-            "attributes": [
-              {
-                "type": {
-                  "type": "struct",
-                  "childType": "Peer"
-                },
-                "id": 1,
-                "name": "peer"
-              },
-              {
-                "type": "int32",
-                "id": 2,
-                "name": "counter"
-              },
-              {
-                "type": {
-                  "type": "alias",
-                  "childType": "date"
-                },
-                "id": 4,
-                "name": "date"
-              }
-            ]
-          }
-        },
-        {
-          "type": "struct",
-          "content": {
-            "name": "DialogGroup",
-            "doc": [
-              "Grouped dialog list",
-              {
-                "type": "reference",
-                "argument": "title",
-                "category": "full",
-                "description": "  Title of group"
-              },
-              {
-                "type": "reference",
-                "argument": "key",
-                "category": "full",
-                "description": "  Key of group"
-              },
-              {
-                "type": "reference",
-                "argument": "dialogs",
-                "category": "full",
-                "description": "  Conversations in group"
-              }
-            ],
-            "attributes": [
-              {
-                "type": "string",
-                "id": 1,
-                "name": "title"
-              },
-              {
-                "type": "string",
-                "id": 2,
-                "name": "key"
-              },
-              {
-                "type": {
-                  "type": "list",
-                  "childType": {
-                    "type": "struct",
-                    "childType": "DialogShort"
-                  }
-                },
-                "id": 3,
-                "name": "dialogs"
-              }
-            ]
-          }
-        },
-        {
-          "type": "struct",
-          "content": {
             "name": "MessageReaction",
             "doc": [
               "Reaction to message",
@@ -5031,6 +4931,18 @@
                 "argument": "message",
                 "category": "full",
                 "description": "  message content"
+              },
+              {
+                "type": "reference",
+                "argument": "isMuted",
+                "category": "full",
+                "description": "  Is this message doesn't produce notification. If present overrides any muting settings."
+              },
+              {
+                "type": "reference",
+                "argument": "isHighlighted",
+                "category": "full",
+                "description": "  I this message highlighted for current user."
               }
             ],
             "attributes": [
@@ -5073,6 +4985,22 @@
                 },
                 "id": 5,
                 "name": "message"
+              },
+              {
+                "type": {
+                  "type": "opt",
+                  "childType": "bool"
+                },
+                "id": 6,
+                "name": "isMuted"
+              },
+              {
+                "type": {
+                  "type": "opt",
+                  "childType": "bool"
+                },
+                "id": 7,
+                "name": "isHighlighted"
               }
             ]
           }
@@ -5127,60 +5055,6 @@
                 },
                 "id": 3,
                 "name": "message"
-              }
-            ]
-          }
-        },
-        {
-          "type": "update",
-          "content": {
-            "name": "MessageDateChanged",
-            "header": 163,
-            "doc": [
-              "Update about message date changed",
-              {
-                "type": "reference",
-                "argument": "peer",
-                "category": "full",
-                "description": "  Destination peer"
-              },
-              {
-                "type": "reference",
-                "argument": "rid",
-                "category": "full",
-                "description": "  Rid of message"
-              },
-              {
-                "type": "reference",
-                "argument": "date",
-                "category": "full",
-                "description": "  Date of message"
-              }
-            ],
-            "attributes": [
-              {
-                "type": {
-                  "type": "struct",
-                  "childType": "Peer"
-                },
-                "id": 1,
-                "name": "peer"
-              },
-              {
-                "type": {
-                  "type": "alias",
-                  "childType": "randomId"
-                },
-                "id": 2,
-                "name": "rid"
-              },
-              {
-                "type": {
-                  "type": "alias",
-                  "childType": "date"
-                },
-                "id": 3,
-                "name": "date"
               }
             ]
           }
@@ -5365,6 +5239,18 @@
                 "argument": "startDate",
                 "category": "full",
                 "description": "  Start date of read message"
+              },
+              {
+                "type": "reference",
+                "argument": "readDate",
+                "category": "full",
+                "description": "  Optional date of read event"
+              },
+              {
+                "type": "reference",
+                "argument": "unreadCount",
+                "category": "full",
+                "description": "  Optional new unread counter"
               }
             ],
             "attributes": [
@@ -5383,6 +5269,25 @@
                 },
                 "id": 2,
                 "name": "startDate"
+              },
+              {
+                "type": {
+                  "type": "opt",
+                  "childType": {
+                    "type": "alias",
+                    "childType": "date"
+                  }
+                },
+                "id": 3,
+                "name": "readDate"
+              },
+              {
+                "type": {
+                  "type": "opt",
+                  "childType": "int32"
+                },
+                "id": 4,
+                "name": "unreadCount"
               }
             ]
           }
@@ -5405,6 +5310,12 @@
                 "argument": "rids",
                 "category": "full",
                 "description": "  Deleted messages"
+              },
+              {
+                "type": "reference",
+                "argument": "unreadCount",
+                "category": "hidden",
+                "description": "  Optional new unread counter"
               }
             ],
             "attributes": [
@@ -5426,6 +5337,14 @@
                 },
                 "id": 2,
                 "name": "rids"
+              },
+              {
+                "type": {
+                  "type": "opt",
+                  "childType": "int32"
+                },
+                "id": 3,
+                "name": "unreadCount"
               }
             ]
           }
@@ -5789,7 +5708,7 @@
                 "type": "reference",
                 "argument": "date",
                 "category": "full",
-                "description": "start date of messages for loading or 0 for loading from start"
+                "description": "DEPRECATED start date of messages for loading or 0 for loading from start"
               },
               {
                 "type": "reference",
@@ -5815,8 +5734,11 @@
               },
               {
                 "type": {
-                  "type": "alias",
-                  "childType": "date"
+                  "type": "opt",
+                  "childType": {
+                    "type": "alias",
+                    "childType": "date"
+                  }
                 },
                 "id": 3,
                 "name": "date"
@@ -5887,12 +5809,6 @@
                 "argument": "message",
                 "category": "full",
                 "description": "  Content of message"
-              },
-              {
-                "type": "reference",
-                "argument": "firstUnreadDate",
-                "category": "full",
-                "description": "  Date of first unread message"
               }
             ],
             "attributes": [
@@ -5959,17 +5875,106 @@
                 },
                 "id": 9,
                 "name": "state"
+              }
+            ]
+          }
+        },
+        {
+          "type": "struct",
+          "content": {
+            "name": "DialogShort",
+            "doc": [
+              "Short Dialog from grouped conversation list",
+              {
+                "type": "reference",
+                "argument": "peer",
+                "category": "full",
+                "description": "  Peer of conversation"
+              },
+              {
+                "type": "reference",
+                "argument": "counter",
+                "category": "full",
+                "description": "  Conversation unread count"
+              },
+              {
+                "type": "reference",
+                "argument": "date",
+                "category": "full",
+                "description": "  Conversation top message date"
+              }
+            ],
+            "attributes": [
+              {
+                "type": {
+                  "type": "struct",
+                  "childType": "Peer"
+                },
+                "id": 1,
+                "name": "peer"
+              },
+              {
+                "type": "int32",
+                "id": 2,
+                "name": "counter"
               },
               {
                 "type": {
-                  "type": "opt",
+                  "type": "alias",
+                  "childType": "date"
+                },
+                "id": 4,
+                "name": "date"
+              }
+            ]
+          }
+        },
+        {
+          "type": "struct",
+          "content": {
+            "name": "DialogGroup",
+            "doc": [
+              "Grouped dialog list",
+              {
+                "type": "reference",
+                "argument": "title",
+                "category": "full",
+                "description": "  Title of group"
+              },
+              {
+                "type": "reference",
+                "argument": "key",
+                "category": "full",
+                "description": "  Key of group"
+              },
+              {
+                "type": "reference",
+                "argument": "dialogs",
+                "category": "full",
+                "description": "  Conversations in group"
+              }
+            ],
+            "attributes": [
+              {
+                "type": "string",
+                "id": 1,
+                "name": "title"
+              },
+              {
+                "type": "string",
+                "id": 2,
+                "name": "key"
+              },
+              {
+                "type": {
+                  "type": "list",
                   "childType": {
-                    "type": "alias",
-                    "childType": "date"
+                    "type": "struct",
+                    "childType": "DialogShort"
                   }
                 },
-                "id": 10,
-                "name": "firstUnreadDate"
+                "id": 3,
+                "name": "dialogs"
               }
             ]
           }
@@ -6001,6 +6006,12 @@
                   "argument": "dialogs",
                   "category": "compact",
                   "description": "  Loaded dialogs"
+                },
+                {
+                  "type": "reference",
+                  "argument": "unreadMessagesCount",
+                  "category": "compact",
+                  "description": "  Global Unread Counter. Global counter starting from first loaded message."
                 }
               ],
               "attributes": [
@@ -6036,6 +6047,14 @@
                   },
                   "id": 3,
                   "name": "dialogs"
+                },
+                {
+                  "type": {
+                    "type": "opt",
+                    "childType": "int32"
+                  },
+                  "id": 4,
+                  "name": "unreadMessagesCount"
                 }
               ]
             },
@@ -6043,9 +6062,9 @@
               "Loading conversation history",
               {
                 "type": "reference",
-                "argument": "minDate",
+                "argument": "startDate",
                 "category": "full",
-                "description": "start date of conversation loading. Use 0 to load latest messages"
+                "description": "start date of conversation loading. Use 0 or null to load latest messages."
               },
               {
                 "type": "reference",
@@ -6057,11 +6076,14 @@
             "attributes": [
               {
                 "type": {
-                  "type": "alias",
-                  "childType": "date"
+                  "type": "opt",
+                  "childType": {
+                    "type": "alias",
+                    "childType": "date"
+                  }
                 },
                 "id": 1,
-                "name": "minDate"
+                "name": "startDate"
               },
               {
                 "type": "int32",
@@ -6074,7 +6096,106 @@
         {
           "type": "rpc",
           "content": {
-            "name": "LoadArchived",
+            "name": "LoadGroupedDialogs",
+            "header": 225,
+            "response": {
+              "type": "anonymous",
+              "header": 226,
+              "doc": [
+                "Loaded grouped dialogs",
+                {
+                  "type": "reference",
+                  "argument": "dialogs",
+                  "category": "hidden",
+                  "description": "  Loaded groups of dialogs"
+                },
+                {
+                  "type": "reference",
+                  "argument": "users",
+                  "category": "hidden",
+                  "description": "  Loaded users"
+                },
+                {
+                  "type": "reference",
+                  "argument": "groups",
+                  "category": "hidden",
+                  "description": "  Loaded groups"
+                },
+                {
+                  "type": "reference",
+                  "argument": "showArchived",
+                  "category": "full",
+                  "description": "  Show archived section"
+                },
+                {
+                  "type": "reference",
+                  "argument": "showInvite",
+                  "category": "full",
+                  "description": "  Show invite message"
+                }
+              ],
+              "attributes": [
+                {
+                  "type": {
+                    "type": "list",
+                    "childType": {
+                      "type": "struct",
+                      "childType": "DialogGroup"
+                    }
+                  },
+                  "id": 1,
+                  "name": "dialogs"
+                },
+                {
+                  "type": {
+                    "type": "list",
+                    "childType": {
+                      "type": "struct",
+                      "childType": "User"
+                    }
+                  },
+                  "id": 2,
+                  "name": "users"
+                },
+                {
+                  "type": {
+                    "type": "list",
+                    "childType": {
+                      "type": "struct",
+                      "childType": "Group"
+                    }
+                  },
+                  "id": 3,
+                  "name": "groups"
+                },
+                {
+                  "type": {
+                    "type": "opt",
+                    "childType": "bool"
+                  },
+                  "id": 4,
+                  "name": "showArchived"
+                },
+                {
+                  "type": {
+                    "type": "opt",
+                    "childType": "bool"
+                  },
+                  "id": 5,
+                  "name": "showInvite"
+                }
+              ]
+            },
+            "doc": [
+              "Load all dialogs from grouped list"
+            ],
+            "attributes": []
+          }
+        },
+        {
+          "type": "rpc",
+          "content": {
+            "name": "LoadGroupedDialogsHistory",
             "header": 2651,
             "response": {
               "type": "anonymous",
@@ -6180,105 +6301,6 @@
                 "name": "limit"
               }
             ]
-          }
-        },
-        {
-          "type": "rpc",
-          "content": {
-            "name": "LoadGroupedDialogs",
-            "header": 225,
-            "response": {
-              "type": "anonymous",
-              "header": 226,
-              "doc": [
-                "Loaded grouped dialogs",
-                {
-                  "type": "reference",
-                  "argument": "dialogs",
-                  "category": "compact",
-                  "description": "  Loaded groups of dialogs"
-                },
-                {
-                  "type": "reference",
-                  "argument": "users",
-                  "category": "compact",
-                  "description": "  Loaded users"
-                },
-                {
-                  "type": "reference",
-                  "argument": "groups",
-                  "category": "full",
-                  "description": "  Loaded groups"
-                },
-                {
-                  "type": "reference",
-                  "argument": "showArchived",
-                  "category": "full",
-                  "description": "  Show archived section"
-                },
-                {
-                  "type": "reference",
-                  "argument": "showInvite",
-                  "category": "full",
-                  "description": "  Show invite message"
-                }
-              ],
-              "attributes": [
-                {
-                  "type": {
-                    "type": "list",
-                    "childType": {
-                      "type": "struct",
-                      "childType": "DialogGroup"
-                    }
-                  },
-                  "id": 1,
-                  "name": "dialogs"
-                },
-                {
-                  "type": {
-                    "type": "list",
-                    "childType": {
-                      "type": "struct",
-                      "childType": "User"
-                    }
-                  },
-                  "id": 2,
-                  "name": "users"
-                },
-                {
-                  "type": {
-                    "type": "list",
-                    "childType": {
-                      "type": "struct",
-                      "childType": "Group"
-                    }
-                  },
-                  "id": 3,
-                  "name": "groups"
-                },
-                {
-                  "type": {
-                    "type": "opt",
-                    "childType": "bool"
-                  },
-                  "id": 4,
-                  "name": "showArchived"
-                },
-                {
-                  "type": {
-                    "type": "opt",
-                    "childType": "bool"
-                  },
-                  "id": 5,
-                  "name": "showInvite"
-                }
-              ]
-            },
-            "doc": [
-              "Load all dialogs from grouped list"
-            ],
-            "attributes": []
           }
         },
         {
@@ -16871,7 +16893,7 @@
         {
           "type": "enum",
           "content": {
-            "name": "UpdateOptimization",
+            "name": "SequenceOptimization",
             "values": [
               {
                 "name": "NONE",
@@ -16916,7 +16938,7 @@
                   "type": "list",
                   "childType": {
                     "type": "enum",
-                    "childType": "UpdateOptimization"
+                    "childType": "SequenceOptimization"
                   }
                 },
                 "id": 1,
@@ -17110,7 +17132,7 @@
                   "type": "list",
                   "childType": {
                     "type": "enum",
-                    "childType": "UpdateOptimization"
+                    "childType": "SequenceOptimization"
                   }
                 },
                 "id": 3,
