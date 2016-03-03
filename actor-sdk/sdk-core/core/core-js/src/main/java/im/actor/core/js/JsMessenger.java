@@ -156,7 +156,7 @@ public class JsMessenger extends Messenger {
     }
 
     public void loadMoreDialogs() {
-        modules.getMessagesModule().loadMoreDialogs();
+        modules.getMessagesModule().getDialogs().loadMore();
     }
 
     public void loadArchivedDialogs(boolean init, RpcCallback<ResponseLoadArchived> callback) {

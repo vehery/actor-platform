@@ -16,7 +16,6 @@ import im.actor.core.api.ApiMember;
 import im.actor.core.entity.Group;
 import im.actor.core.entity.Message;
 import im.actor.core.entity.MessageState;
-import im.actor.core.entity.Peer;
 import im.actor.core.entity.Reaction;
 import im.actor.core.entity.content.ServiceGroupAvatarChanged;
 import im.actor.core.entity.content.ServiceGroupCreated;
@@ -26,9 +25,7 @@ import im.actor.core.entity.content.ServiceGroupUserKicked;
 import im.actor.core.entity.content.ServiceGroupUserLeave;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.internal.messages.DialogsActor;
-import im.actor.core.modules.internal.messages.GroupedDialogsActor;
-import im.actor.core.modules.internal.messages.entity.EntityConverter;
+import im.actor.core.modules.messaging.entity.EntityConverter;
 import im.actor.runtime.annotations.Verified;
 
 import static im.actor.core.util.JavaUtil.equalsE;
@@ -303,11 +300,6 @@ public class GroupsProcessor extends AbsModule {
 
     @Verified
     private void onGroupDescChanged(Group group) {
-        context().getMessagesModule().getDialogsActor()
-                .send(new DialogsActor.GroupChanged(group));
-        if (context().getConfiguration().isEnabledGroupedChatList()) {
-            context().getMessagesModule().getDialogsGroupedActor().send(
-                    new GroupedDialogsActor.PeerInformationChanged(Peer.group(group.getGroupId())));
-        }
+        context().getMessagesModule().getDialogs().onGroupChanged(group);
     }
 }

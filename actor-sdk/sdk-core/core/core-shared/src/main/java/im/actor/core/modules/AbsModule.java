@@ -67,14 +67,6 @@ public abstract class AbsModule {
         return context().getMessagesModule().getSendMessageActor();
     }
 
-    public ActorRef dialogsActor() {
-        return context().getMessagesModule().getDialogsActor();
-    }
-
-    public ActorRef dialogsHistoryActor() {
-        return context().getMessagesModule().getDialogsHistoryActor();
-    }
-
     public ActorRef archivedDialogsActor() {
         return context().getMessagesModule().getArchivedDialogsActor();
     }

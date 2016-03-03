@@ -6,8 +6,12 @@ package im.actor.core.entity;
 
 import com.google.j2objc.annotations.Property;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 
+import im.actor.core.api.ApiPeer;
+import im.actor.core.api.ApiPeerType;
 import im.actor.runtime.bser.Bser;
 import im.actor.runtime.bser.BserCreator;
 import im.actor.runtime.bser.BserObject;
@@ -46,6 +50,15 @@ public class Peer extends BserObject {
 
     public static Peer group(int gid) {
         return new Peer(PeerType.GROUP, gid);
+    }
+
+    @Nullable
+    public static Peer fromApiPeer(ApiPeer peer) {
+        PeerType peerType = PeerType.fromApiPeerType(peer.getType());
+        if (peerType == null) {
+            return null;
+        }
+        return new Peer(peerType, peer.getId());
     }
 
     @Property("readonly, nonatomic")

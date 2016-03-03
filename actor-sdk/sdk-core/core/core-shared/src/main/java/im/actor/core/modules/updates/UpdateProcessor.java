@@ -14,7 +14,6 @@ import im.actor.core.api.ApiGroup;
 import im.actor.core.api.ApiPeerType;
 import im.actor.core.api.ApiUser;
 import im.actor.core.api.rpc.ResponseLoadArchived;
-import im.actor.core.api.rpc.ResponseLoadDialogs;
 import im.actor.core.api.updates.UpdateChatClear;
 import im.actor.core.api.updates.UpdateChatDelete;
 import im.actor.core.api.updates.UpdateChatGroupsChanged;
@@ -56,12 +55,12 @@ import im.actor.core.modules.calls.CallsProcessor;
 import im.actor.core.modules.contacts.ContactsProcessor;
 import im.actor.core.modules.contacts.ContactsSyncActor;
 import im.actor.core.modules.eventbus.EventBusProcessor;
-import im.actor.core.modules.internal.messages.OwnReadActor;
+import im.actor.core.modules.messaging.MessagesProcessor;
+import im.actor.core.modules.messaging.actions.OwnReadActor;
 import im.actor.core.modules.updates.internal.ArchivedDialogLoaded;
 import im.actor.core.modules.updates.internal.ChangeContent;
 import im.actor.core.modules.updates.internal.CombinedDifference;
 import im.actor.core.modules.updates.internal.ContactsLoaded;
-import im.actor.core.modules.updates.internal.DialogHistoryLoaded;
 import im.actor.core.modules.updates.internal.GetDiffCombiner;
 import im.actor.core.modules.updates.internal.GroupCreated;
 import im.actor.core.modules.updates.internal.InternalUpdate;
@@ -113,11 +112,7 @@ public class UpdateProcessor extends AbsModule {
     }
 
     public void processInternalUpdate(InternalUpdate update) {
-        if (update instanceof DialogHistoryLoaded) {
-            ResponseLoadDialogs dialogs = ((DialogHistoryLoaded) update).getDialogs();
-            applyRelated(dialogs.getUsers(), dialogs.getGroups(), false);
-            messagesProcessor.onDialogsLoaded(dialogs);
-        } else if (update instanceof ArchivedDialogLoaded) {
+        if (update instanceof ArchivedDialogLoaded) {
             ResponseLoadArchived dialogs = ((ArchivedDialogLoaded) update).getDialogs();
             applyRelated(dialogs.getUsers(), dialogs.getGroups(), false);
             messagesProcessor.onArchivedDialogsLoaded(((ArchivedDialogLoaded) update).getDialogs());

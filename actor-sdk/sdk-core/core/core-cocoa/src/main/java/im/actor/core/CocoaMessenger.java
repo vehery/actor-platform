@@ -35,7 +35,7 @@ public class CocoaMessenger extends Messenger {
             dialogList.setBindHook(new BindedDisplayList.BindHook<Dialog>() {
                 @Override
                 public void onScrolledToEnd() {
-                    modules.getMessagesModule().loadMoreDialogs();
+                    modules.getMessagesModule().getDialogs().loadMore();
                 }
 
                 @Override

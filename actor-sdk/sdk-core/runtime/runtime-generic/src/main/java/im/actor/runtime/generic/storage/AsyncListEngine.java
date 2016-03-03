@@ -155,6 +155,12 @@ public class AsyncListEngine<T extends BserObject & ListEngineItem>
     }
 
     @Override
+    public List<T> loadAll() {
+        // TODO: Implement?
+        return null;
+    }
+
+    @Override
     public boolean isEmpty() {
         // TODO: Correct implementation
         return getCount() == 0;

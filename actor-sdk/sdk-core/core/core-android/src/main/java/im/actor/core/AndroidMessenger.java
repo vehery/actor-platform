@@ -424,7 +424,7 @@ public class AndroidMessenger extends im.actor.core.Messenger {
             dialogList.setBindHook(new BindedDisplayList.BindHook<Dialog>() {
                 @Override
                 public void onScrolledToEnd() {
-                    modules.getMessagesModule().loadMoreDialogs();
+                    modules.getMessagesModule().getDialogs().loadMore();
                 }
 
                 @Override
