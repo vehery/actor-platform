@@ -4,13 +4,10 @@
 
 package im.actor.core.modules.updates;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import im.actor.core.api.ApiStickerCollection;
 import im.actor.core.api.updates.UpdateOwnStickersChanged;
-import im.actor.core.entity.content.internal.StickersPack;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
 import im.actor.runtime.bser.Bser;

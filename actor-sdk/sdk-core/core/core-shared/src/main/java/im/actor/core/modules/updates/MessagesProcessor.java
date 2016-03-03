@@ -89,10 +89,6 @@ public class MessagesProcessor extends AbsModule {
             plainReceiveActor().send(new CursorReceiverActor.MarkReceived(peer, intMessageSortDate));
         }
 
-        if (outMessageSortDate > 0) {
-            ownReadActor().send(new OwnReadActor.OutMessage(peer, outMessageSortDate));
-        }
-
         // OwnReadActor
         for (Message m : nMessages) {
             if (m.getSenderId() != myUid()) {
@@ -130,9 +126,6 @@ public class MessagesProcessor extends AbsModule {
             // Send to own read actor
             ownReadActor().send(new OwnReadActor.InMessage(peer, message));
             msgContent.onIncoming(peer, context());
-        } else {
-            // Send to own read actor
-            ownReadActor().send(new OwnReadActor.OutMessage(peer, message.getSortDate()));
         }
     }
 
@@ -197,9 +190,6 @@ public class MessagesProcessor extends AbsModule {
 
         // Notify Sender Actor
         sendActor().send(new SenderActor.MessageSent(peer, rid));
-
-        // Send to own read actor
-        ownReadActor().send(new OwnReadActor.OutMessage(peer, date));
     }
 
     @Verified
@@ -371,15 +361,6 @@ public class MessagesProcessor extends AbsModule {
 
     public void onCountersChanged(ApiAppCounters counters) {
         context().getAppStateModule().onCountersChanged(counters);
-    }
-
-    public void onChatArchived(ApiPeer peer) {
-        //context().getMessagesModule().getDialogsActor()
-        //        .send(new DialogsActor.ChatDelete(convert(peer)));
-    }
-
-    public void onChatRestored(Peer peer) {
-
     }
 
     public void onChatGroupsChanged(List<ApiDialogGroup> groups) {
