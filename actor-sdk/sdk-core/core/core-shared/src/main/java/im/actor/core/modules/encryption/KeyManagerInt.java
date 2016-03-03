@@ -16,6 +16,11 @@ public class KeyManagerInt extends ActorInterface {
         super(dest);
     }
 
+
+    public void start() {
+        send(new KeyManagerActor.Start());
+    }
+
     public Promise<KeyManagerActor.OwnIdentity> getOwnIdentity() {
         return ask(new KeyManagerActor.FetchOwnKey());
     }

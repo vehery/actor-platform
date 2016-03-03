@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Actor LLC. <https://actor.im>
  */
 
-package im.actor.core.modules.internal.contacts;
+package im.actor.core.modules.contacts;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -34,6 +34,7 @@ public class ContactsSyncActor extends ModuleActor {
 
     private ArrayList<Integer> contacts = new ArrayList<Integer>();
 
+    private boolean isStarted = false;
     private boolean isInProgress = false;
     private boolean isInvalidated = false;
 
@@ -61,7 +62,13 @@ public class ContactsSyncActor extends ModuleActor {
             }
         }
         notifyState();
-        self().send(new PerformSync());
+    }
+
+    public void startSync() {
+        if (!isStarted) {
+            isStarted = true;
+            self().send(new PerformSync());
+        }
     }
 
     public void performSync() {
@@ -106,8 +113,8 @@ public class ContactsSyncActor extends ModuleActor {
         request(new RequestGetContacts(hashValue), new RpcCallback<ResponseGetContacts>() {
             @Override
             public void onResult(ResponseGetContacts response) {
-                updates().onUpdateReceived(
-                        new im.actor.core.modules.updates.internal.ContactsLoaded(response));
+                context().getWarmer().onContactsLoaded();
+                updates().onUpdateReceived(new im.actor.core.modules.updates.internal.ContactsLoaded(response));
             }
 
             @Override
@@ -291,13 +298,21 @@ public class ContactsSyncActor extends ModuleActor {
         } else if (message instanceof UserChanged) {
             onUserChanged(((UserChanged) message).getUser());
         } else if (message instanceof PerformSync) {
-            performSync();
+            if (isStarted) {
+                performSync();
+            }
+        } else if (message instanceof StartSync) {
+            startSync();
         } else {
             drop(message);
         }
     }
 
     private static class PerformSync {
+
+    }
+
+    public static class StartSync {
 
     }
 

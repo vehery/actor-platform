@@ -2,11 +2,10 @@
  * Copyright (C) 2015 Actor LLC. <https://actor.im>
  */
 
-package im.actor.core.modules.updates;
+package im.actor.core.modules.contacts;
 
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.internal.contacts.ContactsSyncActor;
 import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.annotations.Verified;
 

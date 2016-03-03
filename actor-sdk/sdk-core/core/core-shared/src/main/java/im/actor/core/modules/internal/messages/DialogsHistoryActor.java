@@ -36,8 +36,15 @@ public class DialogsHistoryActor extends ModuleActor {
     public void preStart() {
         historyMaxDate = preferences().getLong(KEY_LOADED_DATE, Long.MAX_VALUE);
         historyLoaded = preferences().getBool(KEY_LOADED, false);
+        Log.d(TAG, "preStart1");
         if (!preferences().getBool(KEY_LOADED_INIT, false)) {
+            Log.d(TAG, "preStart2");
             self().send(new LoadMore());
+            Log.d(TAG, "preStart3");
+        } else {
+            Log.d(TAG, "preStart4:" + context().getWarmer());
+            context().getWarmer().onDialogsLoaded();
+            Log.d(TAG, "preStart5");
         }
     }
 
@@ -83,6 +90,8 @@ public class DialogsHistoryActor extends ModuleActor {
         preferences().putBool(KEY_LOADED_INIT, true);
 
         Log.d(TAG, "History loaded, time = " + maxLoadedDate);
+
+        context().getWarmer().onDialogsLoaded();
     }
 
     // Messages

@@ -54,8 +54,10 @@ public class KeyManagerActor extends ModuleActor {
     private static final String TAG = "KeyManagerActor";
 
     private KeyValueStorage encryptionKeysStorage;
-    private HashMap<Integer, UserKeys> cachedUserKeys = new HashMap<Integer, UserKeys>();
+    private HashMap<Integer, UserKeys> cachedUserKeys = new HashMap<>();
     private PrivateKeyStorage ownKeys;
+
+    private boolean isStarted = false;
 
     private boolean isReady = false;
 
@@ -63,8 +65,12 @@ public class KeyManagerActor extends ModuleActor {
         super(context);
     }
 
-    @Override
-    public void preStart() {
+
+    private void doStart() {
+        if (isStarted) {
+            return;
+        }
+        isStarted = true;
 
         Log.d(TAG, "Starting KeyManager...");
 
@@ -591,6 +597,8 @@ public class KeyManagerActor extends ModuleActor {
         } else if (message instanceof PublicKeysGroupRemoved) {
             PublicKeysGroupRemoved publicKeysGroupRemoved = (PublicKeysGroupRemoved) message;
             onPublicKeysGroupRemoved(publicKeysGroupRemoved.getUid(), publicKeysGroupRemoved.getKeyGroupId());
+        } else if (message instanceof Start) {
+            doStart();
         } else {
             super.onReceive(message);
         }
@@ -615,6 +623,11 @@ public class KeyManagerActor extends ModuleActor {
         } else {
             return super.onAsk(message);
         }
+    }
+
+
+    public static class Start {
+
     }
 
     //

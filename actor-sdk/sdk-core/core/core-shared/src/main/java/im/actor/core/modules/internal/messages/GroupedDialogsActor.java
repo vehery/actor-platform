@@ -154,6 +154,7 @@ public class GroupedDialogsActor extends ModuleActor {
             groups.add(new DialogGroup(i.getTitle(), i.getKey(), dialogSmalls));
         }
         context().getMessagesModule().getDialogGroupsVM().getGroupsValueModel().change(groups);
+        context().getWarmer().onGroupedDialogsLoaded();
     }
 
     private void applyGroups(List<ApiDialogGroup> dialogGroups) {

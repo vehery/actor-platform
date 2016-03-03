@@ -1,4 +1,4 @@
-package im.actor.core.modules.internal.contacts.entity;
+package im.actor.core.modules.contacts.entity;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -9,8 +9,8 @@ import im.actor.runtime.bser.BserWriter;
 
 public class BookImportStorage extends BserObject {
 
-    private HashSet<String> importedEmails = new HashSet<String>();
-    private HashSet<Long> importedPhones = new HashSet<Long>();
+    private HashSet<String> importedEmails = new HashSet<>();
+    private HashSet<Long> importedPhones = new HashSet<>();
 
     public BookImportStorage() {
     }
@@ -21,8 +21,8 @@ public class BookImportStorage extends BserObject {
             super.load(data);
         } catch (IOException e) {
             e.printStackTrace();
-            importedEmails = new HashSet<String>();
-            importedPhones = new HashSet<Long>();
+            importedEmails = new HashSet<>();
+            importedPhones = new HashSet<>();
         }
     }
 
@@ -44,8 +44,8 @@ public class BookImportStorage extends BserObject {
 
     @Override
     public void parse(BserValues values) throws IOException {
-        importedEmails = new HashSet<String>();
-        importedPhones = new HashSet<Long>();
+        importedEmails = new HashSet<>();
+        importedPhones = new HashSet<>();
 
         for (String s : values.getRepeatedString(1)) {
             importedEmails.add(s);

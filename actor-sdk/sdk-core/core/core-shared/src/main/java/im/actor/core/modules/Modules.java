@@ -8,11 +8,11 @@ import im.actor.core.Configuration;
 import im.actor.core.Messenger;
 import im.actor.core.i18n.I18nEngine;
 import im.actor.core.modules.api.ApiModule;
+import im.actor.core.modules.contacts.ContactsModule;
 import im.actor.core.modules.eventbus.EventBusModule;
 import im.actor.core.modules.sequence.Updates;
 import im.actor.core.modules.internal.AppStateModule;
 import im.actor.core.modules.calls.CallsModule;
-import im.actor.core.modules.internal.ContactsModule;
 import im.actor.core.modules.internal.DeviceInfoModule;
 import im.actor.core.modules.internal.DisplayLists;
 import im.actor.core.modules.encryption.EncryptionModule;
@@ -31,6 +31,7 @@ import im.actor.core.modules.internal.SettingsModule;
 import im.actor.core.modules.internal.StickersModule;
 import im.actor.core.modules.internal.TypingModule;
 import im.actor.core.modules.users.UsersModule;
+import im.actor.core.modules.warmer.WarmerModule;
 import im.actor.core.network.ActorApi;
 import im.actor.core.util.Timing;
 import im.actor.runtime.Storage;
@@ -55,6 +56,7 @@ public class Modules implements ModuleContext {
     private final AppStateModule appStateModule;
     private final ExternalModule external;
     private final Authentication authentication;
+    private final WarmerModule warmerModule;
 
     // Modules for authenticated users
     private volatile Updates updates;
@@ -106,9 +108,13 @@ public class Modules implements ModuleContext {
         timing.section("Pushes");
         this.pushes = new PushesModule(this);
 
+        timing.section("Warmer");
+        this.warmerModule = new WarmerModule(this);
+
         timing.section("Auth");
         this.authentication = new Authentication(this);
         this.authentication.run();
+        
         timing.end();
     }
 
@@ -347,6 +353,11 @@ public class Modules implements ModuleContext {
     @Override
     public EventBusModule getEventBus() {
         return eventBusModule;
+    }
+
+    @Override
+    public WarmerModule getWarmer() {
+        return warmerModule;
     }
 
     @Override

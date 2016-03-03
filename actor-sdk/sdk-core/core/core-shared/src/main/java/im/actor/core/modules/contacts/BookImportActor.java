@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Actor LLC. <https://actor.im>
  */
 
-package im.actor.core.modules.internal.contacts;
+package im.actor.core.modules.contacts;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,7 +21,7 @@ import im.actor.core.entity.PhoneBookContact;
 import im.actor.core.entity.PhoneBookEmail;
 import im.actor.core.entity.PhoneBookPhone;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.internal.contacts.entity.BookImportStorage;
+import im.actor.core.modules.contacts.entity.BookImportStorage;
 import im.actor.core.util.ModuleActor;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
@@ -37,6 +37,8 @@ public class BookImportActor extends ModuleActor {
 
     // Reading Phone Book
     private boolean phoneBookReadingIsInProgress = false;
+
+    private boolean isStarted;
 
     // Import Queue
     private boolean isUploadingContacts = false;
@@ -65,7 +67,13 @@ public class BookImportActor extends ModuleActor {
                 e.getLocalizedMessage();
             }
         }
+    }
 
+    private void startSync() {
+        if (isStarted) {
+            return;
+        }
+        isStarted = true;
         self().send(new PerformSync());
     }
 
@@ -173,9 +181,9 @@ public class BookImportActor extends ModuleActor {
         //
 
         isUploadingContacts = true;
-        final ArrayList<ApiPhoneToImport> phoneToImports = new ArrayList<ApiPhoneToImport>();
-        final ArrayList<ApiEmailToImport> emailToImports = new ArrayList<ApiEmailToImport>();
-        for (int i = 0; i < 50 && importQueue.size() > 0; i++) {
+        final ArrayList<ApiPhoneToImport> phoneToImports = new ArrayList<>();
+        final ArrayList<ApiEmailToImport> emailToImports = new ArrayList<>();
+        for (int i = 0; i < MAX_IMPORT_SIZE && importQueue.size() > 0; i++) {
             ImportQueueItem importQueueItem = importQueue.remove(0);
             if (importQueueItem instanceof ImportEmailQueueItem) {
                 emailToImports.add(new ApiEmailToImport(((ImportEmailQueueItem) importQueueItem).getEmail(),
@@ -257,15 +265,23 @@ public class BookImportActor extends ModuleActor {
     @Override
     public void onReceive(Object message) {
         if (message instanceof PerformSync) {
-            performSync();
+            if (isStarted) {
+                performSync();
+            }
         } else if (message instanceof PhoneBookLoaded) {
             onPhoneBookLoaded(((PhoneBookLoaded) message).getPhoneBook());
+        } else if (message instanceof StartSync) {
+            startSync();
         } else {
             drop(message);
         }
     }
 
     public static class PerformSync {
+
+    }
+
+    public static class StartSync {
 
     }
 
