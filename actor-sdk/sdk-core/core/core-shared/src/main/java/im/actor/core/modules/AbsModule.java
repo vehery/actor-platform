@@ -11,6 +11,7 @@ import im.actor.core.entity.Group;
 import im.actor.core.entity.Peer;
 import im.actor.core.entity.PeerType;
 import im.actor.core.entity.User;
+import im.actor.core.modules.messaging.conversation.ConversationInt;
 import im.actor.core.modules.sequence.Updates;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
@@ -79,7 +80,7 @@ public abstract class AbsModule {
         return context().getMessagesModule().getPlainReceiverActor();
     }
 
-    public ActorRef conversationActor(Peer peer) {
+    public ConversationInt conversationActor(Peer peer) {
         return context().getMessagesModule().getConversationActor(peer);
     }
 

@@ -54,6 +54,7 @@ import im.actor.core.modules.messaging.actions.OwnReadActor;
 import im.actor.core.modules.messaging.actions.SenderActor;
 import im.actor.core.modules.messaging.conversation.ConversationActor;
 import im.actor.core.modules.messaging.conversation.ConversationHistoryActor;
+import im.actor.core.modules.messaging.conversation.ConversationInt;
 import im.actor.core.modules.messaging.dialogs.DialogsInt;
 import im.actor.core.modules.updates.internal.ChangeContent;
 import im.actor.core.network.RpcCallback;
@@ -92,7 +93,7 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
     private final HashMap<Peer, ListEngine<Message>> conversationEngines = new HashMap<>();
     private final HashMap<Peer, ListEngine<Message>> conversationDocsEngines = new HashMap<>();
-    private final HashMap<Peer, ActorRef> conversationActors = new HashMap<>();
+    private final HashMap<Peer, ConversationInt> conversationActors = new HashMap<>();
     private final HashMap<Peer, ActorRef> conversationHistoryActors = new HashMap<>();
 
     private final SyncKeyValue cursorStorage;
@@ -188,12 +189,12 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     private void assumeConvActor(final Peer peer) {
         synchronized (conversationActors) {
             if (!conversationActors.containsKey(peer)) {
-                conversationActors.put(peer, system().actorOf(Props.create(new ActorCreator() {
+                conversationActors.put(peer, new ConversationInt(system().actorOf(Props.create(new ActorCreator() {
                     @Override
                     public ConversationActor create() {
                         return new ConversationActor(peer, context());
                     }
-                }), "actor/conv_" + peer.getPeerType() + "_" + peer.getPeerId()));
+                }), "actor/conv_" + peer.getPeerType() + "_" + peer.getPeerId())));
                 conversationHistoryActors.put(peer, system().actorOf(Props.create(new ActorCreator() {
                     @Override
                     public ConversationHistoryActor create() {
@@ -214,7 +215,7 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
         }
     }
 
-    public ActorRef getConversationActor(final Peer peer) {
+    public ConversationInt getConversationActor(final Peer peer) {
         assumeConvActor(peer);
         synchronized (conversationActors) {
             return conversationActors.get(peer);
@@ -258,12 +259,12 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     }
 
     public void deleteMessages(Peer peer, long[] rids) {
-        ActorRef conversationActor = getConversationActor(peer);
+        ConversationInt conversationActor = getConversationActor(peer);
         ArrayList<Long> deleted = new ArrayList<>();
         for (long rid : rids) {
             deleted.add(rid);
         }
-        conversationActor.send(new ConversationActor.MessagesDeleted(deleted));
+        conversationActor.onMessagesDeleted(deleted);
         deletionsActor.send(new MessageDeleteActor.DeleteMessage(peer, rids));
     }
 
@@ -926,11 +927,11 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
         if (event instanceof PeerChatOpened) {
             Peer peer = ((PeerChatOpened) event).getPeer();
             assumeConvActor(peer);
-            conversationActors.get(peer).send(new ConversationActor.ConversationVisible());
+            conversationActors.get(peer).onConverstionVisible();
         } else if (event instanceof PeerChatClosed) {
             Peer peer = ((PeerChatClosed) event).getPeer();
             assumeConvActor(peer);
-            conversationActors.get(peer).send(new ConversationActor.ConversationHidden());
+            conversationActors.get(peer).onConversationHidden();
         }
     }
 }

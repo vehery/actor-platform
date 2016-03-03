@@ -75,13 +75,13 @@ public class GroupsProcessor extends AbsModule {
                     Message message = new Message(rid, date, date, inviterId,
                             MessageState.UNKNOWN, ServiceGroupCreated.create(),
                             new ArrayList<Reaction>());
-                    conversationActor(group.peer()).send(message);
+                    conversationActor(group.peer()).onMessage(message);
                 } else {
                     // else add invite message
                     Message message = new Message(rid, date, date, inviterId,
                             MessageState.SENT, ServiceGroupUserInvited.create(myUid()),
                             new ArrayList<Reaction>());
-                    conversationActor(group.peer()).send(message);
+                    conversationActor(group.peer()).onMessage(message);
                 }
             }
         }
@@ -108,7 +108,7 @@ public class GroupsProcessor extends AbsModule {
                         uid == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
                         ServiceGroupUserLeave.create(),
                         new ArrayList<Reaction>());
-                conversationActor(group.peer()).send(message);
+                conversationActor(group.peer()).onMessage(message);
             }
         }
     }
@@ -134,7 +134,7 @@ public class GroupsProcessor extends AbsModule {
                         kicker == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
                         ServiceGroupUserKicked.create(uid),
                         new ArrayList<Reaction>());
-                conversationActor(group.peer()).send(message);
+                conversationActor(group.peer()).onMessage(message);
             }
         }
     }
@@ -153,7 +153,7 @@ public class GroupsProcessor extends AbsModule {
                         adder == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
                         ServiceGroupUserInvited.create(uid),
                         new ArrayList<Reaction>());
-                conversationActor(group.peer()).send(message);
+                conversationActor(group.peer()).onMessage(message);
             }
         }
     }
@@ -185,7 +185,7 @@ public class GroupsProcessor extends AbsModule {
                         uid == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
                         ServiceGroupTitleChanged.create(title),
                         new ArrayList<Reaction>());
-                conversationActor(group.peer()).send(message);
+                conversationActor(group.peer()).onMessage(message);
             }
         }
     }
@@ -269,7 +269,7 @@ public class GroupsProcessor extends AbsModule {
                         uid == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
                         ServiceGroupAvatarChanged.create(avatar),
                         new ArrayList<Reaction>());
-                conversationActor(group.peer()).send(message);
+                conversationActor(group.peer()).onMessage(message);
             }
         }
     }

@@ -53,7 +53,6 @@ import im.actor.core.entity.content.VoiceContent;
 import im.actor.core.entity.content.internal.Sticker;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.internal.file.UploadManager;
-import im.actor.core.modules.messaging.conversation.ConversationActor;
 import im.actor.core.modules.messaging.entity.PendingMessage;
 import im.actor.core.modules.messaging.entity.PendingMessagesStorage;
 import im.actor.core.util.ModuleActor;
@@ -106,7 +105,8 @@ public class SenderActor extends ModuleActor {
                     } else {
                         List<Long> rids = new ArrayList<Long>();
                         rids.add(pending.getRid());
-                        context().getMessagesModule().getConversationActor(pending.getPeer()).send(new ConversationActor.MessagesDeleted(rids));
+                        context().getMessagesModule().getConversationActor(pending.getPeer())
+                                .onMessagesDeleted(rids);
                         pendingMessages.getPendingMessages().remove(pending);
                         isChanged = true;
                     }
@@ -144,7 +144,7 @@ public class SenderActor extends ModuleActor {
         long sortDate = date + 365 * 24 * 60 * 60 * 1000L;
 
         if (autoDetect) {
-            mentions = new ArrayList<Integer>();
+            mentions = new ArrayList<>();
             if (peer.getPeerType() == PeerType.GROUP) {
                 Group group = getGroup(peer.getPeerId());
                 String lowText = text.toLowerCase();
@@ -169,7 +169,7 @@ public class SenderActor extends ModuleActor {
 
         Message message = new Message(rid, sortDate, date, myUid(), MessageState.PENDING, content,
                 new ArrayList<Reaction>());
-        context().getMessagesModule().getConversationActor(peer).send(message);
+        context().getMessagesModule().getConversationActor(peer).onMessage(message);
 
         pendingMessages.getPendingMessages().add(new PendingMessage(peer, rid, content));
         savePending();
@@ -183,7 +183,7 @@ public class SenderActor extends ModuleActor {
         long sortDate = date + 365 * 24 * 60 * 60 * 1000L;
 
         Message message = new Message(rid, sortDate, date, myUid(), MessageState.PENDING, content, new ArrayList<Reaction>());
-        context().getMessagesModule().getConversationActor(peer).send(message);
+        context().getMessagesModule().getConversationActor(peer).onMessage(message);
 
         pendingMessages.getPendingMessages().add(new PendingMessage(peer, rid, content));
         savePending();
@@ -202,7 +202,7 @@ public class SenderActor extends ModuleActor {
         StickerContent content = StickerContent.create(sticker);
 
         Message message = new Message(rid, sortDate, date, myUid(), MessageState.PENDING, content, new ArrayList<Reaction>());
-        context().getMessagesModule().getConversationActor(peer).send(message);
+        context().getMessagesModule().getConversationActor(peer).onMessage(message);
 
         pendingMessages.getPendingMessages().add(new PendingMessage(peer, rid, content));
         savePending();
@@ -223,7 +223,7 @@ public class SenderActor extends ModuleActor {
 
         Message message = new Message(rid, sortDate, date, myUid(), MessageState.PENDING, documentContent,
                 new ArrayList<Reaction>());
-        context().getMessagesModule().getConversationActor(peer).send(message);
+        context().getMessagesModule().getConversationActor(peer).onMessage(message);
 
         pendingMessages.getPendingMessages().add(new PendingMessage(peer, rid, documentContent));
         savePending();
@@ -240,7 +240,7 @@ public class SenderActor extends ModuleActor {
 
         Message message = new Message(rid, sortDate, date, myUid(), MessageState.PENDING, photoContent,
                 new ArrayList<Reaction>());
-        context().getMessagesModule().getConversationActor(peer).send(message);
+        context().getMessagesModule().getConversationActor(peer).onMessage(message);
 
         pendingMessages.getPendingMessages().add(new PendingMessage(peer, rid, photoContent));
         savePending();
@@ -262,7 +262,7 @@ public class SenderActor extends ModuleActor {
         ContactContent content = ContactContent.create(name, phones, emails, base64photo);
 
         Message message = new Message(rid, sortDate, date, myUid(), MessageState.PENDING, content, new ArrayList<Reaction>());
-        context().getMessagesModule().getConversationActor(peer).send(message);
+        context().getMessagesModule().getConversationActor(peer).onMessage(message);
 
         pendingMessages.getPendingMessages().add(new PendingMessage(peer, rid, content));
         savePending();
@@ -278,7 +278,7 @@ public class SenderActor extends ModuleActor {
         VoiceContent audioContent = VoiceContent.createLocalAudio(descriptor, fileName, fileSize, duration);
 
         Message message = new Message(rid, sortDate, date, myUid(), MessageState.PENDING, audioContent, new ArrayList<Reaction>());
-        context().getMessagesModule().getConversationActor(peer).send(message);
+        context().getMessagesModule().getConversationActor(peer).onMessage(message);
 
         pendingMessages.getPendingMessages().add(new PendingMessage(peer, rid, audioContent));
         savePending();
@@ -299,7 +299,7 @@ public class SenderActor extends ModuleActor {
         LocationContent content = LocationContent.create(longitude, latitude, street, place);
 
         Message message = new Message(rid, sortDate, date, myUid(), MessageState.PENDING, content, new ArrayList<Reaction>());
-        context().getMessagesModule().getConversationActor(peer).send(message);
+        context().getMessagesModule().getConversationActor(peer).onMessage(message);
 
         pendingMessages.getPendingMessages().add(new PendingMessage(peer, rid, content));
         savePending();
@@ -317,7 +317,7 @@ public class SenderActor extends ModuleActor {
 
         Message message = new Message(rid, sortDate, date, myUid(), MessageState.PENDING, videoContent,
                 new ArrayList<Reaction>());
-        context().getMessagesModule().getConversationActor(peer).send(message);
+        context().getMessagesModule().getConversationActor(peer).onMessage(message);
 
         pendingMessages.getPendingMessages().add(new PendingMessage(peer, rid, videoContent));
         savePending();
@@ -359,7 +359,7 @@ public class SenderActor extends ModuleActor {
         }
 
         pendingMessages.getPendingMessages().add(new PendingMessage(msg.getPeer(), msg.getRid(), nContent));
-        context().getMessagesModule().getConversationActor(msg.getPeer()).send(new ConversationActor.MessageContentUpdated(msg.getRid(), nContent));
+        context().getMessagesModule().getConversationActor(msg.getPeer()).onMessageContentChanged(msg.getRid(), nContent);
         performSendContent(msg.getPeer(), rid, nContent);
         fileUploadingWakeLocks.remove(rid).releaseLock();
     }
@@ -475,7 +475,7 @@ public class SenderActor extends ModuleActor {
             }
         }
         savePending();
-        context().getMessagesModule().getConversationActor(peer).send(new ConversationActor.MessageError(rid));
+        context().getMessagesModule().getConversationActor(peer).onMessageError(rid);
     }
 
     private void savePending() {

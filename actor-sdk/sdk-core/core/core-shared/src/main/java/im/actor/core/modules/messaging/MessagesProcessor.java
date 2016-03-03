@@ -29,9 +29,7 @@ import im.actor.core.modules.messaging.actions.ArchivedDialogsActor;
 import im.actor.core.modules.messaging.actions.CursorReceiverActor;
 import im.actor.core.modules.messaging.actions.OwnReadActor;
 import im.actor.core.modules.messaging.actions.SenderActor;
-import im.actor.core.modules.messaging.conversation.ConversationActor;
 import im.actor.core.modules.messaging.conversation.ConversationHistoryActor;
-import im.actor.core.modules.messaging.dialogs.DialogsGroupedActor;
 import im.actor.core.modules.messaging.entity.EntityConverter;
 import im.actor.runtime.annotations.Verified;
 
@@ -75,7 +73,7 @@ public class MessagesProcessor extends AbsModule {
             }
         }
 
-        conversationActor(peer).send(new ConversationActor.Messages(nMessages));
+        conversationActor(peer).onMessages(nMessages);
 
         if (intMessageSortDate > 0) {
             plainReceiveActor().send(new CursorReceiverActor.MarkReceived(peer, intMessageSortDate));
@@ -109,7 +107,7 @@ public class MessagesProcessor extends AbsModule {
         Message message = new Message(rid, date, date, senderUid,
                 isOut ? MessageState.SENT : MessageState.UNKNOWN, msgContent, new ArrayList<Reaction>());
 
-        conversationActor(peer).send(message);
+        conversationActor(peer).onMessage(message);
 
         if (!isOut) {
             // mark message as received
@@ -126,7 +124,7 @@ public class MessagesProcessor extends AbsModule {
         Message message = new Message(rid, date, date, uid,
                 MessageState.UNKNOWN, ServiceUserRegistered.create(), new ArrayList<Reaction>());
 
-        conversationActor(Peer.user(uid)).send(message);
+        conversationActor(Peer.user(uid)).onMessage(message);
     }
 
     @Verified
@@ -139,7 +137,7 @@ public class MessagesProcessor extends AbsModule {
         }
 
         // Sending event to conversation actor
-        conversationActor(peer).send(new ConversationActor.MessageRead(startDate));
+        conversationActor(peer).onMessageRead(startDate);
     }
 
     @Verified
@@ -152,7 +150,7 @@ public class MessagesProcessor extends AbsModule {
         }
 
         // Sending event to conversation actor
-        conversationActor(peer).send(new ConversationActor.MessageReceived(startDate));
+        conversationActor(peer).onMessageReceived(startDate);
     }
 
     @Verified
@@ -178,7 +176,7 @@ public class MessagesProcessor extends AbsModule {
         }
 
         // Change message state in conversation
-        conversationActor(peer).send(new ConversationActor.MessageSent(rid, date));
+        conversationActor(peer).onMessageSent(rid, date);
 
         // Notify Sender Actor
         sendActor().send(new SenderActor.MessageSent(peer, rid));
@@ -193,13 +191,13 @@ public class MessagesProcessor extends AbsModule {
             return;
         }
 
-        ArrayList<Reaction> reactions = new ArrayList<Reaction>();
+        ArrayList<Reaction> reactions = new ArrayList<>();
         for (ApiMessageReaction r : apiReactions) {
             reactions.add(new Reaction(r.getCode(), r.getUsers()));
         }
 
         // Change message state in conversation
-        conversationActor(peer).send(new ConversationActor.MessageReactionsChanged(rid, reactions));
+        conversationActor(peer).onMessageReactionsChanged(rid, reactions);
     }
 
     @Verified
@@ -221,7 +219,7 @@ public class MessagesProcessor extends AbsModule {
         }
 
         // Change message content in conversation
-        conversationActor(peer).send(new ConversationActor.MessageContentUpdated(rid, content));
+        conversationActor(peer).onMessageContentChanged(rid, content);
     }
 
     @Verified
@@ -234,7 +232,7 @@ public class MessagesProcessor extends AbsModule {
         }
 
         // Deleting messages from conversation
-        conversationActor(peer).send(new ConversationActor.MessagesDeleted(rids));
+        conversationActor(peer).onMessagesDeleted(rids);
 
         // TODO: Notify send actor
     }
@@ -249,7 +247,7 @@ public class MessagesProcessor extends AbsModule {
         }
 
         // Clearing conversation
-        conversationActor(peer).send(new ConversationActor.ClearConversation());
+        conversationActor(peer).onClearConversation();
 
         // TODO: Notify send actor
     }
@@ -264,7 +262,7 @@ public class MessagesProcessor extends AbsModule {
         }
 
         // Deleting conversation
-        conversationActor(peer).send(new ConversationActor.DeleteConversation());
+        conversationActor(peer).onDeleteConversation();
 
         // TODO: Notify send actor
     }
@@ -301,7 +299,7 @@ public class MessagesProcessor extends AbsModule {
 
         // Sending updates to conversation actor
         if (messages.size() > 0) {
-            conversationActor(peer).send(new ConversationActor.HistoryLoaded(messages));
+            conversationActor(peer).onHistoryLoaded(messages);
         }
 
         // Sending notification to conversation history actor

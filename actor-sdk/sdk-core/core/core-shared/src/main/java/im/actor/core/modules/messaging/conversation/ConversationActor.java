@@ -17,8 +17,21 @@ import im.actor.core.entity.content.DocumentContent;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.events.AppVisibleChanged;
 import im.actor.core.modules.messaging.actions.OwnReadActor;
+import im.actor.core.modules.messaging.conversation.messages.ClearConversation;
+import im.actor.core.modules.messaging.conversation.messages.ConversationHidden;
+import im.actor.core.modules.messaging.conversation.messages.ConversationVisible;
+import im.actor.core.modules.messaging.conversation.messages.DeleteConversation;
+import im.actor.core.modules.messaging.conversation.messages.HistoryLoaded;
+import im.actor.core.modules.messaging.conversation.messages.MessageContentUpdated;
+import im.actor.core.modules.messaging.conversation.messages.MessageError;
+import im.actor.core.modules.messaging.conversation.messages.MessageReactionsChanged;
+import im.actor.core.modules.messaging.conversation.messages.MessageRead;
+import im.actor.core.modules.messaging.conversation.messages.MessageReadByMe;
+import im.actor.core.modules.messaging.conversation.messages.MessageReceived;
+import im.actor.core.modules.messaging.conversation.messages.MessageSent;
+import im.actor.core.modules.messaging.conversation.messages.Messages;
+import im.actor.core.modules.messaging.conversation.messages.MessagesDeleted;
 import im.actor.core.modules.messaging.dialogs.DialogsInt;
-import im.actor.core.modules.messaging.dialogs.DialogsGroupedActor;
 import im.actor.core.util.ModuleActor;
 import im.actor.runtime.Storage;
 import im.actor.runtime.actors.ActorRef;
@@ -132,7 +145,7 @@ public class ConversationActor extends ModuleActor {
     // Messages receive/update
 
     @Verified
-    private void onInMessages(ArrayList<Message> inMessages) {
+    private void onInMessages(List<Message> inMessages) {
 
         // Prepare messages
         Message topMessage = null;
@@ -621,158 +634,4 @@ public class ConversationActor extends ModuleActor {
         super.onBusEvent(event);
     }
 
-    public static class MessageContentUpdated {
-        private long rid;
-        private AbsContent content;
-
-        public MessageContentUpdated(long rid, AbsContent content) {
-            this.rid = rid;
-            this.content = content;
-        }
-
-        public long getRid() {
-            return rid;
-        }
-
-        public AbsContent getContent() {
-            return content;
-        }
-    }
-
-    public static class HistoryLoaded {
-        private List<Message> messages;
-
-        public HistoryLoaded(List<Message> messages) {
-            this.messages = messages;
-        }
-
-        public List<Message> getMessages() {
-            return messages;
-        }
-    }
-
-    public static class MessageReceived {
-        private long date;
-
-        public MessageReceived(long date) {
-            this.date = date;
-        }
-
-        public long getDate() {
-            return date;
-        }
-    }
-
-    public static class MessageRead {
-        private long date;
-
-        public MessageRead(long date) {
-            this.date = date;
-        }
-
-        public long getDate() {
-            return date;
-        }
-    }
-
-    public static class MessageSent {
-        private long rid;
-        private long date;
-
-        public MessageSent(long rid, long date) {
-            this.rid = rid;
-            this.date = date;
-        }
-
-        public long getDate() {
-            return date;
-        }
-
-        public long getRid() {
-            return rid;
-        }
-    }
-
-    public static class MessageReactionsChanged {
-
-        private long rid;
-        private ArrayList<Reaction> reactions;
-
-        public MessageReactionsChanged(long rid, ArrayList<Reaction> reactions) {
-            this.rid = rid;
-            this.reactions = reactions;
-        }
-
-        public ArrayList<Reaction> getReactions() {
-            return reactions;
-        }
-
-        public long getRid() {
-            return rid;
-        }
-    }
-
-    public static class MessageReadByMe {
-        private long date;
-
-        public MessageReadByMe(long date) {
-            this.date = date;
-        }
-
-        public long getDate() {
-            return date;
-        }
-    }
-
-    public static class MessageError {
-        private long rid;
-
-        public MessageError(long rid) {
-            this.rid = rid;
-        }
-
-        public long getRid() {
-            return rid;
-        }
-    }
-
-    public static class MessagesDeleted {
-        private List<Long> rids;
-
-        public MessagesDeleted(List<Long> rids) {
-            this.rids = rids;
-        }
-
-        public List<Long> getRids() {
-            return rids;
-        }
-    }
-
-    public static class ClearConversation {
-
-    }
-
-    public static class DeleteConversation {
-
-    }
-
-    public static class Messages {
-        private ArrayList<Message> messages;
-
-        public Messages(ArrayList<Message> messages) {
-            this.messages = messages;
-        }
-
-        public ArrayList<Message> getMessages() {
-            return messages;
-        }
-    }
-
-    public static class ConversationVisible {
-
-    }
-
-    public static class ConversationHidden {
-
-    }
 }

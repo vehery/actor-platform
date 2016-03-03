@@ -9,7 +9,6 @@ import im.actor.core.entity.Message;
 import im.actor.core.entity.Peer;
 import im.actor.core.entity.content.TextContent;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.conversation.ConversationActor;
 import im.actor.core.util.ModuleActor;
 
 public class OwnReadActor extends ModuleActor {
@@ -70,7 +69,7 @@ public class OwnReadActor extends ModuleActor {
                 .send(new CursorReaderActor.MarkRead(peer, sortingDate));
 
         // Update Counters
-        context().getMessagesModule().getConversationActor(peer).send(new ConversationActor.MessageReadByMe(sortingDate));
+        context().getMessagesModule().getConversationActor(peer).onMessageReadByMe(sortingDate);
 
         // Saving last read message
         context().getMessagesModule().saveReadState(peer, sortingDate);
@@ -87,7 +86,7 @@ public class OwnReadActor extends ModuleActor {
         }
 
         // Update Counters
-        context().getMessagesModule().getConversationActor(peer).send(new ConversationActor.MessageReadByMe(sortingDate));
+        context().getMessagesModule().getConversationActor(peer).onMessageReadByMe(sortingDate);
 
         // Saving read state
         context().getMessagesModule().saveReadState(peer, sortingDate);
