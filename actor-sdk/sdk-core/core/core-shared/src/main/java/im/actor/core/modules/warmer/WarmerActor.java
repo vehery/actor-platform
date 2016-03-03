@@ -4,12 +4,10 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.contacts.BookImportActor;
 import im.actor.core.modules.contacts.ContactsSyncActor;
 import im.actor.core.util.ModuleActor;
-import im.actor.runtime.Log;
 
 public class WarmerActor extends ModuleActor {
 
-    private static final String TAG = "WarmerActor";
-
+    private boolean isSequenceStarted;
     private boolean isDialogsLoaded;
     private boolean isGroupedDialogsLoaded;
     private boolean isContactsLoaded;
@@ -22,9 +20,15 @@ public class WarmerActor extends ModuleActor {
     public void preStart() {
         isDialogsLoaded = false;
         isGroupedDialogsLoaded = !config().isEnabledGroupedChatList();
+    }
 
-        if (isDialogsLoaded && isGroupedDialogsLoaded) {
-            onAllDialogsLoaded();
+    public void onSequenceStarted() {
+        if (!isSequenceStarted) {
+            isSequenceStarted = true;
+
+            if (isDialogsLoaded && isGroupedDialogsLoaded) {
+                onAllDialogsLoaded();
+            }
         }
     }
 
@@ -32,7 +36,7 @@ public class WarmerActor extends ModuleActor {
         if (!isDialogsLoaded) {
             isDialogsLoaded = true;
 
-            if (isGroupedDialogsLoaded) {
+            if (isGroupedDialogsLoaded && isSequenceStarted) {
                 onAllDialogsLoaded();
             }
         }
@@ -42,7 +46,7 @@ public class WarmerActor extends ModuleActor {
         if (!isGroupedDialogsLoaded) {
             isGroupedDialogsLoaded = true;
 
-            if (isDialogsLoaded) {
+            if (isDialogsLoaded && isSequenceStarted) {
                 onAllDialogsLoaded();
             }
         }
@@ -68,9 +72,15 @@ public class WarmerActor extends ModuleActor {
             onDialogsLoaded();
         } else if (message instanceof OnGroupedDialogsLoaded) {
             onGroupedDialogsLoaded();
+        } else if (message instanceof OnSequenceStarted) {
+            onSequenceStarted();
         } else {
             super.onReceive(message);
         }
+    }
+
+    public static class OnSequenceStarted {
+
     }
 
     public static class OnContactsLoaded {
