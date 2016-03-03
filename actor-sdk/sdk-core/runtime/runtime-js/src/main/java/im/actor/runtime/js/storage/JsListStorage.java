@@ -156,8 +156,11 @@ public class JsListStorage implements ListStorage {
 
     @Override
     public List<ListEngineRecord> loadAllItems() {
-        // TODO: Implement
-        return null;
+        ArrayList<ListEngineRecord> res = new ArrayList<>();
+        for (Index l : index) {
+            res.add(loadItem(l.getId()));
+        }
+        return res;
     }
 
     @Override
@@ -176,42 +179,6 @@ public class JsListStorage implements ListStorage {
         } else {
             return null;
         }
-    }
-
-    public long[] getOrderedIds() {
-        long[] res = new long[index.size()];
-        for (int i = 0; i < res.length; i++) {
-            res[i] = index.get(i).getId();
-        }
-        return res;
-    }
-
-    public long[] getPrevIdsInclusive(long sortKey) {
-        ArrayList<Long> res = new ArrayList<Long>();
-        for (Index i : index) {
-            if (i.getSortKey() <= sortKey) {
-                res.add(i.getId());
-            }
-        }
-        long[] res2 = new long[res.size()];
-        for (int i = 0; i < res2.length; i++) {
-            res2[i] = res.get(i);
-        }
-        return res2;
-    }
-
-    public long[] getPrevIdsExclusive(long sortKey) {
-        ArrayList<Long> res = new ArrayList<Long>();
-        for (Index i : index) {
-            if (i.getSortKey() < sortKey) {
-                res.add(i.getId());
-            }
-        }
-        long[] res2 = new long[res.size()];
-        for (int i = 0; i < res2.length; i++) {
-            res2[i] = res.get(i);
-        }
-        return res2;
     }
 
     private String getId(long id) {

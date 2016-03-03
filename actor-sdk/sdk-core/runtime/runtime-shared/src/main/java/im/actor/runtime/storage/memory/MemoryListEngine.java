@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import im.actor.core.entity.Peer;
 import im.actor.runtime.bser.BserCreator;
 import im.actor.runtime.bser.BserObject;
 import im.actor.runtime.bser.BserParser;
@@ -17,7 +18,7 @@ import im.actor.runtime.storage.ObjectCache;
 public class MemoryListEngine<T extends BserObject & ListEngineItem> implements ListEngine<T> {
 
     private final Object LOCK = new Object();
-    private final ObjectCache<Long, T> cache = new ObjectCache<Long, T>();
+    private final ObjectCache<Long, T> cache = new ObjectCache<>();
     private final MemoryListStorage storage;
     private final BserCreator<T> creator;
 
@@ -42,7 +43,7 @@ public class MemoryListEngine<T extends BserObject & ListEngineItem> implements 
     @Override
     public void addOrUpdateItems(List<T> items) {
         synchronized (LOCK) {
-            ArrayList<ListEngineRecord> records = new ArrayList<ListEngineRecord>();
+            ArrayList<ListEngineRecord> records = new ArrayList<>();
             for (T item : items) {
                 cache.onObjectUpdated(item.getEngineId(), item);
                 records.add(new ListEngineRecord(item.getEngineId(),
@@ -59,7 +60,7 @@ public class MemoryListEngine<T extends BserObject & ListEngineItem> implements 
         synchronized (LOCK) {
             cache.clear();
 
-            ArrayList<ListEngineRecord> records = new ArrayList<ListEngineRecord>();
+            ArrayList<ListEngineRecord> records = new ArrayList<>();
             for (T item : items) {
                 cache.onObjectUpdated(item.getEngineId(), item);
                 records.add(new ListEngineRecord(item.getEngineId(),
@@ -114,6 +115,25 @@ public class MemoryListEngine<T extends BserObject & ListEngineItem> implements 
             }
             return loadValue(key);
         }
+    }
+
+    @Override
+    public List<T> loadAll() {
+        ArrayList<T> res = new ArrayList<>();
+        synchronized (LOCK) {
+            for (ListEngineRecord r : storage.loadAllItems()) {
+                T t;
+                try {
+                    t = creator.createInstance();
+                    t.parse(new BserValues(BserParser.deserialize(new DataInput(r.getData()))));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+                cache.onObjectLoaded(t.getEngineId(), t);
+            }
+        }
+        return res;
     }
 
     @Override

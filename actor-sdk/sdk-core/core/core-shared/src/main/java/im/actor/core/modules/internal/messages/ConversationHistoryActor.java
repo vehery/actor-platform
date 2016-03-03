@@ -38,8 +38,12 @@ public class ConversationHistoryActor extends ModuleActor {
     @Override
     public void preStart() {
         super.preStart();
-        historyMaxDate = preferences().getLong(KEY_LOADED_DATE, Long.MAX_VALUE);
-        historyLoaded = preferences().getBool(KEY_LOADED, false);
+        historyMaxDate = Long.MAX_VALUE;
+        historyLoaded = false;
+        if (isPersistenceEnabled()) {
+            historyMaxDate = preferences().getLong(KEY_LOADED_DATE, Long.MAX_VALUE);
+            historyLoaded = preferences().getBool(KEY_LOADED, false);
+        }
         if (!preferences().getBool(KEY_LOADED_INIT, false)) {
             self().send(new LoadMore());
         } else {
@@ -82,9 +86,11 @@ public class ConversationHistoryActor extends ModuleActor {
             historyMaxDate = maxLoadedDate;
         }
 
-        preferences().putLong(KEY_LOADED_DATE, maxLoadedDate);
-        preferences().putBool(KEY_LOADED, historyLoaded);
-        preferences().putBool(KEY_LOADED_INIT, true);
+        if (isPersistenceEnabled()) {
+            preferences().putLong(KEY_LOADED_DATE, maxLoadedDate);
+            preferences().putBool(KEY_LOADED, historyLoaded);
+            preferences().putBool(KEY_LOADED_INIT, true);
+        }
 
         if (historyLoaded) {
             context().getMessagesModule().markAsLoaded(peer);

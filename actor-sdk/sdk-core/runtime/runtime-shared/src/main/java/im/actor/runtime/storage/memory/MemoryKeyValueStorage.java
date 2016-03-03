@@ -9,7 +9,7 @@ import im.actor.runtime.storage.KeyValueStorage;
 
 public class MemoryKeyValueStorage implements KeyValueStorage {
 
-    private HashMap<Long, byte[]> records = new HashMap<Long, byte[]>();
+    private HashMap<Long, byte[]> records = new HashMap<>();
 
     @Override
     public void addOrUpdateItem(long key, byte[] data) {

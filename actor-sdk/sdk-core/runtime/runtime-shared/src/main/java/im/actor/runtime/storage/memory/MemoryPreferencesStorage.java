@@ -6,7 +6,7 @@ import im.actor.runtime.storage.PreferencesStorage;
 
 public class MemoryPreferencesStorage implements PreferencesStorage {
 
-    private HashMap<String, Object> keys = new HashMap<String, Object>();
+    private HashMap<String, Object> keys = new HashMap<>();
 
     @Override
     public void putLong(String key, long v) {

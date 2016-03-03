@@ -103,6 +103,10 @@ public abstract class AbsModule {
         return context.getAuthModule().myUid();
     }
 
+    public boolean isPersistentEnabled() {
+        return context.getConfiguration().isEnablePersistence();
+    }
+
     public <T extends Response> void request(Request<T> request, RpcCallback<T> callback) {
         context.getActorApi().request(request, callback);
     }

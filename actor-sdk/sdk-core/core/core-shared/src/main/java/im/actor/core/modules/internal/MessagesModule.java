@@ -78,7 +78,9 @@ import im.actor.runtime.eventbus.Event;
 import im.actor.runtime.files.FileSystemReference;
 import im.actor.runtime.mvvm.MVVMCollection;
 import im.actor.runtime.storage.ListEngine;
+import im.actor.runtime.storage.ListStorage;
 import im.actor.runtime.storage.SyncKeyValue;
+import im.actor.runtime.storage.memory.MemoryListStorage;
 
 import static im.actor.runtime.actors.ActorSystem.system;
 
@@ -248,8 +250,15 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     public ListEngine<Message> getConversationEngine(Peer peer) {
         synchronized (conversationEngines) {
             if (!conversationEngines.containsKey(peer)) {
-                conversationEngines.put(peer,
-                        Storage.createList(STORAGE_CHAT_PREFIX + peer.getUnuqueId(), Message.CREATOR));
+                String listName = STORAGE_CHAT_PREFIX + peer.getUnuqueId();
+                ListStorage storage;
+                if (isPersistentEnabled()) {
+                    storage = Storage.createList(listName);
+                } else {
+                    storage = new MemoryListStorage();
+                }
+                conversationEngines.put(peer, Storage.createList(storage, Message.CREATOR));
+
             }
             return conversationEngines.get(peer);
         }
@@ -942,7 +951,9 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     }
 
     public void markAsLoaded(Peer peer) {
-        preferences().putBool("chat.state_" + peer, true);
+        if (isPersistentEnabled()) {
+            preferences().putBool("chat.state_" + peer, true);
+        }
         getConversationVM(peer).getIsLoaded().change(true);
     }
 

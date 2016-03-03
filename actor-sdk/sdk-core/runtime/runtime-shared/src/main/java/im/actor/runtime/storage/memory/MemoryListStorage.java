@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import im.actor.runtime.Log;
 import im.actor.runtime.storage.ListEngineRecord;
 import im.actor.runtime.storage.ListStorage;
 
 public class MemoryListStorage implements ListStorage {
 
-    private HashMap<Long, Record> records = new HashMap<Long, Record>();
+    private HashMap<Long, Record> records = new HashMap<>();
 
     @Override
     public void updateOrAdd(ListEngineRecord valueContainer) {
@@ -53,9 +54,11 @@ public class MemoryListStorage implements ListStorage {
 
     @Override
     public List<ListEngineRecord> loadAllItems() {
-        ArrayList<ListEngineRecord> res = new ArrayList<ListEngineRecord>();
+        Log.d("MemoryListStorage", "loadAllItems:" + records);
+        ArrayList<ListEngineRecord> res = new ArrayList<>();
         for (long id : records.keySet()) {
             Record record = records.get(id);
+            Log.d("MemoryListStorage", "loadAllItems:" + id);
             res.add(new ListEngineRecord(id, record.getOrder(), record.getQuery(), record.getData()));
         }
         return res;

@@ -24,7 +24,7 @@ public class JsEngineProvider implements EnginesRuntime {
 
     @Override
     public <T extends BserObject & ListEngineItem> ListEngine<T> createListEngine(ListStorage storage, BserCreator<T> creator) {
-        return new JsListEngine<T>((JsListStorage) storage, creator);
+        return new JsListEngine<>(storage, creator);
     }
 
     @Override

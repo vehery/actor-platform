@@ -1,7 +1,6 @@
 package im.actor.runtime.js.mvvm;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,15 +116,10 @@ public class JsDisplayListBind<T extends JavaScriptObject, V extends BserObject 
     }
 
     public void initAll() {
+        Log.d("JsDisplayListBind", "initAll");
         clearState();
-
-        long[] rids = listEngine.getOrderedIds();
-        for (long rid : rids) {
-            V item = listEngine.getValue(rid);
-            if (item == null) {
-                Log.w("JsDisplayList", "Unable to find item #" + rid);
-                continue;
-            }
+        Log.d("JsDisplayListBind", "initAll2");
+        for (V item : listEngine.loadAll()) {
             values.add(item);
             jsValues.push(entityConverter.convert(item));
 
@@ -146,76 +140,76 @@ public class JsDisplayListBind<T extends JavaScriptObject, V extends BserObject 
         notifySubscriber();
     }
 
-    public void initTop(int limit) {
-        clearState();
+//    public void initTop(int limit) {
+//        clearState();
+//
+//        long[] rids = listEngine.lo.getOrderedIds();
+//        for (int i = 0; i < rids.length && i < limit; i++) {
+//            V item = listEngine.getValue(rids[i]);
+//            if (item == null) {
+//                Log.w("JsDisplayList", "Unable to find item #" + rids[i]);
+//                continue;
+//            }
+//            values.add(item);
+//            jsValues.push(entityConverter.convert(item));
+//
+//            if (isOverlaysSupported) {
+//                jsOverlays.push(null);
+//                isOverlayDirty.add(true);
+//            }
+//        }
+//
+//        processDirtyOverlays();
+//
+//        isInited = true;
+//        windowTop = 0;
+//        isOpenTop = true;
+//        if (rids.length > 0) {
+//            windowBottom = rids[rids.length - 1];
+//            isOpenBottom = false;
+//        } else {
+//            windowBottom = 0;
+//            isOpenBottom = true;
+//        }
+//
+//        notifySubscriber();
+//    }
 
-        long[] rids = listEngine.getOrderedIds();
-        for (int i = 0; i < rids.length && i < limit; i++) {
-            V item = listEngine.getValue(rids[i]);
-            if (item == null) {
-                Log.w("JsDisplayList", "Unable to find item #" + rids[i]);
-                continue;
-            }
-            values.add(item);
-            jsValues.push(entityConverter.convert(item));
-
-            if (isOverlaysSupported) {
-                jsOverlays.push(null);
-                isOverlayDirty.add(true);
-            }
-        }
-
-        processDirtyOverlays();
-
-        isInited = true;
-        windowTop = 0;
-        isOpenTop = true;
-        if (rids.length > 0) {
-            windowBottom = rids[rids.length - 1];
-            isOpenBottom = false;
-        } else {
-            windowBottom = 0;
-            isOpenBottom = true;
-        }
-
-        notifySubscriber();
-    }
-
-    public void loadBottom(int limit) {
-        if (!isInited) {
-            return;
-        }
-        if (isOpenBottom) {
-            return;
-        }
-        long[] rids = listEngine.getPrevIdsExclusive(windowBottom);
-        for (int i = 0; i < rids.length && i < limit; i++) {
-            V item = listEngine.getValue(rids[i]);
-            if (item == null) {
-                Log.w("JsDisplayList", "Unable to find item #" + rids[i]);
-                continue;
-            }
-            values.add(item);
-            jsValues.push(entityConverter.convert(item));
-
-            if (isOverlaysSupported) {
-                jsOverlays.push(null);
-                isOverlayDirty.add(true);
-            }
-        }
-
-        processDirtyOverlays();
-
-        if (rids.length > 0) {
-            windowBottom = rids[rids.length - 1];
-            isOpenBottom = false;
-        } else {
-            windowBottom = 0;
-            isOpenBottom = true;
-        }
-
-        notifySubscriber();
-    }
+//    public void loadBottom(int limit) {
+//        if (!isInited) {
+//            return;
+//        }
+//        if (isOpenBottom) {
+//            return;
+//        }
+//        long[] rids = listEngine.getPrevIdsExclusive(windowBottom);
+//        for (int i = 0; i < rids.length && i < limit; i++) {
+//            V item = listEngine.getValue(rids[i]);
+//            if (item == null) {
+//                Log.w("JsDisplayList", "Unable to find item #" + rids[i]);
+//                continue;
+//            }
+//            values.add(item);
+//            jsValues.push(entityConverter.convert(item));
+//
+//            if (isOverlaysSupported) {
+//                jsOverlays.push(null);
+//                isOverlayDirty.add(true);
+//            }
+//        }
+//
+//        processDirtyOverlays();
+//
+//        if (rids.length > 0) {
+//            windowBottom = rids[rids.length - 1];
+//            isOpenBottom = false;
+//        } else {
+//            windowBottom = 0;
+//            isOpenBottom = true;
+//        }
+//
+//        notifySubscriber();
+//    }
 
     public void dispose() {
         listEngine.removeListener(this);

@@ -8,7 +8,7 @@ import im.actor.runtime.storage.IndexStorage;
 
 public class MemoryIndexStorage implements IndexStorage {
 
-    private HashMap<Long, Long> index = new HashMap<Long, Long>();
+    private HashMap<Long, Long> index = new HashMap<>();
 
     @Override
     public void put(long key, long value) {

@@ -40,6 +40,9 @@ public interface ListEngine<T extends BserObject & ListEngineItem> {
     @ObjectiveCName("getHeadValue")
     T getHeadValue();
 
+    @ObjectiveCName("loadAll")
+    List<T> loadAll();
+
     @ObjectiveCName("isEmpty")
     boolean isEmpty();
 

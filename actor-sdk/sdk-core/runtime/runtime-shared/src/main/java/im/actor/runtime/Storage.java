@@ -12,6 +12,7 @@ import im.actor.runtime.storage.KeyValueItem;
 import im.actor.runtime.storage.KeyValueStorage;
 import im.actor.runtime.storage.ListEngine;
 import im.actor.runtime.storage.ListEngineItem;
+import im.actor.runtime.storage.ListStorage;
 import im.actor.runtime.storage.PreferencesStorage;
 
 public class Storage {
@@ -49,8 +50,16 @@ public class Storage {
         return storageRuntime.createKeyValue(name);
     }
 
+    public static ListStorage createList(String name) {
+        return storageRuntime.createList(name);
+    }
+
     public static <T extends BserObject & ListEngineItem> ListEngine<T> createList(String name, BserCreator<T> creator) {
-        return enginesRuntime.createListEngine(storageRuntime.createList(name), creator);
+        return enginesRuntime.createListEngine(createList(name), creator);
+    }
+
+    public static <T extends BserObject & ListEngineItem> ListEngine<T> createList(ListStorage storage, BserCreator<T> creator) {
+        return enginesRuntime.createListEngine(storage, creator);
     }
 
     public static <V extends BaseValueModel<T>,
@@ -61,8 +70,8 @@ public class Storage {
     }
 
     public static <T extends BserObject & ListEngineItem> PlatformDisplayList<T> createDisplayList(ListEngine<T> engine,
-                                                                                           boolean isSharedInstance,
-                                                                                           String entityName) {
+                                                                                                   boolean isSharedInstance,
+                                                                                                   String entityName) {
         return enginesRuntime.createDisplayList(engine, isSharedInstance, entityName);
     }
 

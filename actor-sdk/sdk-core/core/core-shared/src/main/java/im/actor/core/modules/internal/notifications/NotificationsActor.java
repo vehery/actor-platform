@@ -107,12 +107,14 @@ public class NotificationsActor extends ModuleActor {
 
         // Loading pending messages
         pendingStorage = new PendingStorage();
-        byte[] storage = this.storage.get(0);
-        if (storage != null) {
-            try {
-                pendingStorage = PendingStorage.fromBytes(storage);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (isPersistenceEnabled()) {
+            byte[] storage = this.storage.get(0);
+            if (storage != null) {
+                try {
+                    pendingStorage = PendingStorage.fromBytes(storage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -515,7 +517,9 @@ public class NotificationsActor extends ModuleActor {
      * Saving pending messages storage
      */
     private void saveStorage() {
-        this.storage.put(0, pendingStorage.toByteArray());
+        if (isPersistenceEnabled()) {
+            this.storage.put(0, pendingStorage.toByteArray());
+        }
     }
 
     /**

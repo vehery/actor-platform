@@ -16,17 +16,18 @@ import im.actor.runtime.bser.BserObject;
 import im.actor.runtime.storage.ListEngine;
 import im.actor.runtime.storage.ListEngineItem;
 import im.actor.runtime.storage.ListEngineRecord;
+import im.actor.runtime.storage.ListStorage;
 
 public class JsListEngine<T extends BserObject & ListEngineItem> implements ListEngine<T> {
 
     private static final String TAG = "JsListEngine";
 
-    private JsListStorage storage;
+    private ListStorage storage;
     private BserCreator<T> creator;
-    private HashMap<Long, T> cache = new HashMap<Long, T>();
+    private HashMap<Long, T> cache = new HashMap<>();
     private ArrayList<JsListEngineCallback<T>> callbacks = new ArrayList<JsListEngineCallback<T>>();
 
-    public JsListEngine(JsListStorage storage, BserCreator<T> creator) {
+    public JsListEngine(ListStorage storage, BserCreator<T> creator) {
         this.storage = storage;
         this.creator = creator;
     }
@@ -159,11 +160,29 @@ public class JsListEngine<T extends BserObject & ListEngineItem> implements List
 
     @Override
     public T getHeadValue() {
-        Long id = storage.getHeadId();
-        if (id != null) {
-            return getValue(id);
-        }
+//        Long id = storage.getHeadId();
+//        if (id != null) {
+//            return getValue(id);
+//        }
         return null;
+    }
+
+    @Override
+    public List<T> loadAll() {
+        Log.d(TAG, "loadAll");
+        ArrayList<T> res = new ArrayList<>();
+        Log.d(TAG, "loadAll2");
+        for (ListEngineRecord r : storage.loadAllItems()) {
+            try {
+                T t = Bser.parse(creator.createInstance(), r.getData());
+                cache.put(t.getEngineId(), t);
+                res.add(t);
+            } catch (IOException e) {
+                Log.d("JsListEngine", "Unable to decode: " + e.getMessage());
+                Log.e(TAG, e);
+            }
+        }
+        return res;
     }
 
     @Override
@@ -174,14 +193,6 @@ public class JsListEngine<T extends BserObject & ListEngineItem> implements List
     @Override
     public int getCount() {
         return storage.getCount();
-    }
-
-    public long[] getOrderedIds() {
-        return storage.getOrderedIds();
-    }
-
-    public long[] getPrevIdsExclusive(long sortKey) {
-        return storage.getPrevIdsExclusive(sortKey);
     }
 
     public void addListener(JsListEngineCallback<T> callback) {

@@ -24,7 +24,9 @@ public abstract class CursorActor extends ModuleActor {
     public CursorActor(long cursorId, ModuleContext context) {
         super(context);
         this.cursorId = cursorId;
-        this.keyValue = context.getMessagesModule().getCursorStorage();
+        if (isPersistenceEnabled()) {
+            this.keyValue = context.getMessagesModule().getCursorStorage();
+        }
     }
 
     @Override
@@ -32,19 +34,21 @@ public abstract class CursorActor extends ModuleActor {
         super.preStart();
 
         plainCursorsStorage = new PlainCursorsStorage();
-        byte[] data = keyValue.get(cursorId);
-        if (data != null) {
-            try {
-                plainCursorsStorage = PlainCursorsStorage.fromBytes(data);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (isPersistenceEnabled()) {
+            byte[] data = keyValue.get(cursorId);
+            if (data != null) {
+                try {
+                    plainCursorsStorage = PlainCursorsStorage.fromBytes(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        for (PlainCursor cursor : plainCursorsStorage.getAllCursors()) {
-            if (cursor.getSortDate() < cursor.getPendingSortDate()) {
-                inProgress.add(cursor.getPeer());
-                perform(cursor.getPeer(), cursor.getPendingSortDate());
+            for (PlainCursor cursor : plainCursorsStorage.getAllCursors()) {
+                if (cursor.getSortDate() < cursor.getPendingSortDate()) {
+                    inProgress.add(cursor.getPeer());
+                    perform(cursor.getPeer(), cursor.getPendingSortDate());
+                }
             }
         }
     }
@@ -99,7 +103,9 @@ public abstract class CursorActor extends ModuleActor {
 
 
     private void saveCursorState() {
-        keyValue.put(cursorId, plainCursorsStorage.toByteArray());
+        if (isPersistenceEnabled()) {
+            keyValue.put(cursorId, plainCursorsStorage.toByteArray());
+        }
     }
 
     @Override

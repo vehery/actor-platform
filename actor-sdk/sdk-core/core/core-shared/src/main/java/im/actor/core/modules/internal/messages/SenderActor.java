@@ -79,12 +79,14 @@ public class SenderActor extends ModuleActor {
     @Override
     public void preStart() {
         pendingMessages = new PendingMessagesStorage();
-        byte[] p = preferences().getBytes(PREFERENCES);
-        if (p != null) {
-            try {
-                pendingMessages = PendingMessagesStorage.fromBytes(p);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (isPersistenceEnabled()) {
+            byte[] p = preferences().getBytes(PREFERENCES);
+            if (p != null) {
+                try {
+                    pendingMessages = PendingMessagesStorage.fromBytes(p);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -476,7 +478,9 @@ public class SenderActor extends ModuleActor {
     }
 
     private void savePending() {
-        preferences().putBytes(PREFERENCES, pendingMessages.toByteArray());
+        if (isPersistenceEnabled()) {
+            preferences().putBytes(PREFERENCES, pendingMessages.toByteArray());
+        }
     }
 
     private PendingMessage findPending(long rid) {
