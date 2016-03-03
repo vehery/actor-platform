@@ -3,6 +3,7 @@ package im.actor.core.modules.warmer;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.contacts.BookImportActor;
 import im.actor.core.modules.contacts.ContactsSyncActor;
+import im.actor.core.modules.sequence.SequenceActor;
 import im.actor.core.util.ModuleActor;
 
 public class WarmerActor extends ModuleActor {
@@ -61,6 +62,7 @@ public class WarmerActor extends ModuleActor {
             isContactsLoaded = true;
             context().getContactsModule().getBookImportActor().send(new BookImportActor.StartSync());
             context().getEncryption().getKeyManagerInt().start();
+            context().getUpdatesModule().getUpdateActor().send(new SequenceActor.StartSequence());
         }
     }
 
