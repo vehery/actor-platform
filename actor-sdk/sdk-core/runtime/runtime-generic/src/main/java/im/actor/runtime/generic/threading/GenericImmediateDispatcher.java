@@ -2,6 +2,7 @@ package im.actor.runtime.generic.threading;
 
 import java.util.ArrayList;
 
+import im.actor.runtime.*;
 import im.actor.runtime.actors.ThreadPriority;
 import im.actor.runtime.threading.ImmediateDispatcher;
 

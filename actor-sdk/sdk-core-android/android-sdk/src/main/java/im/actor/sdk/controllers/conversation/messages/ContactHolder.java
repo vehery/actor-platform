@@ -83,14 +83,14 @@ public class ContactHolder extends MessageHolder {
                     stateIcon.setResource(R.drawable.msg_clock);
                     stateIcon.setTint(waitColor);
                     break;
-                case READ:
-                    stateIcon.setResource(R.drawable.msg_check_2);
-                    stateIcon.setTint(readColor);
-                    break;
-                case RECEIVED:
-                    stateIcon.setResource(R.drawable.msg_check_2);
-                    stateIcon.setTint(deliveredColor);
-                    break;
+//                case READ:
+//                    stateIcon.setResource(R.drawable.msg_check_2);
+//                    stateIcon.setTint(readColor);
+//                    break;
+//                case RECEIVED:
+//                    stateIcon.setResource(R.drawable.msg_check_2);
+//                    stateIcon.setTint(deliveredColor);
+//                    break;
                 case SENT:
                     stateIcon.setResource(R.drawable.msg_check_1);
                     stateIcon.setTint(sentColor);

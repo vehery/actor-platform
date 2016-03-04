@@ -1,5 +1,7 @@
 package im.actor.runtime.promise;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,6 +16,7 @@ import im.actor.runtime.function.Consumer;
 import im.actor.runtime.function.Function;
 import im.actor.runtime.function.Predicate;
 import im.actor.runtime.function.Predicates;
+import im.actor.runtime.storage.IoResult;
 
 /**
  * Array of Promises. Allows you to invoke map, mapPromise and other useful methods
@@ -23,6 +26,7 @@ import im.actor.runtime.function.Predicates;
  */
 public class PromisesArray<T> {
     private static final RandomRuntime rundom = new RandomRuntimeProvider();
+
     /**
      * Create PromisesArray from collection
      *
@@ -78,6 +82,25 @@ public class PromisesArray<T> {
     public static <T> PromisesArray<T> ofPromises(Promise<T>... items) {
         ArrayList<Promise<T>> res = new ArrayList<>();
         Collections.addAll(res, items);
+        final Promise[] promises = res.toArray(new Promise[res.size()]);
+        return new PromisesArray<>(new PromiseFunc<Promise<T>[]>() {
+            @Override
+            public void exec(PromiseResolver<Promise<T>[]> executor) {
+                executor.result(promises);
+            }
+        });
+    }
+
+    /**
+     * Create PromisesArray from multiple Promise
+     *
+     * @param items promises
+     * @param <T>   type of array
+     * @return array
+     */
+    public static <T> PromisesArray<T> ofPromises(Collection<Promise<T>> items) {
+        ArrayList<Promise<T>> res = new ArrayList<>();
+        res.addAll(items);
         final Promise[] promises = res.toArray(new Promise[res.size()]);
         return new PromisesArray<>(new PromiseFunc<Promise<T>[]>() {
             @Override
@@ -564,6 +587,20 @@ public class PromisesArray<T> {
             @Override
             public Promise<T[]> apply(T[] t) {
                 return Promises.success(t);
+            }
+        });
+    }
+
+    /**
+     * Zipping to IO Monad
+     *
+     * @return
+     */
+    public Promise<IoResult> zipIo() {
+        return zip().mapPromise(new Function<T[], Promise<IoResult>>() {
+            @Override
+            public Promise<IoResult> apply(T[] ts) {
+                return IoResult.OK();
             }
         });
     }

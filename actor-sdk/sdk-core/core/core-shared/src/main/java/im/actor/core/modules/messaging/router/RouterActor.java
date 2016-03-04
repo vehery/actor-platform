@@ -1,5 +1,6 @@
 package im.actor.core.modules.messaging.router;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import im.actor.core.entity.Message;
@@ -14,11 +15,17 @@ import im.actor.core.modules.messaging.router.messages.RouterChatDelete;
 import im.actor.core.modules.messaging.router.messages.RouterMessageContentChanged;
 import im.actor.core.modules.messaging.router.messages.RouterMessageError;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReactionsChanged;
+import im.actor.core.modules.messaging.router.messages.RouterMessageRead;
+import im.actor.core.modules.messaging.router.messages.RouterMessageReceive;
 import im.actor.core.modules.messaging.router.messages.RouterMessageSent;
 import im.actor.core.modules.messaging.router.messages.RouterMessages;
 import im.actor.core.modules.messaging.router.messages.RouterMessagesDeleted;
 import im.actor.core.util.ModuleActor;
+import im.actor.runtime.*;
 import im.actor.runtime.function.Consumer;
+import im.actor.runtime.promise.Promise;
+import im.actor.runtime.promise.PromisesArray;
+import im.actor.runtime.storage.IoResult;
 
 public class RouterActor extends ModuleActor {
 
@@ -32,6 +39,7 @@ public class RouterActor extends ModuleActor {
     //
 
     public void onMessages(Peer peer, List<Message> messages) {
+        final long start = im.actor.runtime.Runtime.getActorTime();
         Message topServerMessage = null;
         for (Message m : messages) {
             if (m.isOnServer()) {
@@ -40,10 +48,19 @@ public class RouterActor extends ModuleActor {
                 }
             }
         }
+        ArrayList<Promise<IoResult>> results = new ArrayList<>();
+
         if (topServerMessage != null) {
-            dialogs().onInMessage(peer, topServerMessage, 0);
+            results.add(dialogs().onInMessage(peer, topServerMessage, -1));
         }
-        chat(peer).onMessages(messages);
+        results.add(chat(peer).onMessages(messages));
+
+        PromisesArray.ofPromises(results).zipIo().then(new Consumer<IoResult>() {
+            @Override
+            public void apply(IoResult ioResult) {
+                Log.d("Router", "onMessages: " + (im.actor.runtime.Runtime.getActorTime() - start) + " ms");
+            }
+        }).done(self());
     }
 
 
@@ -55,13 +72,26 @@ public class RouterActor extends ModuleActor {
         chat(peer).onMessageSent(rid, date).then(new Consumer<Message>() {
             @Override
             public void apply(Message message) {
-                dialogs().onInMessage(peer, message, 0);
+                dialogs().onInMessage(peer, message, -1);
             }
         }).done(self());
     }
 
     public void onMessageError(Peer peer, long rid) {
         chat(peer).onMessageError(rid);
+    }
+
+
+    //
+    // Receive States
+    //
+
+    public void onChatRead(Peer peer, long date) {
+        dialogs().onChatRead(peer, date);
+    }
+
+    public void onChatReceive(Peer peer, long date) {
+        dialogs().onChatReceive(peer, date);
     }
 
 
@@ -93,9 +123,13 @@ public class RouterActor extends ModuleActor {
         chat(peer).clearChat();
     }
 
-    public void onDeleted(Peer peer, List<Long> rids) {
-        chat(peer).onMessagesDeleted(rids);
-        // TODO: Handle deletion in group
+    public void onDeleted(final Peer peer, List<Long> rids) {
+        chat(peer).onMessagesDeleted(rids).then(new Consumer<Message>() {
+            @Override
+            public void apply(Message message) {
+                dialogs().onMessageDeleted(peer, message);
+            }
+        }).done(self());
     }
 
 
@@ -143,6 +177,12 @@ public class RouterActor extends ModuleActor {
         } else if (message instanceof RouterMessagesDeleted) {
             RouterMessagesDeleted messagesDeleted = (RouterMessagesDeleted) message;
             onDeleted(messagesDeleted.getPeer(), messagesDeleted.getRids());
+        } else if (message instanceof RouterMessageReceive) {
+            RouterMessageReceive messageReceive = (RouterMessageReceive) message;
+            onChatReceive(messageReceive.getPeer(), messageReceive.getReceiveDate());
+        } else if (message instanceof RouterMessageRead) {
+            RouterMessageRead messageRead = (RouterMessageRead) message;
+            onChatRead(messageRead.getPeer(), messageRead.getReadDate());
         } else {
             super.onReceive(message);
         }

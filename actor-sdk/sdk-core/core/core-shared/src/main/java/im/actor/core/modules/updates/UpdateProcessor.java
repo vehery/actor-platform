@@ -20,7 +20,6 @@ import im.actor.core.api.updates.UpdateChatGroupsChanged;
 import im.actor.core.api.updates.UpdateContactRegistered;
 import im.actor.core.api.updates.UpdateContactsAdded;
 import im.actor.core.api.updates.UpdateContactsRemoved;
-import im.actor.core.api.updates.UpdateCountersChanged;
 import im.actor.core.api.updates.UpdateGroupAboutChanged;
 import im.actor.core.api.updates.UpdateGroupAvatarChanged;
 import im.actor.core.api.updates.UpdateGroupInvite;
@@ -58,7 +57,6 @@ import im.actor.core.modules.encryption.EncryptedProcessor;
 import im.actor.core.modules.eventbus.EventBusProcessor;
 import im.actor.core.modules.groups.GroupsProcessor;
 import im.actor.core.modules.messaging.MessagesProcessor;
-import im.actor.core.modules.messaging.actions.OwnReadActor;
 import im.actor.core.modules.updates.internal.ArchivedDialogLoaded;
 import im.actor.core.modules.updates.internal.ChangeContent;
 import im.actor.core.modules.updates.internal.CombinedDifference;
@@ -172,7 +170,7 @@ public class UpdateProcessor extends AbsModule {
     public void applyDifferenceUpdate(List<ApiUser> users, List<ApiGroup> groups, List<Update> updates) {
 
         applyRelated(users, groups, false);
-        context().getMessagesModule().getOwnReadActor().send(new OwnReadActor.StartGetDifference());
+        //context().getMessagesModule().getOwnReadActor().send(new OwnReadActor.StartGetDifference());
 
         CombinedDifference combinedDifference = GetDiffCombiner.buildDiff(updates);
 
@@ -203,7 +201,7 @@ public class UpdateProcessor extends AbsModule {
 //            messagesProcessor.onCountersChanged(combinedDifference.getCounters());
 //        }
 
-        context().getMessagesModule().getOwnReadActor().send(new OwnReadActor.StopGetDifference());
+//        context().getMessagesModule().getOwnReadActor().send(new OwnReadActor.StopGetDifference());
         applyRelated(users, groups, true);
     }
 

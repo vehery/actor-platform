@@ -28,6 +28,7 @@ import im.actor.runtime.collections.ManagedList;
 import im.actor.runtime.function.Predicate;
 import im.actor.runtime.promise.Promise;
 import im.actor.runtime.promise.Promises;
+import im.actor.runtime.storage.IoResult;
 import im.actor.runtime.storage.ListEngine;
 
 /**
@@ -57,7 +58,7 @@ public class ConversationActor extends ModuleActor {
     //
 
     @Verified
-    private void onMessages(List<Message> inMessages, boolean ignorePresent) {
+    private Promise<IoResult> onMessages(List<Message> inMessages, boolean ignorePresent) {
 
         // Ignore if we already have this message
         // UPDATE: Changed behaviour to providing faster implementation
@@ -73,6 +74,8 @@ public class ConversationActor extends ModuleActor {
 
         messages.addOrUpdateItems(updatedMessages);
         docs.addOrUpdateItems(updatedDocsMessages);
+
+        return IoResult.OK();
     }
 
 
@@ -160,11 +163,13 @@ public class ConversationActor extends ModuleActor {
     //
 
     @Verified
-    private void onMessagesDeleted(List<Long> rids) {
+    private Promise<Message> onMessagesDeleted(List<Long> rids) {
         long[] rids2 = JavaUtil.unboxList(rids);
 
         messages.removeItems(rids2);
         docs.removeItems(rids2);
+
+        return Promises.success(messages.getHeadValue());
     }
 
     @Verified
@@ -197,10 +202,8 @@ public class ConversationActor extends ModuleActor {
 
     @Override
     public void onReceive(Object message) {
-        if (message instanceof Messages) {
-            onMessages(((Messages) message).getMessages(), false);
-        } else if (message instanceof HistoryLoaded) {
-            onMessages(((HistoryLoaded) message).getMessages(), true);
+        if (message instanceof HistoryLoaded) {
+            onMessages(((HistoryLoaded) message).getMessages(), true).done(self());
         } else if (message instanceof MessageContentUpdated) {
             MessageContentUpdated contentUpdated = (MessageContentUpdated) message;
             onMessageContentUpdated(contentUpdated.getRid(), contentUpdated.getContent());
@@ -223,6 +226,11 @@ public class ConversationActor extends ModuleActor {
         if (message instanceof MessageSent) {
             MessageSent messageSent = (MessageSent) message;
             return onMessageSent(messageSent.getRid(), messageSent.getDate());
+        } else if (message instanceof MessagesDeleted) {
+            MessagesDeleted deleted = (MessagesDeleted) message;
+            return onMessagesDeleted(deleted.getRids());
+        } else if (message instanceof Messages) {
+            return onMessages(((Messages) message).getMessages(), false);
         } else {
             return super.onAsk(message);
         }

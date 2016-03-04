@@ -104,14 +104,14 @@ public class TextHolder extends MessageHolder {
                     status.setResource(R.drawable.msg_check_1);
                     status.setTint(sentColor);
                     break;
-                case RECEIVED:
-                    status.setResource(R.drawable.msg_check_2);
-                    status.setTint(deliveredColor);
-                    break;
-                case READ:
-                    status.setResource(R.drawable.msg_check_2);
-                    status.setTint(readColor);
-                    break;
+//                case RECEIVED:
+//                    status.setResource(R.drawable.msg_check_2);
+//                    status.setTint(deliveredColor);
+//                    break;
+//                case READ:
+//                    status.setResource(R.drawable.msg_check_2);
+//                    status.setTint(readColor);
+//                    break;
                 default:
                 case PENDING:
                     status.setResource(R.drawable.msg_clock);

@@ -23,9 +23,7 @@ public class EntityConverter {
         }
         switch (state) {
             case READ:
-                return MessageState.READ;
             case RECEIVED:
-                return MessageState.RECEIVED;
             case SENT:
                 return MessageState.SENT;
             default:

@@ -2,7 +2,11 @@ package im.actor.core.modules.messaging.conversation.messages;
 
 import java.util.List;
 
-public class MessagesDeleted {
+import im.actor.core.entity.Message;
+import im.actor.runtime.actors.ask.AskMessage;
+
+public class MessagesDeleted implements AskMessage<Message> {
+
     private List<Long> rids;
 
     public MessagesDeleted(List<Long> rids) {

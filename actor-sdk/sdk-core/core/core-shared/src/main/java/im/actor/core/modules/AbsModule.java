@@ -73,13 +73,13 @@ public abstract class AbsModule {
         return context().getMessagesModule().getArchivedDialogsActor();
     }
 
-    public ActorRef ownReadActor() {
-        return context().getMessagesModule().getOwnReadActor();
-    }
-
-    public ActorRef plainReceiveActor() {
-        return context().getMessagesModule().getPlainReceiverActor();
-    }
+//    public ActorRef ownReadActor() {
+//        return context().getMessagesModule().getOwnReadActor();
+//    }
+//
+//    public ActorRef plainReceiveActor() {
+//        return context().getMessagesModule().getPlainReceiverActor();
+//    }
 
 //    public ConversationInt conversationActor(Peer peer) {
 //        return context().getMessagesModule().getConversationActor(peer);

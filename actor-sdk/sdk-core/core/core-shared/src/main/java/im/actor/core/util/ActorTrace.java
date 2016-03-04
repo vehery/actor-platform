@@ -22,12 +22,13 @@ public class ActorTrace implements TraceInterface {
 
     @Override
     public void onEnvelopeDelivered(Envelope envelope) {
-        // Log.w(TAG, "EnvelopeDelivered |" + envelope.getScope().getDispatcher().getName() + "| " + envelope.getScope().getPath() + " {" + envelope.getMessage() + "}");
+        // long sendDuration = ActorTime.currentTime() - envelope.getSendTime();
+        // Log.w(TAG, "EnvelopeDelivered |" + envelope.getScope().getDispatcher().getName() + "| " + envelope.getScope().getPath() + " {" + envelope.getMessage() + "} in " + (sendDuration) + " ms");
     }
 
     @Override
     public void onEnvelopeProcessed(Envelope envelope, long duration) {
-        long sendDuration = ActorTime.currentTime() - envelope.getSendTime() - duration;
+        // long sendDuration = ActorTime.currentTime() - envelope.getSendTime() - duration;
         if (duration > PROCESS_THRESHOLD) {
             Log.w(TAG, "Too long " + envelope.getScope().getPath() + " {" + envelope.getMessage() + "}");
         }
@@ -36,7 +37,7 @@ public class ActorTrace implements TraceInterface {
 
     @Override
     public void onDrop(ActorRef sender, Object message, Actor actor) {
-        Log.w(TAG, "Drop: " + message);
+        Log.w(TAG, "Drop: " + message + ", " + actor.self().getPath());
     }
 
     @Override

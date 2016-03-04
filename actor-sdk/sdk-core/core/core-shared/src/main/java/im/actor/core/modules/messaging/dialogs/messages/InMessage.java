@@ -2,8 +2,10 @@ package im.actor.core.modules.messaging.dialogs.messages;
 
 import im.actor.core.entity.Message;
 import im.actor.core.entity.Peer;
+import im.actor.runtime.actors.ask.AskMessage;
+import im.actor.runtime.storage.IoResult;
 
-public class InMessage {
+public class InMessage implements AskMessage<IoResult> {
     private Peer peer;
     private Message message;
     private int counter;

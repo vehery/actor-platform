@@ -22,5 +22,6 @@ public class CountersInt extends ActorInterface {
                 return new CountersActor(dialogsInt, context);
             }
         });
+        setDest(countersActor);
     }
 }

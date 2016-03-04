@@ -100,28 +100,18 @@ public class AADialogCell: AATableViewCell, AABindedCell {
             self.counterView.hidden = true
             self.counterViewBg.hidden = true
         }
-        
-        let messageState = item.status.ordinal()
-        
-        if (messageState == ACMessageState.PENDING().ordinal()) {
-            self.statusView.tintColor = appStyle.dialogStatusSending
-            self.statusView.image = appStyle.chatIconClock
-            self.statusView.hidden = false
-        } else if (messageState == ACMessageState.READ().ordinal()) {
-            self.statusView.tintColor = appStyle.dialogStatusRead
-            self.statusView.image = appStyle.chatIconCheck2
-            self.statusView.hidden = false
-        } else if (messageState == ACMessageState.RECEIVED().ordinal()) {
-            self.statusView.tintColor = appStyle.dialogStatusReceived
-            self.statusView.image = appStyle.chatIconCheck2
-            self.statusView.hidden = false
-        } else if (messageState == ACMessageState.SENT().ordinal()) {
-            self.statusView.tintColor = appStyle.dialogStatusSent
-            self.statusView.image = appStyle.chatIconCheck1
-            self.statusView.hidden = false
-        } else if (messageState == ACMessageState.ERROR().ordinal()) {
-            self.statusView.tintColor = appStyle.dialogStatusError
-            self.statusView.image = appStyle.chatIconError
+  
+        if item.senderId == Actor.myUid() {
+            if item.isRead() {
+                self.statusView.tintColor = appStyle.dialogStatusRead
+                self.statusView.image = appStyle.chatIconCheck2
+            } else if item.isReceived() {
+                self.statusView.tintColor = appStyle.dialogStatusReceived
+                self.statusView.image = appStyle.chatIconCheck2
+            } else {
+                self.statusView.tintColor = appStyle.dialogStatusSent
+                self.statusView.image = appStyle.chatIconCheck1
+            }
             self.statusView.hidden = false
         } else {
             self.statusView.hidden = true

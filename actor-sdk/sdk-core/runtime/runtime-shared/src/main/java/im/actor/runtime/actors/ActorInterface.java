@@ -38,18 +38,18 @@ public abstract class ActorInterface {
         return new Promise<T>(new PromiseFunc<T>() {
             @Override
             public void exec(PromiseResolver<T> executor) {
-                Log.d("IPC", "[" + dest.getPath() + "] -> " + message);
+                // Log.d("IPC", "[" + dest.getPath() + "] -> " + message);
                 send(new AskIntRequest(message, executor));
             }
         }).then(new Consumer<T>() {
             @Override
             public void apply(T t) {
-                Log.d("IPC", "[" + dest.getPath() + "] <- " + message + " <- " + t);
+                // Log.d("IPC", "[" + dest.getPath() + "] <- " + message + " <- " + t);
             }
         }).failure(new Consumer<Exception>() {
             @Override
             public void apply(Exception e) {
-                Log.w("IPC", "[" + dest.getPath() + "] <- " + message + " <- " + e);
+                // Log.w("IPC", "[" + dest.getPath() + "] <- " + message + " <- " + e);
             }
         });
     }

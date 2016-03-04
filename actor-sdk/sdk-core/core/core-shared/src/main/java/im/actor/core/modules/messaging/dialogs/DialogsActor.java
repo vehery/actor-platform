@@ -12,6 +12,7 @@ import im.actor.core.entity.ContentDescription;
 import im.actor.core.entity.ContentType;
 import im.actor.core.entity.Dialog;
 import im.actor.core.entity.DialogBuilder;
+import im.actor.core.entity.DialogState;
 import im.actor.core.entity.Group;
 import im.actor.core.entity.Message;
 import im.actor.core.entity.MessageState;
@@ -23,6 +24,8 @@ import im.actor.core.modules.messaging.dialogs.messages.DialogClear;
 import im.actor.core.modules.messaging.dialogs.messages.DialogDelete;
 import im.actor.core.modules.messaging.dialogs.messages.DialogCounterChanged;
 import im.actor.core.modules.messaging.dialogs.messages.DialogsLoaded;
+import im.actor.core.modules.messaging.dialogs.messages.DialogsRead;
+import im.actor.core.modules.messaging.dialogs.messages.DialogsReceive;
 import im.actor.core.modules.messaging.dialogs.messages.GroupChanged;
 import im.actor.core.modules.messaging.dialogs.messages.InMessage;
 import im.actor.core.modules.messaging.dialogs.messages.MessageContentChanged;
@@ -34,6 +37,8 @@ import im.actor.core.util.ModuleActor;
 import im.actor.runtime.Log;
 import im.actor.runtime.Runtime;
 import im.actor.runtime.annotations.Verified;
+import im.actor.runtime.promise.Promise;
+import im.actor.runtime.storage.IoResult;
 import im.actor.runtime.storage.ListEngine;
 
 import static im.actor.core.util.JavaUtil.equalsE;
@@ -56,27 +61,39 @@ public class DialogsActor extends ModuleActor {
     }
 
     @Verified
-    private void onMessage(Peer peer, Message message, boolean forceWrite, int counter) {
-        long start = im.actor.runtime.Runtime.getCurrentTime();
+    private Promise<IoResult> onMessage(Peer peer, Message message, boolean forceWrite, int counter) {
         PeerDesc peerDesc = buildPeerDesc(peer);
         if (peerDesc == null) {
-            Log.d("DialogsActor", "unknown peer desc");
-            return;
+            return IoResult.OK();
         }
 
         if (message == null) {
             // Ignore empty message if not forcing write
             if (!forceWrite) {
-                Log.d("DialogsActor", "not force");
-                return;
+                return IoResult.OK();
             }
 
             // Else perform chat clear
             onChatClear(peer);
         } else {
-            Dialog dialog = dialogs.getValue(peer.getUnuqueId());
 
             ContentDescription contentDescription = ContentDescription.fromContent(message.getContent());
+            Dialog dialog = dialogs.getValue(peer.getUnuqueId());
+
+            //
+            // Filtering Incorrect
+            //
+            if (dialog != null) {
+                if (!forceWrite && dialog.getSortDate() > message.getSortDate()) {
+                    return IoResult.OK();
+                }
+            } else {
+                // Do not create dialogs for silent messages
+                if (contentDescription.isSilent()) {
+                    return IoResult.OK();
+                }
+            }
+
 
             DialogBuilder builder = new DialogBuilder()
                     .setRid(message.getRid())
@@ -84,7 +101,6 @@ public class DialogsActor extends ModuleActor {
                     .setMessageType(contentDescription.getContentType())
                     .setText(contentDescription.getText())
                     .setRelatedUid(contentDescription.getRelatedUser())
-                    .setStatus(message.getMessageState())
                     .setSenderId(message.getSenderId());
 
             if (counter >= 0) {
@@ -94,11 +110,6 @@ public class DialogsActor extends ModuleActor {
             boolean forceUpdate = false;
 
             if (dialog != null) {
-                // Ignore old messages if no force
-                if (!forceWrite && dialog.getSortDate() > message.getSortDate()) {
-                    Log.d("DialogsActor", "too old");
-                    return;
-                }
 
                 builder.setPeer(dialog.getPeer())
                         .setDialogTitle(dialog.getDialogTitle())
@@ -111,12 +122,6 @@ public class DialogsActor extends ModuleActor {
                 }
 
             } else {
-                // Do not create dialogs for silent messages
-                if (contentDescription.isSilent()) {
-                    Log.d("DialogsActor", "is silent in");
-                    return;
-                }
-
                 builder.setPeer(peer)
                         .setDialogTitle(peerDesc.getTitle())
                         .setDialogAvatar(peerDesc.getAvatar())
@@ -129,7 +134,7 @@ public class DialogsActor extends ModuleActor {
             notifyState(forceUpdate);
         }
 
-        Log.d("DialogsActor", "onMessage in " + (Runtime.getCurrentTime() - start) + " ms");
+        return IoResult.OK();
     }
 
     @Verified
@@ -168,9 +173,7 @@ public class DialogsActor extends ModuleActor {
 
     @Verified
     private void onChatDeleted(Peer peer) {
-        // Removing dialog
         dialogs.removeItem(peer.getUnuqueId());
-
         notifyState(true);
     }
 
@@ -189,22 +192,34 @@ public class DialogsActor extends ModuleActor {
                     .setUnreadCount(0)
                     .setRid(0)
                     .setSenderId(0)
-                    .setStatus(MessageState.UNKNOWN)
                     .createDialog());
         }
     }
 
     @Verified
-    private void onMessageStatusChanged(Peer peer, long rid, MessageState state) {
+    private void onChatRead(Peer peer, long readDate) {
         Dialog dialog = dialogs.getValue(peer.getUnuqueId());
+        if (dialog != null) {
+            DialogBuilder builder = new DialogBuilder(dialog);
+            if (readDate > dialog.getReadDate()) {
+                builder.setReadDate(readDate);
+            }
+            if (readDate > dialog.getReceivedDate()) {
+                builder.setReceiveDate(readDate);
+            }
+            dialogs.addOrUpdateItem(builder.createDialog());
+        }
+    }
 
-        // If message is on top
-        if (dialog != null && dialog.getRid() == rid) {
-
-            // Update dialog
-            addOrUpdateItem(new DialogBuilder(dialog)
-                    .setStatus(state)
-                    .createDialog());
+    @Verified
+    private void onChatReceive(Peer peer, long receiveDate) {
+        Dialog dialog = dialogs.getValue(peer.getUnuqueId());
+        if (dialog != null) {
+            DialogBuilder builder = new DialogBuilder(dialog);
+            if (receiveDate > dialog.getReceivedDate()) {
+                builder.setReceiveDate(receiveDate);
+            }
+            dialogs.addOrUpdateItem(builder.createDialog());
         }
     }
 
@@ -260,11 +275,11 @@ public class DialogsActor extends ModuleActor {
 
             ContentDescription description = ContentDescription.fromContent(dialogHistory.getContent());
 
-            updated.add(new Dialog(dialogHistory.getPeer(),
-                    dialogHistory.getSortDate(), peerDesc.getTitle(), peerDesc.getAvatar(),
-                    dialogHistory.getUnreadCount(),
-                    dialogHistory.getRid(), description.getContentType(), description.getText(), dialogHistory.getStatus(),
-                    dialogHistory.getSenderId(), dialogHistory.getDate(), description.getRelatedUser()));
+//            updated.add(new Dialog(dialogHistory.getPeer(),
+//                    dialogHistory.getSortDate(), peerDesc.getTitle(), peerDesc.getAvatar(),
+//                    dialogHistory.getUnreadCount(),
+//                    dialogHistory.getRid(), description.getContentType(), description.getText(), dialogHistory.getStatus(),
+//                    dialogHistory.getSenderId(), dialogHistory.getDate(), description.getRelatedUser()));
         }
         addOrUpdateItems(updated);
         updateSearch(updated);
@@ -340,20 +355,13 @@ public class DialogsActor extends ModuleActor {
 
     @Override
     public void onReceive(Object message) {
-        if (message instanceof InMessage) {
-            InMessage inMessage = (InMessage) message;
-            onMessage(inMessage.getPeer(), inMessage.getMessage(), false, inMessage.getCounter());
-        } else if (message instanceof UserChanged) {
+        if (message instanceof UserChanged) {
             UserChanged userChanged = (UserChanged) message;
             onUserChanged(userChanged.getUser());
         } else if (message instanceof DialogClear) {
             onChatClear(((DialogClear) message).getPeer());
         } else if (message instanceof DialogDelete) {
             onChatDeleted(((DialogDelete) message).getPeer());
-        } else if (message instanceof MessageStateChanged) {
-            MessageStateChanged messageStateChanged = (MessageStateChanged) message;
-            onMessageStatusChanged(messageStateChanged.getPeer(), messageStateChanged.getRid(),
-                    messageStateChanged.getState());
         } else if (message instanceof MessageDeleted) {
             MessageDeleted deleted = (MessageDeleted) message;
             onMessage(deleted.getPeer(), deleted.getTopMessage(), true, -1);
@@ -370,8 +378,24 @@ public class DialogsActor extends ModuleActor {
         } else if (message instanceof DialogCounterChanged) {
             DialogCounterChanged dialogCounterChanged = (DialogCounterChanged) message;
             onCounterChanged(dialogCounterChanged.getPeer(), dialogCounterChanged.getCounter());
+        } else if (message instanceof DialogsReceive) {
+            DialogsReceive dialogsReceive = (DialogsReceive) message;
+            onChatReceive(dialogsReceive.getPeer(), dialogsReceive.getReceiveDate());
+        } else if (message instanceof DialogsRead) {
+            DialogsRead dialogsRead = (DialogsRead) message;
+            onChatRead(dialogsRead.getPeer(), dialogsRead.getReadDate());
         } else {
-            drop(message);
+            super.onReceive(message);
+        }
+    }
+
+    @Override
+    public Promise onAsk(Object message) throws Exception {
+        if (message instanceof InMessage) {
+            InMessage inMessage = (InMessage) message;
+            return onMessage(inMessage.getPeer(), inMessage.getMessage(), false, inMessage.getCounter());
+        } else {
+            return super.onAsk(message);
         }
     }
 }

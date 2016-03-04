@@ -195,14 +195,14 @@ public class AABubbleVoiceCell: AABubbleBaseFileCell,AAModernConversationAudioPl
                 self.statusView.image = appStyle.chatIconCheck1
                 self.statusView.tintColor = appStyle.chatStatusSent
                 break
-            case ACMessageState.RECEIVED().ordinal():
-                self.statusView.image = appStyle.chatIconCheck2
-                self.statusView.tintColor = appStyle.chatStatusReceived
-                break
-            case ACMessageState.READ().ordinal():
-                self.statusView.image = appStyle.chatIconCheck2
-                self.statusView.tintColor = appStyle.chatStatusRead
-                break
+//            case ACMessageState.RECEIVED().ordinal():
+//                self.statusView.image = appStyle.chatIconCheck2
+//                self.statusView.tintColor = appStyle.chatStatusReceived
+//                break
+//            case ACMessageState.READ().ordinal():
+//                self.statusView.image = appStyle.chatIconCheck2
+//                self.statusView.tintColor = appStyle.chatStatusRead
+//                break
             case ACMessageState.ERROR().ordinal():
                 self.statusView.image = appStyle.chatIconError
                 self.statusView.tintColor = appStyle.chatStatusError

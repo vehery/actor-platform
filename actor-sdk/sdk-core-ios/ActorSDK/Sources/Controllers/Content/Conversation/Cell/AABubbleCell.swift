@@ -225,7 +225,7 @@ public class AABubbleCell: UICollectionViewCell {
         if (bindedMessage != nil && bindedMessage?.rid == message.rid) {
             reuse = true
         }
-        isOut = message.senderId == Actor.myUid();
+        isOut = message.senderId == Actor.myUid()
         bindedMessage = message
         self.isShowNewMessages = isShowNewMessages
         if !reuse && !isFullSize {

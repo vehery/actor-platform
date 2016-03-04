@@ -59,15 +59,16 @@ public class Dialog extends BserObject implements ListEngineItem {
     @SuppressWarnings("NullableProblems")
     @Property("readonly, nonatomic")
     private String text;
-    @NotNull
-    @SuppressWarnings("NullableProblems")
-    @Property("readonly, nonatomic")
-    private MessageState status;
     @Nullable
     @Property("readonly, nonatomic")
     private Avatar dialogAvatar;
     @Property("readonly, nonatomic")
     private int relatedUid;
+
+    @Property("readonly, nonatomic")
+    private long receivedDate;
+    @Property("readonly, nonatomic")
+    private long readDate;
 
     public Dialog(@NotNull Peer peer,
                   long sortKey,
@@ -77,10 +78,11 @@ public class Dialog extends BserObject implements ListEngineItem {
                   long rid,
                   @NotNull ContentType messageType,
                   @NotNull String text,
-                  @NotNull MessageState status,
                   int senderId,
                   long date,
-                  int relatedUid) {
+                  int relatedUid,
+                  long receivedDate,
+                  long readDate) {
         this.peer = peer;
         this.dialogTitle = dialogTitle;
         this.dialogAvatar = dialogAvatar;
@@ -91,8 +93,9 @@ public class Dialog extends BserObject implements ListEngineItem {
         this.date = date;
         this.messageType = messageType;
         this.text = text;
-        this.status = status;
         this.relatedUid = relatedUid;
+        this.receivedDate = receivedDate;
+        this.readDate = readDate;
     }
 
     private Dialog() {
@@ -129,6 +132,14 @@ public class Dialog extends BserObject implements ListEngineItem {
         return date;
     }
 
+    public long getReceivedDate() {
+        return receivedDate;
+    }
+
+    public long getReadDate() {
+        return readDate;
+    }
+
     @NotNull
     public ContentType getMessageType() {
         return messageType;
@@ -139,9 +150,12 @@ public class Dialog extends BserObject implements ListEngineItem {
         return text;
     }
 
-    @NotNull
-    public MessageState getStatus() {
-        return status;
+    public boolean isRead() {
+        return readDate >= date;
+    }
+
+    public boolean isReceived() {
+        return receivedDate >= date;
     }
 
     public int getRelatedUid() {
@@ -154,8 +168,8 @@ public class Dialog extends BserObject implements ListEngineItem {
     }
 
     public Dialog editPeerInfo(String title, Avatar dialogAvatar) {
-        return new Dialog(peer, sortDate, title, dialogAvatar, unreadCount, rid, messageType, text, status, senderId,
-                date, relatedUid);
+        return new Dialog(peer, sortDate, title, dialogAvatar, unreadCount, rid, messageType, text, senderId,
+                date, relatedUid, receivedDate, readDate);
     }
 
     @Override
@@ -176,8 +190,9 @@ public class Dialog extends BserObject implements ListEngineItem {
         date = values.getLong(8);
         messageType = ContentType.fromValue(values.getInt(9));
         text = values.getString(10);
-        status = MessageState.fromValue(values.getInt(11));
         relatedUid = values.getInt(12);
+        receivedDate = values.optLong(14);
+        readDate = values.optLong(15);
     }
 
     @Override
@@ -194,8 +209,9 @@ public class Dialog extends BserObject implements ListEngineItem {
         writer.writeLong(8, date);
         writer.writeInt(9, messageType.getValue());
         writer.writeString(10, text);
-        writer.writeInt(11, status.getValue());
         writer.writeInt(12, relatedUid);
+        writer.writeLong(14, receivedDate);
+        writer.writeLong(15, readDate);
     }
 
     @Override

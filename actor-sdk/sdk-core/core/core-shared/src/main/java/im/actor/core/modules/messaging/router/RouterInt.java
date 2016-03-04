@@ -12,6 +12,8 @@ import im.actor.core.modules.messaging.router.messages.RouterChatDelete;
 import im.actor.core.modules.messaging.router.messages.RouterMessageContentChanged;
 import im.actor.core.modules.messaging.router.messages.RouterMessageError;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReactionsChanged;
+import im.actor.core.modules.messaging.router.messages.RouterMessageRead;
+import im.actor.core.modules.messaging.router.messages.RouterMessageReceive;
 import im.actor.core.modules.messaging.router.messages.RouterMessageSent;
 import im.actor.core.modules.messaging.router.messages.RouterMessages;
 import im.actor.core.modules.messaging.router.messages.RouterMessagesDeleted;
@@ -54,6 +56,18 @@ public class RouterInt extends ActorInterface {
         send(new RouterMessageError(peer, rid));
     }
 
+
+    //
+    // Receive State
+    //
+
+    public void onChatRead(Peer peer, long readDate) {
+        send(new RouterMessageRead(peer, readDate));
+    }
+
+    public void onChatReceive(Peer peer, long receiveDate) {
+        send(new RouterMessageReceive(peer, receiveDate));
+    }
 
     //
     // Content Updates

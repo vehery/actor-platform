@@ -10,6 +10,7 @@ import im.actor.runtime.actors.ActorInterface;
 import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.collections.ManagedList;
 import im.actor.runtime.promise.Promise;
+import im.actor.runtime.storage.IoResult;
 
 public class ConversationInt extends ActorInterface {
 
@@ -17,12 +18,12 @@ public class ConversationInt extends ActorInterface {
         super(dest);
     }
 
-    public void onMessages(List<Message> messages) {
-        send(new Messages(messages));
+    public Promise<IoResult> onMessages(List<Message> messages) {
+        return ask(new Messages(messages));
     }
 
-    public void onMessage(Message message) {
-        onMessages(ManagedList.of(message));
+    public Promise<IoResult> onMessage(Message message) {
+        return onMessages(ManagedList.of(message));
     }
 
     public void onMessageContentChanged(long rid, AbsContent content) {
@@ -55,8 +56,8 @@ public class ConversationInt extends ActorInterface {
     // Deletion
     //
 
-    public void onMessagesDeleted(List<Long> rids) {
-        send(new MessagesDeleted(rids));
+    public Promise<Message> onMessagesDeleted(List<Long> rids) {
+        return ask(new MessagesDeleted(rids));
     }
 
     public void clearChat() {

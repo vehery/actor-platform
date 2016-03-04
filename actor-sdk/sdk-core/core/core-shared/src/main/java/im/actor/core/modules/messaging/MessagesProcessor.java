@@ -26,6 +26,7 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.actions.ArchivedDialogsActor;
 import im.actor.core.modules.messaging.conversation.ConversationHistoryActor;
 import im.actor.core.modules.messaging.entity.EntityConverter;
+import im.actor.runtime.Log;
 
 import static im.actor.core.modules.messaging.entity.EntityConverter.convert;
 
@@ -74,11 +75,10 @@ public class MessagesProcessor extends AbsModule {
             return;
         }
 
-        boolean isOut = myUid() == senderUid;
-
         // Sending message to conversation
-        Message message = new Message(rid, date, date, senderUid,
-                isOut ? MessageState.SENT : MessageState.UNKNOWN, msgContent, new ArrayList<Reaction>());
+        Message message = new Message(rid, date, senderUid, MessageState.SENT, msgContent);
+
+        Log.d("MessagesProcessor", "On Message: " + senderUid);
 
         getRouter().onMessage(peer, message);
     }
@@ -166,27 +166,25 @@ public class MessagesProcessor extends AbsModule {
     //
 
     public void onMessageRead(ApiPeer _peer, long startDate) {
-//        Peer peer = convert(_peer);
-//
-//        // We are not invalidating sequence because of this update
-//        if (!isValidPeer(peer)) {
-//            return;
-//        }
-//
-//        // Sending event to conversation actor
-//        conversationActor(peer).onMessageRead(startDate);
+        Peer peer = convert(_peer);
+
+        // We are not invalidating sequence because of this update
+        if (!isValidPeer(peer)) {
+            return;
+        }
+
+        getRouter().onChatRead(peer, startDate);
     }
 
     public void onMessageReceived(ApiPeer _peer, long startDate) {
-//        Peer peer = convert(_peer);
-//
-//        // We are not invalidating sequence because of this update
-//        if (!isValidPeer(peer)) {
-//            return;
-//        }
-//
-//        // Sending event to conversation actor
-//        conversationActor(peer).onMessageReceived(startDate);
+        Peer peer = convert(_peer);
+
+        // We are not invalidating sequence because of this update
+        if (!isValidPeer(peer)) {
+            return;
+        }
+
+        getRouter().onChatReceive(peer, startDate);
     }
 
     public void onMessageReadByMe(ApiPeer _peer, long startDate) {

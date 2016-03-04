@@ -13,10 +13,11 @@ public class DialogBuilder {
     private long rid;
     private ContentType messageType;
     private String text;
-    private MessageState status;
     private int senderId;
     private long time;
     private int relatedUid = 0;
+    private long receiveDate;
+    private long readDate;
 
     public DialogBuilder() {
 
@@ -31,10 +32,11 @@ public class DialogBuilder {
         rid = dialog.getRid();
         messageType = dialog.getMessageType();
         text = dialog.getText();
-        status = dialog.getStatus();
         senderId = dialog.getSenderId();
         time = dialog.getDate();
         relatedUid = dialog.getRelatedUid();
+        receiveDate = dialog.getReceivedDate();
+        readDate = dialog.getReadDate();
     }
 
     public DialogBuilder setPeer(Peer peer) {
@@ -72,11 +74,6 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder setStatus(MessageState status) {
-        this.status = status;
-        return this;
-    }
-
     public DialogBuilder setSenderId(int senderId) {
         this.senderId = senderId;
         return this;
@@ -97,7 +94,18 @@ public class DialogBuilder {
         return this;
     }
 
+    public DialogBuilder setReceiveDate(long receiveDate) {
+        this.receiveDate = receiveDate;
+        return this;
+    }
+
+    public DialogBuilder setReadDate(long readDate) {
+        this.readDate = readDate;
+        return this;
+    }
+
     public Dialog createDialog() {
-        return new Dialog(peer, sortKey, dialogTitle, dialogAvatar, unreadCount, rid, messageType, text, status, senderId, time, relatedUid);
+        return new Dialog(peer, sortKey, dialogTitle, dialogAvatar, unreadCount, rid, messageType,
+                text, senderId, time, relatedUid, receiveDate, readDate);
     }
 }

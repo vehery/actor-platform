@@ -18,6 +18,7 @@ import im.actor.core.api.base.SeqUpdate;
 import im.actor.core.api.rpc.RequestArchiveChat;
 import im.actor.core.api.rpc.RequestClearChat;
 import im.actor.core.api.rpc.RequestDeleteChat;
+import im.actor.core.api.rpc.RequestDeleteMessage;
 import im.actor.core.api.rpc.RequestFavouriteDialog;
 import im.actor.core.api.rpc.RequestMessageRemoveReaction;
 import im.actor.core.api.rpc.RequestMessageSetReaction;
@@ -49,14 +50,11 @@ import im.actor.core.events.PeerChatOpened;
 import im.actor.core.modules.messaging.actions.ArchivedDialogsActor;
 import im.actor.core.modules.messaging.actions.CursorReaderActor;
 import im.actor.core.modules.messaging.actions.CursorReceiverActor;
-import im.actor.core.modules.messaging.actions.MessageDeleteActor;
-import im.actor.core.modules.messaging.actions.OwnReadActor;
 import im.actor.core.modules.messaging.actions.SenderActor;
 import im.actor.core.modules.messaging.conversation.ConversationActor;
 import im.actor.core.modules.messaging.conversation.ConversationHistoryActor;
 import im.actor.core.modules.messaging.conversation.ConversationInt;
 import im.actor.core.modules.messaging.dialogs.DialogsInt;
-import im.actor.core.modules.messaging.router.RouterActor;
 import im.actor.core.modules.messaging.router.RouterInt;
 import im.actor.core.modules.updates.internal.ChangeContent;
 import im.actor.core.network.RpcCallback;
@@ -68,7 +66,6 @@ import im.actor.core.viewmodel.ConversationVM;
 import im.actor.core.viewmodel.DialogGroupsVM;
 import im.actor.core.viewmodel.DialogSpecVM;
 import im.actor.runtime.Storage;
-import im.actor.runtime.actors.Actor;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.actors.Props;
@@ -88,11 +85,9 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     private RouterInt router;
     private DialogsInt dialogs;
     private ActorRef archivedDialogsActor;
-    private ActorRef ownReadActor;
     private ActorRef plainReadActor;
     private ActorRef plainReceiverActor;
     private ActorRef sendMessageActor;
-    private ActorRef deletionsActor;
 
     private final HashMap<Peer, ListEngine<Message>> conversationEngines = new HashMap<>();
     private final HashMap<Peer, ListEngine<Message>> conversationDocsEngines = new HashMap<>();
@@ -122,13 +117,6 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
                 return new ArchivedDialogsActor(context());
             }
         });
-
-        this.ownReadActor = system().actorOf("actor/read/own", new ActorCreator() {
-            @Override
-            public OwnReadActor create() {
-                return new OwnReadActor(context());
-            }
-        });
         this.plainReadActor = system().actorOf("actor/plain/read", "heavy", new ActorCreator() {
             @Override
             public CursorReaderActor create() {
@@ -145,12 +133,6 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
             @Override
             public SenderActor create() {
                 return new SenderActor(context());
-            }
-        });
-        this.deletionsActor = system().actorOf("actor/deletions", new ActorCreator() {
-            @Override
-            public MessageDeleteActor create() {
-                return new MessageDeleteActor(context());
             }
         });
 
@@ -185,10 +167,6 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
     public ActorRef getPlainReceiverActor() {
         return plainReceiverActor;
-    }
-
-    public ActorRef getOwnReadActor() {
-        return ownReadActor;
     }
 
     public SyncKeyValue getCursorStorage() {
@@ -275,8 +253,7 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
         }
         getRouter().onDeletedMessages(peer, deleted);
 
-        // conversationActor.onMessagesDeleted(deleted);
-        deletionsActor.send(new MessageDeleteActor.DeleteMessage(peer, rids));
+        context().getApiModule().performPersistRequest(new RequestDeleteMessage(buildApiOutPeer(peer), deleted));
     }
 
     public void loadMoreArchivedDialogs(final boolean init, final RpcCallback<ResponseLoadArchived> callback) {

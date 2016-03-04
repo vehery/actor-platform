@@ -14,6 +14,8 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.dialogs.messages.DialogClear;
 import im.actor.core.modules.messaging.dialogs.messages.DialogDelete;
 import im.actor.core.modules.messaging.dialogs.messages.DialogCounterChanged;
+import im.actor.core.modules.messaging.dialogs.messages.DialogsRead;
+import im.actor.core.modules.messaging.dialogs.messages.DialogsReceive;
 import im.actor.core.modules.messaging.dialogs.messages.GroupChanged;
 import im.actor.core.modules.messaging.dialogs.messages.InMessage;
 import im.actor.core.modules.messaging.dialogs.messages.MessageContentChanged;
@@ -26,6 +28,8 @@ import im.actor.runtime.actors.Actor;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorInterface;
 import im.actor.runtime.actors.ActorRef;
+import im.actor.runtime.promise.Promise;
+import im.actor.runtime.storage.IoResult;
 import im.actor.runtime.storage.ListEngine;
 
 import static im.actor.runtime.actors.ActorSystem.system;
@@ -64,6 +68,7 @@ public class DialogsInt extends ActorInterface {
         } else {
             this.dialogsGroupedActor = null;
         }
+        setDest(dialogsHistory);
     }
 
     public ListEngine<Dialog> getDialogs() {
@@ -74,19 +79,16 @@ public class DialogsInt extends ActorInterface {
         return dialogGroups;
     }
 
-    public void onInMessage(Peer peer, Message message, int counter) {
-        dialogsHistory.send(new InMessage(peer, message, counter));
+    public Promise<IoResult> onInMessage(Peer peer, Message message, int counter) {
+        Promise<IoResult> res = ask(new InMessage(peer, message, counter));
         if (dialogsGroupedActor != null) {
             dialogsGroupedActor.send(new DialogsGroupedActor.CounterChanged(peer, counter));
         }
+        return res;
     }
 
     public void onContentChanged(Peer peer, long rid, AbsContent content) {
         dialogsHistory.send(new MessageContentChanged(peer, rid, content));
-    }
-
-    public void onMessageStateChanged(Peer peer, long rid, MessageState state) {
-        dialogsHistory.send(new MessageStateChanged(peer, rid, state));
     }
 
     public void onCountersChanged(Peer peer, int counter) {
@@ -94,6 +96,14 @@ public class DialogsInt extends ActorInterface {
         if (dialogsGroupedActor != null) {
             dialogsGroupedActor.send(new DialogsGroupedActor.CounterChanged(peer, counter));
         }
+    }
+
+    public void onChatRead(Peer peer, long readDate) {
+        dialogsHistory.send(new DialogsRead(peer, readDate));
+    }
+
+    public void onChatReceive(Peer peer, long receiveDate) {
+        dialogsHistory.send(new DialogsReceive(peer, receiveDate));
     }
 
     public void onMessageDeleted(Peer peer, Message topMessage) {

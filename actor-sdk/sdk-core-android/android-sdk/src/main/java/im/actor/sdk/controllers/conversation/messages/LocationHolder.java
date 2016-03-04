@@ -123,14 +123,14 @@ public class LocationHolder extends MessageHolder {
                     stateIcon.setResource(R.drawable.msg_clock);
                     stateIcon.setTint(COLOR_PENDING);
                     break;
-                case READ:
-                    stateIcon.setResource(R.drawable.msg_check_2);
-                    stateIcon.setTint(COLOR_READ);
-                    break;
-                case RECEIVED:
-                    stateIcon.setResource(R.drawable.msg_check_2);
-                    stateIcon.setTint(COLOR_RECEIVED);
-                    break;
+//                case READ:
+//                    stateIcon.setResource(R.drawable.msg_check_2);
+//                    stateIcon.setTint(COLOR_READ);
+//                    break;
+//                case RECEIVED:
+//                    stateIcon.setResource(R.drawable.msg_check_2);
+//                    stateIcon.setTint(COLOR_RECEIVED);
+//                    break;
                 case SENT:
                     stateIcon.setResource(R.drawable.msg_check_1);
                     stateIcon.setTint(COLOR_SENT);

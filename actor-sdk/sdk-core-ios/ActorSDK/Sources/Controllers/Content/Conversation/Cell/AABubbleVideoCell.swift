@@ -108,14 +108,14 @@ public class AABubbleVideoCell: AABubbleBaseFileCell {
                 self.statusView.image = appStyle.chatIconCheck1;
                 self.statusView.tintColor = appStyle.chatStatusMediaSent
                 break;
-            case ACMessageState.RECEIVED().ordinal():
-                self.statusView.image = appStyle.chatIconCheck2;
-                self.statusView.tintColor = appStyle.chatStatusMediaReceived
-                break;
-            case ACMessageState.READ().ordinal():
-                self.statusView.image = appStyle.chatIconCheck2;
-                self.statusView.tintColor = appStyle.chatStatusMediaRead
-                break;
+//            case ACMessageState.RECEIVED().ordinal():
+//                self.statusView.image = appStyle.chatIconCheck2;
+//                self.statusView.tintColor = appStyle.chatStatusMediaReceived
+//                break;
+//            case ACMessageState.READ().ordinal():
+//                self.statusView.image = appStyle.chatIconCheck2;
+//                self.statusView.tintColor = appStyle.chatStatusMediaRead
+//                break;
             case ACMessageState.ERROR().ordinal():
                 self.statusView.image = appStyle.chatIconError;
                 self.statusView.tintColor = appStyle.chatStatusMediaError

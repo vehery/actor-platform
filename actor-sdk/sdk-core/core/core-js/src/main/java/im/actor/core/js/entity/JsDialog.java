@@ -53,7 +53,7 @@ public class JsDialog extends JavaScriptObject {
                     date,
                     senderName, showSender,
                     messageText, highlightContent,
-                    Enums.convert(src.getStatus()),
+                    null,
                     src.getUnreadCount());
         }
 
