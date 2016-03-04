@@ -1,4 +1,4 @@
-package im.actor.core.modules.updates;
+package im.actor.core.modules.encryption;
 
 import im.actor.core.api.updates.UpdateEncryptedPackage;
 import im.actor.core.api.updates.UpdatePublicKeyGroupAdded;

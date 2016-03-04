@@ -2,11 +2,11 @@ package im.actor.core.modules.messaging.dialogs.messages;
 
 import im.actor.core.entity.Peer;
 
-public class CounterChanged {
+public class DialogCounterChanged {
     private Peer peer;
     private int counter;
 
-    public CounterChanged(Peer peer, int counter) {
+    public DialogCounterChanged(Peer peer, int counter) {
         this.peer = peer;
         this.counter = counter;
     }

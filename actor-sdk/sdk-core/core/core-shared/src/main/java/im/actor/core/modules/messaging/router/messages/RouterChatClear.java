@@ -1,11 +1,12 @@
-package im.actor.core.modules.messaging.dialogs.messages;
+package im.actor.core.modules.messaging.router.messages;
 
 import im.actor.core.entity.Peer;
 
-public class ChatClear {
+public class RouterChatClear {
+
     private Peer peer;
 
-    public ChatClear(Peer peer) {
+    public RouterChatClear(Peer peer) {
         this.peer = peer;
     }
 

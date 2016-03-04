@@ -5,6 +5,7 @@
 package im.actor.core.entity;
 
 public enum MessageState {
+
     PENDING(1),
     SENT(2),
     RECEIVED(3),

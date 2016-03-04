@@ -12,6 +12,7 @@ import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.function.Consumer;
 import im.actor.runtime.function.Function;
 import im.actor.runtime.function.Supplier;
+import im.actor.runtime.function.VoidConsumer;
 
 /**
  * Promise support implementations. It is much more like js promises than traditional
@@ -143,6 +144,30 @@ public class Promise<T> {
 
         } else {
             callbacks.add(callback);
+        }
+        return this;
+    }
+
+    public synchronized Promise<T> any(final VoidConsumer consumer) {
+        if (isFinished) {
+            dispatchActor.send(new PromiseDispatch(this) {
+                @Override
+                public void run() {
+                    consumer.apply();
+                }
+            });
+        } else {
+            callbacks.add(new PromiseCallback<T>() {
+                @Override
+                public void onResult(T t) {
+                    consumer.apply();
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    consumer.apply();
+                }
+            });
         }
         return this;
     }

@@ -11,9 +11,9 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.User;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.dialogs.messages.ChatClear;
-import im.actor.core.modules.messaging.dialogs.messages.ChatDelete;
-import im.actor.core.modules.messaging.dialogs.messages.CounterChanged;
+import im.actor.core.modules.messaging.dialogs.messages.DialogClear;
+import im.actor.core.modules.messaging.dialogs.messages.DialogDelete;
+import im.actor.core.modules.messaging.dialogs.messages.DialogCounterChanged;
 import im.actor.core.modules.messaging.dialogs.messages.GroupChanged;
 import im.actor.core.modules.messaging.dialogs.messages.InMessage;
 import im.actor.core.modules.messaging.dialogs.messages.MessageContentChanged;
@@ -90,7 +90,7 @@ public class DialogsInt extends ActorInterface {
     }
 
     public void onCountersChanged(Peer peer, int counter) {
-        dialogsHistory.send(new CounterChanged(peer, counter));
+        dialogsHistory.send(new DialogCounterChanged(peer, counter));
         if (dialogsGroupedActor != null) {
             dialogsGroupedActor.send(new DialogsGroupedActor.CounterChanged(peer, counter));
         }
@@ -101,11 +101,11 @@ public class DialogsInt extends ActorInterface {
     }
 
     public void onChatClear(Peer peer) {
-        dialogsHistory.send(new ChatClear(peer));
+        dialogsHistory.send(new DialogClear(peer));
     }
 
     public void onChatDeleted(Peer peer) {
-        dialogsHistory.send(new ChatDelete(peer));
+        dialogsHistory.send(new DialogDelete(peer));
     }
 
     public void onGroupChanged(Group group) {

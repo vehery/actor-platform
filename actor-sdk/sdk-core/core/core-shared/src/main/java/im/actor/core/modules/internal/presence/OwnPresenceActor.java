@@ -17,14 +17,12 @@ import im.actor.runtime.eventbus.Event;
 
 /**
  * Actor for processing current user's online status.
- * TODO: Implement correct request timeout
  */
 public class OwnPresenceActor extends ModuleActor implements BusSubscriber {
 
     private static final int RESEND_TIMEOUT = 60 * 1000; // 1 min
     private static final int TIMEOUT = 90 * 1000;
 
-    private boolean isAlwaysOnline = false;
     private boolean isVisible = false;
     private long prevRid = 0;
     private Cancellable performCancellable;
@@ -35,14 +33,7 @@ public class OwnPresenceActor extends ModuleActor implements BusSubscriber {
 
     @Override
     public void preStart() {
-        // isAlwaysOnline = config().getDeviceCategory() == DeviceCategory.DESKTOP;
-        isAlwaysOnline = false;
-
-        if (isAlwaysOnline) {
-            schedulePerform(0);
-        } else {
-            context().getEvents().subscribe(this, AppVisibleChanged.EVENT);
-        }
+        context().getEvents().subscribe(this, AppVisibleChanged.EVENT);
     }
 
     private void onAppVisible() {
@@ -60,7 +51,7 @@ public class OwnPresenceActor extends ModuleActor implements BusSubscriber {
             cancelRequest(prevRid);
             prevRid = 0;
         }
-        boolean isOnline = isVisible || isAlwaysOnline;
+        boolean isOnline = isVisible;
         prevRid = request(new RequestSetOnline(isOnline, TIMEOUT, null, null));
         if (isOnline) {
             schedulePerform(RESEND_TIMEOUT);

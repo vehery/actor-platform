@@ -9,6 +9,7 @@ import im.actor.core.util.ModuleActor;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
 import im.actor.core.util.JavaUtil;
+import im.actor.runtime.function.Consumer;
 
 public class DeviceInfoActor extends ModuleActor {
 
@@ -50,19 +51,13 @@ public class DeviceInfoActor extends ModuleActor {
         // Performing Notification
         //
         final String finalExpectedLangs = expectedLangs;
-        request(new RequestNotifyAboutDeviceInfo(langs, timeZone), new RpcCallback<ResponseVoid>() {
+        api(new RequestNotifyAboutDeviceInfo(langs, timeZone)).then(new Consumer<ResponseVoid>() {
             @Override
-            public void onResult(ResponseVoid response) {
-
+            public void apply(ResponseVoid responseVoid) {
                 // Mark as sent
                 preferences().putString("device_info_langs", finalExpectedLangs);
                 preferences().putString("device_info_timezone", timeZone);
             }
-
-            @Override
-            public void onError(RpcException e) {
-                // Ignoring error
-            }
-        });
+        }).done(self());
     }
 }

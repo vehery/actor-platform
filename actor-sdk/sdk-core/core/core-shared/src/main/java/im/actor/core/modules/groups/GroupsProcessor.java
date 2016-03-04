@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Actor LLC. <https://actor.im>
  */
 
-package im.actor.core.modules.updates;
+package im.actor.core.modules.groups;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +38,7 @@ public class GroupsProcessor extends AbsModule {
 
     @Verified
     public void applyGroups(Collection<ApiGroup> updated, boolean forced) {
-        ArrayList<Group> batch = new ArrayList<Group>();
+        ArrayList<Group> batch = new ArrayList<>();
         for (ApiGroup group : updated) {
             Group saved = groups().getValue(group.getId());
             if (saved == null) {
@@ -73,15 +73,15 @@ public class GroupsProcessor extends AbsModule {
                 if (inviterId == myUid()) {
                     // If current user invite himself, add create group message
                     Message message = new Message(rid, date, date, inviterId,
-                            MessageState.UNKNOWN, ServiceGroupCreated.create(),
+                            MessageState.SENT, ServiceGroupCreated.create(),
                             new ArrayList<Reaction>());
-                    conversationActor(group.peer()).onMessage(message);
+                    getRouter().onMessage(group.peer(), message);
                 } else {
                     // else add invite message
                     Message message = new Message(rid, date, date, inviterId,
                             MessageState.SENT, ServiceGroupUserInvited.create(myUid()),
                             new ArrayList<Reaction>());
-                    conversationActor(group.peer()).onMessage(message);
+                    getRouter().onMessage(group.peer(), message);
                 }
             }
         }
@@ -104,11 +104,9 @@ public class GroupsProcessor extends AbsModule {
 
             // Create message if needed
             if (!isSilent) {
-                Message message = new Message(rid, date, date, uid,
-                        uid == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
-                        ServiceGroupUserLeave.create(),
-                        new ArrayList<Reaction>());
-                conversationActor(group.peer()).onMessage(message);
+                Message message = new Message(rid, date, date, uid, MessageState.SENT,
+                        ServiceGroupUserLeave.create(), new ArrayList<Reaction>());
+                getRouter().onMessage(group.peer(), message);
             }
         }
     }
@@ -130,11 +128,9 @@ public class GroupsProcessor extends AbsModule {
 
             // Create message if needed
             if (!isSilent) {
-                Message message = new Message(rid, date, date, kicker,
-                        kicker == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
-                        ServiceGroupUserKicked.create(uid),
-                        new ArrayList<Reaction>());
-                conversationActor(group.peer()).onMessage(message);
+                Message message = new Message(rid, date, date, kicker, MessageState.SENT,
+                        ServiceGroupUserKicked.create(uid), new ArrayList<Reaction>());
+                getRouter().onMessage(group.peer(), message);
             }
         }
     }
@@ -149,11 +145,9 @@ public class GroupsProcessor extends AbsModule {
 
             // Create message if needed
             if (!isSilent) {
-                Message message = new Message(rid, date, date, adder,
-                        adder == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
-                        ServiceGroupUserInvited.create(uid),
-                        new ArrayList<Reaction>());
-                conversationActor(group.peer()).onMessage(message);
+                Message message = new Message(rid, date, date, adder, MessageState.SENT,
+                        ServiceGroupUserInvited.create(uid), new ArrayList<Reaction>());
+                getRouter().onMessage(group.peer(), message);
             }
         }
     }
@@ -181,11 +175,9 @@ public class GroupsProcessor extends AbsModule {
 
             // Create message if needed
             if (!isSilent) {
-                Message message = new Message(rid, date, date, uid,
-                        uid == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
-                        ServiceGroupTitleChanged.create(title),
-                        new ArrayList<Reaction>());
-                conversationActor(group.peer()).onMessage(message);
+                Message message = new Message(rid, date, date, uid, MessageState.SENT,
+                        ServiceGroupTitleChanged.create(title), new ArrayList<Reaction>());
+                getRouter().onMessage(group.peer(), message);
             }
         }
     }
@@ -209,8 +201,6 @@ public class GroupsProcessor extends AbsModule {
                 // Notify about group change
                 onGroupDescChanged(upd);
             }
-
-
         }
     }
 
@@ -233,8 +223,6 @@ public class GroupsProcessor extends AbsModule {
                 // Notify about group change
                 onGroupDescChanged(upd);
             }
-
-
         }
     }
 
@@ -265,11 +253,9 @@ public class GroupsProcessor extends AbsModule {
 
             // Create message if needed
             if (!isSilent) {
-                Message message = new Message(rid, date, date, uid,
-                        uid == myUid() ? MessageState.SENT : MessageState.UNKNOWN,
-                        ServiceGroupAvatarChanged.create(avatar),
-                        new ArrayList<Reaction>());
-                conversationActor(group.peer()).onMessage(message);
+                Message message = new Message(rid, date, date, uid, MessageState.SENT,
+                        ServiceGroupAvatarChanged.create(avatar), new ArrayList<Reaction>());
+                getRouter().onMessage(group.peer(), message);
             }
         }
     }

@@ -56,6 +56,8 @@ import im.actor.core.modules.messaging.conversation.ConversationActor;
 import im.actor.core.modules.messaging.conversation.ConversationHistoryActor;
 import im.actor.core.modules.messaging.conversation.ConversationInt;
 import im.actor.core.modules.messaging.dialogs.DialogsInt;
+import im.actor.core.modules.messaging.router.RouterActor;
+import im.actor.core.modules.messaging.router.RouterInt;
 import im.actor.core.modules.updates.internal.ChangeContent;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
@@ -66,6 +68,7 @@ import im.actor.core.viewmodel.ConversationVM;
 import im.actor.core.viewmodel.DialogGroupsVM;
 import im.actor.core.viewmodel.DialogSpecVM;
 import im.actor.runtime.Storage;
+import im.actor.runtime.actors.Actor;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.actors.Props;
@@ -82,9 +85,9 @@ import static im.actor.runtime.actors.ActorSystem.system;
 
 public class MessagesModule extends AbsModule implements BusSubscriber {
 
+    private RouterInt router;
     private DialogsInt dialogs;
     private ActorRef archivedDialogsActor;
-    // private ActorRef dialogsGroupedActor;
     private ActorRef ownReadActor;
     private ActorRef plainReadActor;
     private ActorRef plainReceiverActor;
@@ -109,7 +112,9 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     }
 
     public void run() {
+
         this.dialogs = new DialogsInt(context());
+        this.router = new RouterInt(context());
 
         this.archivedDialogsActor = system().actorOf("actor/dialogs/archived", new ActorCreator() {
             @Override
@@ -156,6 +161,10 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
     public DialogsInt getDialogs() {
         return dialogs;
+    }
+
+    public RouterInt getRouter() {
+        return router;
     }
 
     public DialogGroupsVM getDialogGroupsVM() {
@@ -259,12 +268,14 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     }
 
     public void deleteMessages(Peer peer, long[] rids) {
-        ConversationInt conversationActor = getConversationActor(peer);
+
         ArrayList<Long> deleted = new ArrayList<>();
         for (long rid : rids) {
             deleted.add(rid);
         }
-        conversationActor.onMessagesDeleted(deleted);
+        getRouter().onDeletedMessages(peer, deleted);
+
+        // conversationActor.onMessagesDeleted(deleted);
         deletionsActor.send(new MessageDeleteActor.DeleteMessage(peer, rids));
     }
 
@@ -923,15 +934,15 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     @Override
     public void onBusEvent(Event event) {
 
-        // Need to be here as events can be sent when no actor is created yet.
-        if (event instanceof PeerChatOpened) {
-            Peer peer = ((PeerChatOpened) event).getPeer();
-            assumeConvActor(peer);
-            conversationActors.get(peer).onConversationVisible();
-        } else if (event instanceof PeerChatClosed) {
-            Peer peer = ((PeerChatClosed) event).getPeer();
-            assumeConvActor(peer);
-            conversationActors.get(peer).onConversationHidden();
-        }
+//        // Need to be here as events can be sent when no actor is created yet.
+//        if (event instanceof PeerChatOpened) {
+//            Peer peer = ((PeerChatOpened) event).getPeer();
+//            assumeConvActor(peer);
+//            conversationActors.get(peer).onConversationVisible();
+//        } else if (event instanceof PeerChatClosed) {
+//            Peer peer = ((PeerChatClosed) event).getPeer();
+//            assumeConvActor(peer);
+//            conversationActors.get(peer).onConversationHidden();
+//        }
     }
 }

@@ -54,7 +54,9 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.calls.CallsProcessor;
 import im.actor.core.modules.contacts.ContactsProcessor;
 import im.actor.core.modules.contacts.ContactsSyncActor;
+import im.actor.core.modules.encryption.EncryptedProcessor;
 import im.actor.core.modules.eventbus.EventBusProcessor;
+import im.actor.core.modules.groups.GroupsProcessor;
 import im.actor.core.modules.messaging.MessagesProcessor;
 import im.actor.core.modules.messaging.actions.OwnReadActor;
 import im.actor.core.modules.updates.internal.ArchivedDialogLoaded;
@@ -197,9 +199,9 @@ public class UpdateProcessor extends AbsModule {
             processUpdate(u);
         }
 
-        if (combinedDifference.getCounters() != null) {
-            messagesProcessor.onCountersChanged(combinedDifference.getCounters());
-        }
+//        if (combinedDifference.getCounters() != null) {
+//            messagesProcessor.onCountersChanged(combinedDifference.getCounters());
+//        }
 
         context().getMessagesModule().getOwnReadActor().send(new OwnReadActor.StopGetDifference());
         applyRelated(users, groups, true);
@@ -276,11 +278,6 @@ public class UpdateProcessor extends AbsModule {
         } else if (update instanceof UpdateChatDelete) {
             UpdateChatDelete chatDelete = (UpdateChatDelete) update;
             messagesProcessor.onChatDelete(chatDelete.getPeer());
-        } else if (update instanceof UpdateContactRegistered) {
-            UpdateContactRegistered registered = (UpdateContactRegistered) update;
-            if (!registered.isSilent()) {
-                messagesProcessor.onUserRegistered(registered.getRid(), registered.getUid(), registered.getDate());
-            }
         } else if (update instanceof UpdateGroupTitleChanged) {
             UpdateGroupTitleChanged titleChanged = (UpdateGroupTitleChanged) update;
             groupsProcessor.onTitleChanged(titleChanged.getGroupId(), titleChanged.getRid(),
@@ -337,8 +334,6 @@ public class UpdateProcessor extends AbsModule {
             settingsProcessor.onSettingsChanged(
                     ((UpdateParameterChanged) update).getKey(),
                     ((UpdateParameterChanged) update).getValue());
-        } else if (update instanceof UpdateCountersChanged) {
-            messagesProcessor.onCountersChanged(((UpdateCountersChanged) update).getCounters());
         } else if (update instanceof UpdateChatGroupsChanged) {
             messagesProcessor.onChatGroupsChanged(((UpdateChatGroupsChanged) update).getDialogs());
         } else if (update instanceof UpdateReactionsUpdate) {

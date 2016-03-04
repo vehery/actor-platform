@@ -109,7 +109,7 @@ public class MessageDeleteActor extends ModuleActor {
     public void onReceive(Object message) {
         if (message instanceof DeleteMessage) {
             DeleteMessage deleteMessage = (DeleteMessage) message;
-            ArrayList<Long> rids = new ArrayList<Long>();
+            ArrayList<Long> rids = new ArrayList<>();
             for (long l : deleteMessage.getRids()) {
                 rids.add(l);
             }

@@ -19,9 +19,9 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.User;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.dialogs.messages.ChatClear;
-import im.actor.core.modules.messaging.dialogs.messages.ChatDelete;
-import im.actor.core.modules.messaging.dialogs.messages.CounterChanged;
+import im.actor.core.modules.messaging.dialogs.messages.DialogClear;
+import im.actor.core.modules.messaging.dialogs.messages.DialogDelete;
+import im.actor.core.modules.messaging.dialogs.messages.DialogCounterChanged;
 import im.actor.core.modules.messaging.dialogs.messages.DialogsLoaded;
 import im.actor.core.modules.messaging.dialogs.messages.GroupChanged;
 import im.actor.core.modules.messaging.dialogs.messages.InMessage;
@@ -283,7 +283,7 @@ public class DialogsActor extends ModuleActor {
     }
 
     private void updateSearch(Dialog dialog) {
-        ArrayList<Dialog> d = new ArrayList<Dialog>();
+        ArrayList<Dialog> d = new ArrayList<>();
         d.add(dialog);
         context().getSearchModule().onDialogsChanged(d);
     }
@@ -346,10 +346,10 @@ public class DialogsActor extends ModuleActor {
         } else if (message instanceof UserChanged) {
             UserChanged userChanged = (UserChanged) message;
             onUserChanged(userChanged.getUser());
-        } else if (message instanceof ChatClear) {
-            onChatClear(((ChatClear) message).getPeer());
-        } else if (message instanceof ChatDelete) {
-            onChatDeleted(((ChatDelete) message).getPeer());
+        } else if (message instanceof DialogClear) {
+            onChatClear(((DialogClear) message).getPeer());
+        } else if (message instanceof DialogDelete) {
+            onChatDeleted(((DialogDelete) message).getPeer());
         } else if (message instanceof MessageStateChanged) {
             MessageStateChanged messageStateChanged = (MessageStateChanged) message;
             onMessageStatusChanged(messageStateChanged.getPeer(), messageStateChanged.getRid(),
@@ -367,9 +367,9 @@ public class DialogsActor extends ModuleActor {
             MessageContentChanged contentChanged = (MessageContentChanged) message;
             onMessageContentChanged(contentChanged.getPeer(), contentChanged.getRid(),
                     contentChanged.getContent());
-        } else if (message instanceof CounterChanged) {
-            CounterChanged counterChanged = (CounterChanged) message;
-            onCounterChanged(counterChanged.getPeer(), counterChanged.getCounter());
+        } else if (message instanceof DialogCounterChanged) {
+            DialogCounterChanged dialogCounterChanged = (DialogCounterChanged) message;
+            onCounterChanged(dialogCounterChanged.getPeer(), dialogCounterChanged.getCounter());
         } else {
             drop(message);
         }

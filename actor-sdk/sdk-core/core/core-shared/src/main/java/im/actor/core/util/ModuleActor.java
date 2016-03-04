@@ -13,6 +13,7 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.PeerType;
 import im.actor.core.entity.User;
 import im.actor.core.modules.ModuleContext;
+import im.actor.core.modules.messaging.dialogs.DialogsInt;
 import im.actor.core.modules.sequence.Updates;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
@@ -87,6 +88,10 @@ public class ModuleActor extends AskcableActor implements BusSubscriber {
         } else {
             return null;
         }
+    }
+
+    public DialogsInt getDialogs() {
+        return context.getMessagesModule().getDialogs();
     }
 
     public KeyValueEngine<User> users() {

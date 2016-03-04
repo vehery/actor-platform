@@ -1,20 +1,20 @@
 package im.actor.core.modules.messaging.conversation.messages;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import im.actor.core.entity.Reaction;
 
 public class MessageReactionsChanged {
 
     private long rid;
-    private ArrayList<Reaction> reactions;
+    private List<Reaction> reactions;
 
-    public MessageReactionsChanged(long rid, ArrayList<Reaction> reactions) {
+    public MessageReactionsChanged(long rid, List<Reaction> reactions) {
         this.rid = rid;
         this.reactions = reactions;
     }
 
-    public ArrayList<Reaction> getReactions() {
+    public List<Reaction> getReactions() {
         return reactions;
     }
 

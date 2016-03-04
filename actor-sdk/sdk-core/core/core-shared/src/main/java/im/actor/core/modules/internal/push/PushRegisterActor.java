@@ -16,6 +16,7 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.util.ModuleActor;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
+import im.actor.runtime.function.Consumer;
 
 public class PushRegisterActor extends ModuleActor {
 
@@ -69,17 +70,12 @@ public class PushRegisterActor extends ModuleActor {
         preferences().putLong("push.google.id", projectId);
         preferences().putString("push.google.token", token);
 
-        request(new RequestRegisterGooglePush(projectId, token), new RpcCallback<ResponseVoid>() {
+        api(new RequestRegisterGooglePush(projectId, token)).then(new Consumer<ResponseVoid>() {
             @Override
-            public void onResult(ResponseVoid response) {
+            public void apply(ResponseVoid responseVoid) {
                 preferences().putBool("push.google.registered", true);
             }
-
-            @Override
-            public void onError(RpcException e) {
-                e.printStackTrace();
-            }
-        });
+        }).done(self());
     }
 
     private void registerApplePush(int apnsId, String token) {
@@ -96,17 +92,12 @@ public class PushRegisterActor extends ModuleActor {
         preferences().putInt("push.apple.id", apnsId);
         preferences().putString("push.apple.token", token);
 
-        request(new RequestRegisterApplePush(apnsId, token), new RpcCallback<ResponseVoid>() {
+        api(new RequestRegisterApplePush(apnsId, token)).then(new Consumer<ResponseVoid>() {
             @Override
-            public void onResult(ResponseVoid response) {
+            public void apply(ResponseVoid responseVoid) {
                 preferences().putBool("push.apple.registered", true);
             }
-
-            @Override
-            public void onError(RpcException e) {
-
-            }
-        });
+        }).done(self());
     }
 
     private void registerApplePushKit(int apnsId, String token) {
@@ -123,17 +114,12 @@ public class PushRegisterActor extends ModuleActor {
         preferences().putInt("push.apple_puskkit.id", apnsId);
         preferences().putString("push.apple_puskkit.token", token);
 
-        request(new RequestRegisterApplePushKit(apnsId, token), new RpcCallback<ResponseVoid>() {
+        api(new RequestRegisterApplePushKit(apnsId, token)).then(new Consumer<ResponseVoid>() {
             @Override
-            public void onResult(ResponseVoid response) {
+            public void apply(ResponseVoid responseVoid) {
                 preferences().putBool("push.apple_puskkit.registered", true);
             }
-
-            @Override
-            public void onError(RpcException e) {
-
-            }
-        });
+        }).done(self());
     }
 
     private void registerActorPush(String endpoint) {
@@ -148,17 +134,12 @@ public class PushRegisterActor extends ModuleActor {
         preferences().putBool("push.actor.registered", false);
         preferences().putString("push.actor.endpoint", endpoint);
 
-        request(new RequestRegisterActorPush(endpoint, new ArrayList<ApiEncryptionKey>()), new RpcCallback<ResponseVoid>() {
+        api(new RequestRegisterActorPush(endpoint, new ArrayList<ApiEncryptionKey>())).then(new Consumer<ResponseVoid>() {
             @Override
-            public void onResult(ResponseVoid response) {
+            public void apply(ResponseVoid responseVoid) {
                 preferences().putBool("push.actor.registered", true);
             }
-
-            @Override
-            public void onError(RpcException e) {
-
-            }
-        });
+        }).done(self());
     }
 
     @Override

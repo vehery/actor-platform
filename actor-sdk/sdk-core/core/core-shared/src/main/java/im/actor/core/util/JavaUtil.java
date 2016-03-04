@@ -57,7 +57,7 @@ public class JavaUtil {
      * @return result list
      */
     public static <T> List<T> last(List<T> elements, int limit) {
-        ArrayList<T> res = new ArrayList<T>();
+        ArrayList<T> res = new ArrayList<>();
         for (int i = 0; i < elements.size(); i++) {
             if (res.size() >= limit) {
                 break;
@@ -65,5 +65,19 @@ public class JavaUtil {
             res.add(elements.get(elements.size() - 1 - i));
         }
         return res;
+    }
+
+    /**
+     * Unboxing Longs from list to array
+     *
+     * @param longs boxed longs
+     * @return unboxed longs
+     */
+    public static long[] unboxList(List<Long> longs) {
+        long[] rids2 = new long[longs.size()];
+        for (int i = 0; i < rids2.length; i++) {
+            rids2[i] = longs.get(i);
+        }
+        return rids2;
     }
 }

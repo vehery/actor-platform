@@ -13,7 +13,6 @@ import im.actor.core.api.ApiMessage;
 import im.actor.core.api.ApiMessageContainer;
 import im.actor.core.api.ApiMessageReaction;
 import im.actor.core.api.ApiPeer;
-import im.actor.core.api.ApiAppCounters;
 import im.actor.core.api.rpc.ResponseLoadArchived;
 import im.actor.core.api.rpc.ResponseLoadHistory;
 import im.actor.core.api.updates.UpdateMessage;
@@ -22,16 +21,11 @@ import im.actor.core.entity.MessageState;
 import im.actor.core.entity.Peer;
 import im.actor.core.entity.Reaction;
 import im.actor.core.entity.content.AbsContent;
-import im.actor.core.entity.content.ServiceUserRegistered;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.actions.ArchivedDialogsActor;
-import im.actor.core.modules.messaging.actions.CursorReceiverActor;
-import im.actor.core.modules.messaging.actions.OwnReadActor;
-import im.actor.core.modules.messaging.actions.SenderActor;
 import im.actor.core.modules.messaging.conversation.ConversationHistoryActor;
 import im.actor.core.modules.messaging.entity.EntityConverter;
-import im.actor.runtime.annotations.Verified;
 
 import static im.actor.core.modules.messaging.entity.EntityConverter.convert;
 
@@ -42,12 +36,12 @@ public class MessagesProcessor extends AbsModule {
     }
 
     public void onMessages(ApiPeer _peer, List<UpdateMessage> messages) {
-
-        long outMessageSortDate = 0;
-        long intMessageSortDate = 0;
         Peer peer = convert(_peer);
+        if (!isValidPeer(peer)) {
+            return;
+        }
 
-        ArrayList<Message> nMessages = new ArrayList<Message>();
+        ArrayList<Message> nMessages = new ArrayList<>();
         for (UpdateMessage u : messages) {
 
             AbsContent msgContent;
@@ -58,40 +52,19 @@ public class MessagesProcessor extends AbsModule {
                 continue;
             }
 
-            boolean isOut = myUid() == u.getSenderUid();
-
             // Sending message to conversation
-            nMessages.add(new Message(u.getRid(), u.getDate(), u.getDate(), u.getSenderUid(),
-                    isOut ? MessageState.SENT : MessageState.UNKNOWN, msgContent,
-                    new ArrayList<Reaction>()));
-
-            if (!isOut) {
-
-                intMessageSortDate = Math.max(intMessageSortDate, u.getDate());
-            } else {
-                outMessageSortDate = Math.max(outMessageSortDate, u.getDate());
-            }
+            nMessages.add(new Message(u.getRid(), u.getDate(), u.getSenderUid(),
+                    MessageState.SENT, msgContent));
         }
 
-        conversationActor(peer).onMessages(nMessages);
-
-        if (intMessageSortDate > 0) {
-            plainReceiveActor().send(new CursorReceiverActor.MarkReceived(peer, intMessageSortDate));
-        }
-
-        // OwnReadActor
-        for (Message m : nMessages) {
-            if (m.getSenderId() != myUid()) {
-                ownReadActor().send(new OwnReadActor.InMessage(peer, m));
-            }
-        }
+        context().getMessagesModule().getRouter().onMessages(peer, nMessages);
     }
 
-    @Verified
-    public void onMessage(ApiPeer _peer, int senderUid, long date, long rid,
-                          ApiMessage content) {
-
+    public void onMessage(ApiPeer _peer, int senderUid, long date, long rid, ApiMessage content) {
         Peer peer = convert(_peer);
+        if (!isValidPeer(peer)) {
+            return;
+        }
 
         AbsContent msgContent;
         try {
@@ -107,82 +80,16 @@ public class MessagesProcessor extends AbsModule {
         Message message = new Message(rid, date, date, senderUid,
                 isOut ? MessageState.SENT : MessageState.UNKNOWN, msgContent, new ArrayList<Reaction>());
 
-        conversationActor(peer).onMessage(message);
-
-        if (!isOut) {
-            // mark message as received
-            plainReceiveActor().send(new CursorReceiverActor.MarkReceived(peer, date));
-
-            // Send to own read actor
-            ownReadActor().send(new OwnReadActor.InMessage(peer, message));
-            msgContent.onIncoming(peer, context());
-        }
+        getRouter().onMessage(peer, message);
     }
 
-    @Verified
-    public void onUserRegistered(long rid, int uid, long date) {
-        Message message = new Message(rid, date, date, uid,
-                MessageState.UNKNOWN, ServiceUserRegistered.create(), new ArrayList<Reaction>());
-
-        conversationActor(Peer.user(uid)).onMessage(message);
-    }
-
-    @Verified
-    public void onMessageRead(ApiPeer _peer, long startDate) {
-        Peer peer = convert(_peer);
-
-        // We are not invalidating sequence because of this update
-        if (!isValidPeer(peer)) {
-            return;
-        }
-
-        // Sending event to conversation actor
-        conversationActor(peer).onMessageRead(startDate);
-    }
-
-    @Verified
-    public void onMessageReceived(ApiPeer _peer, long startDate) {
-        Peer peer = convert(_peer);
-
-        // We are not invalidating sequence because of this update
-        if (!isValidPeer(peer)) {
-            return;
-        }
-
-        // Sending event to conversation actor
-        conversationActor(peer).onMessageReceived(startDate);
-    }
-
-    @Verified
-    public void onMessageReadByMe(ApiPeer _peer, long startDate) {
-        Peer peer = convert(_peer);
-
-        // We are not invalidating sequence because of this update
-        if (!isValidPeer(peer)) {
-            return;
-        }
-
-        // Sending event to own read actor
-        ownReadActor().send(new OwnReadActor.MessageReadByMe(peer, startDate));
-    }
-
-    @Verified
     public void onMessageSent(ApiPeer _peer, long rid, long date) {
         Peer peer = convert(_peer);
-
-        // We are not invalidating sequence because of this update
-        if (!isValidPeer(peer)) {
-            return;
+        if (isValidPeer(peer)) {
+            getRouter().onMessageSent(peer, rid, date);
         }
-
-        // Change message state in conversation
-        conversationActor(peer).onMessageSent(rid, date);
-
-        // Notify Sender Actor
-        sendActor().send(new SenderActor.MessageSent(peer, rid));
     }
 
-    @Verified
     public void onReactionsChanged(ApiPeer _peer, long rid, List<ApiMessageReaction> apiReactions) {
         Peer peer = convert(_peer);
 
@@ -197,12 +104,10 @@ public class MessagesProcessor extends AbsModule {
         }
 
         // Change message state in conversation
-        conversationActor(peer).onMessageReactionsChanged(rid, reactions);
+        getRouter().onMessageReactionsChanged(peer, rid, reactions);
     }
 
-    @Verified
-    public void onMessageContentChanged(ApiPeer _peer, long rid,
-                                        ApiMessage message) {
+    public void onMessageContentChanged(ApiPeer _peer, long rid, ApiMessage message) {
         Peer peer = convert(_peer);
 
         // We are not invalidating sequence because of this update
@@ -218,11 +123,14 @@ public class MessagesProcessor extends AbsModule {
             return;
         }
 
-        // Change message content in conversation
-        conversationActor(peer).onMessageContentChanged(rid, content);
+        getRouter().onMessageContentChanged(peer, rid, content);
     }
 
-    @Verified
+
+    //
+    // Deletion
+    //
+
     public void onMessageDelete(ApiPeer _peer, List<Long> rids) {
         Peer peer = convert(_peer);
 
@@ -231,45 +139,75 @@ public class MessagesProcessor extends AbsModule {
             return;
         }
 
-        // Deleting messages from conversation
-        conversationActor(peer).onMessagesDeleted(rids);
-
-        // TODO: Notify send actor
+        getRouter().onDeletedMessages(peer, rids);
     }
 
-    @Verified
     public void onChatClear(ApiPeer _peer) {
         Peer peer = convert(_peer);
-
-        // We are not invalidating sequence because of this update
         if (!isValidPeer(peer)) {
             return;
         }
 
-        // Clearing conversation
-        conversationActor(peer).onClearConversation();
-
-        // TODO: Notify send actor
+        getRouter().onChatClear(peer);
     }
 
-    @Verified
     public void onChatDelete(ApiPeer _peer) {
         Peer peer = convert(_peer);
-
-        // We are not invalidating sequence because of this update
         if (!isValidPeer(peer)) {
             return;
         }
 
-        // Deleting conversation
-        conversationActor(peer).onDeleteConversation();
-
-        // TODO: Notify send actor
+        getRouter().onChatDelete(peer);
     }
 
-    @Verified
+
+    //
+    // Read State
+    //
+
+    public void onMessageRead(ApiPeer _peer, long startDate) {
+//        Peer peer = convert(_peer);
+//
+//        // We are not invalidating sequence because of this update
+//        if (!isValidPeer(peer)) {
+//            return;
+//        }
+//
+//        // Sending event to conversation actor
+//        conversationActor(peer).onMessageRead(startDate);
+    }
+
+    public void onMessageReceived(ApiPeer _peer, long startDate) {
+//        Peer peer = convert(_peer);
+//
+//        // We are not invalidating sequence because of this update
+//        if (!isValidPeer(peer)) {
+//            return;
+//        }
+//
+//        // Sending event to conversation actor
+//        conversationActor(peer).onMessageReceived(startDate);
+    }
+
+    public void onMessageReadByMe(ApiPeer _peer, long startDate) {
+//        Peer peer = convert(_peer);
+//
+//        // We are not invalidating sequence because of this update
+//        if (!isValidPeer(peer)) {
+//            return;
+//        }
+//
+//        // Sending event to own read actor
+//        ownReadActor().send(new OwnReadActor.MessageReadByMe(peer, startDate));
+    }
+
+
+    //
+    // Obsolete
+    //
+
     public void onMessagesLoaded(Peer peer, ResponseLoadHistory historyResponse) {
-        ArrayList<Message> messages = new ArrayList<Message>();
+        ArrayList<Message> messages = new ArrayList<>();
         long maxLoadedDate = Long.MAX_VALUE;
         for (ApiMessageContainer historyMessage : historyResponse.getHistory()) {
 
@@ -286,7 +224,7 @@ public class MessagesProcessor extends AbsModule {
             }
             MessageState state = EntityConverter.convert(historyMessage.getState());
 
-            ArrayList<Reaction> reactions = new ArrayList<Reaction>();
+            ArrayList<Reaction> reactions = new ArrayList<>();
 
             for (ApiMessageReaction r : historyMessage.getReactions()) {
                 reactions.add(new Reaction(r.getCode(), r.getUsers()));
@@ -299,7 +237,7 @@ public class MessagesProcessor extends AbsModule {
 
         // Sending updates to conversation actor
         if (messages.size() > 0) {
-            conversationActor(peer).onHistoryLoaded(messages);
+            // conversationActor(peer).onHistoryLoaded(messages);
         }
 
         // Sending notification to conversation history actor
@@ -307,9 +245,9 @@ public class MessagesProcessor extends AbsModule {
                 maxLoadedDate));
     }
 
-    public void onCountersChanged(ApiAppCounters counters) {
-        context().getAppStateModule().onCountersChanged(counters);
-    }
+    //
+    // Grouped Updates
+    //
 
     public void onChatGroupsChanged(List<ApiDialogGroup> groups) {
         if (context().getConfiguration().isEnabledGroupedChatList()) {
