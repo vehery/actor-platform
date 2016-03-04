@@ -41,6 +41,7 @@ class Call extends Component {
     return {
       isOpen: CallStore.isOpen(),
       isOutgoing: CallStore.isOutgoing(),
+      isMuted: CallStore.isMuted(),
       callId: CallStore.getId(),
       callMembers: CallStore.getMembers(),
       callPeer: CallStore.getPeer(),
@@ -86,19 +87,19 @@ class Call extends Component {
   }
 
   renderContent() {
-    const {isOpen, callState, peerInfo, isOutgoing} = this.state;
+    const {isOpen, callState, peerInfo, isOutgoing, isMuted} = this.state;
     if (!isOpen) {
       return null;
     }
 
     return (
-      <div className="activity__body">
+      <div className="activity__body call__container">
         <section className="call">
-          <CallHeader isOutgoing={isOutgoing} />
           <CallBody peerInfo={peerInfo} callState={callState}/>
           <CallControls
             callState={callState}
             isOutgoing={isOutgoing}
+            isMuted={isMuted}
             onEnd={this.onEnd}
             onAnswer={this.onAnswer}
             onMuteToggle={this.onMuteToggle}
@@ -121,8 +122,8 @@ class Call extends Component {
       <section className={className}>
         {this.renderContent()}
       </section>
-    )
+    );
   }
 }
 
-export default Container.create(Call, {pure: false});
+export default Container.create(Call);
