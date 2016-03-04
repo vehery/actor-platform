@@ -15,7 +15,7 @@ import im.actor.core.modules.internal.file.entity.Downloaded;
 import im.actor.core.util.BaseKeyValueEngine;
 import im.actor.core.viewmodel.FileCallback;
 import im.actor.core.viewmodel.UploadFileCallback;
-import im.actor.runtime.Storage;
+import im.actor.runtime.*;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.actors.Props;
@@ -70,12 +70,22 @@ public class FilesModule extends AbsModule {
         return downloadedEngine;
     }
 
-    public void bindFile(FileReference fileReference, boolean isAutostart, FileCallback callback) {
-        downloadManager.send(new DownloadManager.BindDownload(fileReference, isAutostart, callback));
+    public void bindFile(final FileReference fileReference, final boolean isAutostart, final FileCallback callback) {
+        im.actor.runtime.Runtime.dispatch(new Runnable() {
+            @Override
+            public void run() {
+                downloadManager.send(new DownloadManager.BindDownload(fileReference, isAutostart, callback));
+            }
+        });
     }
 
-    public void unbindFile(long fileId, FileCallback callback, boolean cancel) {
-        downloadManager.send(new DownloadManager.UnbindDownload(fileId, cancel, callback));
+    public void unbindFile(final long fileId, final FileCallback callback, final boolean cancel) {
+        im.actor.runtime.Runtime.dispatch(new Runnable() {
+            @Override
+            public void run() {
+                downloadManager.send(new DownloadManager.UnbindDownload(fileId, cancel, callback));
+            }
+        });
     }
 
     public void requestState(long fileId, final FileCallback callback) {
