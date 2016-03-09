@@ -98,10 +98,14 @@ class Call extends Component {
   }
 
   renderContactInfo() {
-    const { peerInfo } = this.state;
-    if (!peerInfo) return null
+    const { callPeer, peerInfo } = this.state;
+    if (!peerInfo || callPeer.type === PeerTypes.GROUP) return null;
 
-    return <ContactDetails peerInfo={peerInfo}/>
+    return (
+      <section className="call__info">
+        <ContactDetails peerInfo={peerInfo}/>
+      </section>
+    )
   }
 
   render() {
@@ -130,8 +134,8 @@ class Call extends Component {
 
     return (
       <section className="activity activity--shown">
-        <div className="activity__body call__container">
-          <section className="call">
+        <div className="activity__body call">
+          <section className="call__container">
             <CallBody peerInfo={peerInfo} callState={callState}/>
             <CallControls
               callState={callState}
@@ -146,9 +150,7 @@ class Call extends Component {
               onClose={this.onClose}
             />
           </section>
-          <section className="call__info">
-            {this.renderContactInfo()}
-          </section>
+          {this.renderContactInfo()}
         </div>
       </section>
     );
