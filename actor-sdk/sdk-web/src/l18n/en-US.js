@@ -7,6 +7,7 @@ export default {
       'wrong': 'Wrong?',
       'phone': 'Phone number',
       'email': 'Email address',
+      'phone_or_email': 'Phone number or Email address',
       'authCode': 'Auth code',
       'yourName': 'Your name',
       'errors': {
@@ -185,7 +186,8 @@ export default {
     'profile': {
       'email': 'email',
       'phone': 'phone',
-      'nickname': 'nickname'
+      'nickname': 'nickname',
+      'about': 'about'
     },
     'createdBy': 'сreated by',
     'addPeople': 'Add people',

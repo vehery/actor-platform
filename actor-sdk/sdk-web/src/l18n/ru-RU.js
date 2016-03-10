@@ -7,6 +7,7 @@ export default {
       'wrong': 'Ошиблись?',
       'phone': 'Номер телефона',
       'email': 'Email адрес',
+      'phone_or_email': 'Номер телефона или Email адрес',
       'authCode': 'Код авторизации',
       'yourName': 'Ваше имя',
       'errors': {
@@ -184,7 +185,8 @@ export default {
     'profile': {
       'email': 'email',
       'phone': 'телефон',
-      'nickname': 'ник'
+      'nickname': 'ник',
+      'about': 'о себе'
     },
     'createdBy': 'создал',
     'addPeople': 'Пригласить',
