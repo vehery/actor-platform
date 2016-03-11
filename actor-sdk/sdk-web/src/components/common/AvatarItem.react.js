@@ -16,15 +16,6 @@ export default class AvatarItem extends Component {
     onClick: PropTypes.func
   };
 
-  constructor(props) {
-    super(props);
-  }
-
-  handleClick = (event) => {
-    const { onClick } = this.props;
-    onClick && onClick(event);
-  };
-
   render() {
     const { title, className, image, size, placeholder } = this.props;
 
@@ -51,7 +42,7 @@ export default class AvatarItem extends Component {
     }
 
     return (
-      <div className={avatarClassName} onClick={this.handleClick}>
+      <div className={avatarClassName} onClick={this.props.onClick}>
         {avatar}
         <span className={placeholderClassName}>{placeholderChar}</span>
       </div>

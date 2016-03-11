@@ -7,19 +7,23 @@ import React, { Component, PropTypes } from 'react';
 import Loading from './messages/Loading.react';
 import Welcome from './messages/Welcome.react';
 
+import DropdownStore from '../../stores/DropdownStore';
+
 class MessagesList extends Component {
   static propTypes = {
     messages: PropTypes.array.isRequired,
     selectedMessages: PropTypes.object.isRequired,
     peer: PropTypes.object.isRequired,
     overlay: PropTypes.array.isRequired,
+    dropdownMessage: PropTypes.object,
     isMember: PropTypes.bool.isRequired,
     isAllMessagesLoaded: PropTypes.bool.isRequired,
+    onSelect: PropTypes.func.isRequired,
+    onVisibilityChange: PropTypes.func.isRequired,
+    isExperimental: PropTypes.bool.isRequired,
     components: PropTypes.shape({
       MessageItem: PropTypes.func.isRequired
-    }).isRequired,
-    onSelect: PropTypes.func.isRequired,
-    onVisibilityChange: PropTypes.func.isRequired
+    }).isRequired
   }
 
   renderWelcome() {
@@ -43,7 +47,7 @@ class MessagesList extends Component {
   }
 
   renderMessages() {
-    const {messages, selectedMessages, peer, overlay, components} = this.props;
+    const {messages, peer, overlay, selectedMessages, dropdownMessage, components} = this.props;
     const {MessageItem} = this.props.components;
 
     const result = [];
@@ -59,13 +63,17 @@ class MessagesList extends Component {
 
       result.push(
         <MessageItem
-          key={message.sortKey}
+          peer={peer}
           message={message}
-          overlay={overlay[index]}
           isSelected={selectedMessages.has(message.rid)}
+          isHighlighted={dropdownMessage && message && dropdownMessage.rid === message.rid}
+          isShortMessage={overlayItem.useShort}
+
           onSelect={this.props.onSelect}
           onVisibilityChange={this.props.onVisibilityChange}
-          peer={peer}
+          components={this.props.components}
+          isExperimental={this.props.isExperimental}
+          key={message.sortKey}
         />
       );
     });

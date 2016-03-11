@@ -13,9 +13,21 @@ import MessageActionCreators from '../../actions/MessageActionCreators';
 import VisibilityStore from '../../stores/VisibilityStore';
 import DialogStore from '../../stores/DialogStore';
 import MessageStore from '../../stores/MessageStore';
+import DropdownStore from '../../stores/DropdownStore';
 
 import DefaultMessageItem from './messages/MessageItem.react';
 import MessagesList from './MessagesList.react';
+
+// Default message content components
+import DefaultService from './messages/Service.react';
+import DefaultText from './messages/Text.react';
+import DefaultPhoto from './messages/Photo.react.js';
+import DefaultDocument from './messages/Document.react';
+import DefaultVoice from './messages/Voice.react';
+import DefaultContact from './messages/Contact.react';
+import DefaultLocation from './messages/Location.react.js';
+import DefaultModern from './messages/Modern.react.js';
+import DefaultSticker from './messages/Sticker.react.js';
 
 
 let _delayed = [];
@@ -36,19 +48,21 @@ class MessagesSection extends Component {
   };
 
   static contextTypes = {
-    delegate: PropTypes.object
+    delegate: PropTypes.object.isRequired,
+    isExperimental: PropTypes.bool.isRequired
   };
 
   static getStores() {
-    return [MessageStore, VisibilityStore]
+    return [MessageStore, VisibilityStore, DropdownStore];
   }
 
   static calculateState() {
     return {
       selectedMessages: MessageStore.getSelected(),
       isAllMessagesLoaded: MessageStore.isLoaded(),
-      isAppVisible: VisibilityStore.isAppVisible()
-    }
+      isAppVisible: VisibilityStore.isAppVisible(),
+      dropdownMessage: DropdownStore.getMessage()
+    };
   }
 
   componentDidUpdate() {
@@ -79,21 +93,41 @@ class MessagesSection extends Component {
   };
 
   getComponents() {
-    const {dialog, messages} = this.context.delegate.components;
+    const {dialog} = this.context.delegate.components;
+
     if (dialog && dialog.messages && isFunction(dialog.messages.message)) {
       return {
-        MessageItem: dialog.messages.message
+        MessageItem: dialog.messages.message,
+        Service: dialog.messages.service || DefaultService,
+        Text: dialog.messages.text || DefaultText,
+        Modern: dialog.messages.modern || DefaultModern,
+        Photo: dialog.messages.photo || DefaultPhoto,
+        Document: dialog.messages.document || DefaultDocument,
+        Voice: dialog.messages.voice || DefaultVoice,
+        Contact: dialog.messages.contact || DefaultContact,
+        Location: dialog.messages.location || DefaultLocation,
+        Sticker: dialog.messages.sticker || DefaultSticker
       };
     }
 
     return {
-      MessageItem: DefaultMessageItem
+      MessageItem: DefaultMessageItem,
+      Service: DefaultService,
+      Text: DefaultText,
+      Modern: DefaultModern,
+      Photo: DefaultPhoto,
+      Document: DefaultDocument,
+      Voice: DefaultVoice,
+      Contact: DefaultContact,
+      Location: DefaultLocation,
+      Sticker: DefaultSticker
     };
   }
 
   render() {
     const { peer, overlay, messages, isMember } = this.props;
-    const { selectedMessages, isAllMessagesLoaded } = this.state;
+    const { selectedMessages, isAllMessagesLoaded, dropdownMessage } = this.state;
+    const { isExperimental } = this.context;
 
     const components = this.getComponents();
 
@@ -104,11 +138,13 @@ class MessagesSection extends Component {
           overlay={overlay}
           messages={messages}
           selectedMessages={selectedMessages}
+          dropdownMessage={dropdownMessage}
           isMember={isMember}
           isAllMessagesLoaded={isAllMessagesLoaded}
-          components={components}
           onSelect={this.onMessageSelect}
           onVisibilityChange={this.onMessageVisibilityChange}
+          components={components}
+          isExperimental={isExperimental}
         />
       </Scrollbar>
     );

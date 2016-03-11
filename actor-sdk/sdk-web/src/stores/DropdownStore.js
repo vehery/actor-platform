@@ -16,16 +16,16 @@ class DropdownStore extends Store {
     this._isRecentContextOpen = false;
     this._targetRect = {};
     this._contextPos = {}
-    this._message = {};
+    this._message = null;
     this._peer = {};
   }
 
   isMessageDropdownOpen(rid) {
-    if (rid === this._message.rid) {
-      return this._isMessageDropdownOpen;
-    } else {
+    if (!this._message) {
       return false;
     }
+
+    return this._message && rid === this._message.rid;
   }
 
   isRecentContextOpen() {
@@ -59,12 +59,14 @@ class DropdownStore extends Store {
         break;
       case ActionTypes.MESSAGE_DROPDOWN_HIDE:
         this._isMessageDropdownOpen = false;
+        this._message = null;
         this.__emitChange();
         break;
 
       case ActionTypes.RECENT_CONTEXT_MENU_SHOW:
         this._isRecentContextOpen = true;
         this._isMessageDropdownOpen = false;
+        this._message = null;
         this._contextPos = action.contextPos;
         this._peer = action.peer;
         this.__emitChange();
