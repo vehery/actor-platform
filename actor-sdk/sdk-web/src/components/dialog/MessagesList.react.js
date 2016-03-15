@@ -20,7 +20,7 @@ class MessagesList extends Component {
     }).isRequired,
     onSelect: PropTypes.func.isRequired,
     onVisibilityChange: PropTypes.func.isRequired
-  }
+  };
 
   renderWelcome() {
     const {peer, isMember, isAllMessagesLoaded} = this.props;
@@ -61,7 +61,7 @@ class MessagesList extends Component {
         <MessageItem
           key={message.sortKey}
           message={message}
-          overlay={overlay[index]}
+          isShort={overlayItem.useShort}
           isSelected={selectedMessages.has(message.rid)}
           onSelect={this.props.onSelect}
           onVisibilityChange={this.props.onVisibilityChange}

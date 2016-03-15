@@ -17,7 +17,17 @@ class LoggerSection extends Component {
   static getStores = () => [LoggerStore];
 
   static calculateState() {
-    return LoggerStore.getState();
+    const isOpen = LoggerStore.isOpen();
+    if (!isOpen) {
+      return {isOpen: false};
+    }
+
+    const logs = LoggerStore.getLogs();
+    return {
+      isOpen,
+      logs,
+      length: logs.length
+    };
   }
 
   onClose() {
@@ -30,39 +40,33 @@ class LoggerSection extends Component {
     const { logs } = this.state;
     for (let i = logs.length - 1; i >= 0; i--) {
       result.push(
-        <LoggerRow {...logs[i]} key={i} />
+        <LoggerRow data={logs[i]} key={i} />
       );
     }
 
     return result;
   }
 
-  renderBody() {
-    return (
-      <div className="activity__body logger__body">
-        <div className="logger__controls">
-          <button className="button button--icon" type="button" onClick={this.onClose}>
-            <i className="material-icons">close</i>
-          </button>
-        </div>
-        <LoggerFilter />
-        <Scrollbar>
-          <div className="logger__container">
-            {this.renderLogs()}
-          </div>
-        </Scrollbar>
-      </div>
-    );
-  }
-
   render() {
-    const className = classNames('activity logger', {
-      'activity--shown': this.state.isOpen
-    });
+    if (!this.state.isOpen) {
+      return <section className="activity logger" />;
+    }
 
     return (
-      <section className={className}>
-        {this.renderBody()}
+      <section className="activity logger activity--shown">
+        <div className="activity__body logger__body">
+          <div className="logger__controls">
+            <button className="button button--icon" type="button" onClick={this.onClose}>
+              <i className="material-icons">close</i>
+            </button>
+          </div>
+          <LoggerFilter />
+          <Scrollbar>
+            <div className="logger__container">
+              {this.renderLogs()}
+            </div>
+          </Scrollbar>
+        </div>
       </section>
     );
   }
