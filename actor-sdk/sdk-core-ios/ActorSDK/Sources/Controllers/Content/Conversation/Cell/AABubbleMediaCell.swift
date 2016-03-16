@@ -4,7 +4,8 @@
 
 import Foundation
 import VBFPopFlatButton
-import YYKit
+import YYImage
+import YYCategories
 
 public class AABubbleMediaCell : AABubbleBaseFileCell, NYTPhotosViewControllerDelegate {
     

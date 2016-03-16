@@ -5,7 +5,7 @@
 import UIKit
 import VBFPopFlatButton
 import AVFoundation
-import YYKit
+import YYImage
 
 public class AABubbleVideoCell: AABubbleBaseFileCell {
     

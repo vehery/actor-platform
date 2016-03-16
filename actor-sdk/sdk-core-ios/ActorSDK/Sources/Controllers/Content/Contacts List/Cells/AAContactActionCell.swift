@@ -6,7 +6,7 @@ import Foundation
 
 public class AAContactActionCell: AATableViewCell {
     
-    public let titleView = UILabel()
+    public let titleView = YYLabel()
     public let iconView = UIImageView()
     
     public override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
@@ -14,6 +14,7 @@ public class AAContactActionCell: AATableViewCell {
         
         titleView.font = UIFont.systemFontOfSize(18)
         titleView.textColor = ActorSDK.sharedActor().style.cellTintColor
+        titleView.displaysAsynchronously = true
         iconView.contentMode = UIViewContentMode.Center
         self.contentView.addSubview(titleView)
         self.contentView.addSubview(iconView)

@@ -247,6 +247,11 @@ public class CallFragment extends BaseFragment {
         }
 
         audioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+
+
+
+
+        audioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
         final TintImageView speaker = (TintImageView) cont.findViewById(R.id.speaker);
         speaker.setResource(R.drawable.ic_volume_up_white_24dp);
         final TextView speakerTV = (TextView) cont.findViewById(R.id.speaker_tv);
@@ -293,12 +298,15 @@ public class CallFragment extends BaseFragment {
             call.getIsMuted().subscribe(new ValueChangedListener<Boolean>() {
                 @Override
                 public void onChanged(Boolean val, Value<Boolean> valueModel) {
-                    if(val){
-                        muteCallTv.setTextColor(getResources().getColor(R.color.picker_grey));
-                        muteCall.setTint(getResources().getColor(R.color.picker_grey));
-                    }else{
-                        muteCallTv.setTextColor(Color.WHITE);
-                        muteCall.setTint(Color.WHITE);
+                    if(getActivity()!=null){
+                        if(val){
+
+                            muteCallTv.setTextColor(getResources().getColor(R.color.picker_grey));
+                            muteCall.setTint(getResources().getColor(R.color.picker_grey));
+                        }else{
+                            muteCallTv.setTextColor(Color.WHITE);
+                            muteCall.setTint(Color.WHITE);
+                        }
                     }
                 }
             });
@@ -315,6 +323,7 @@ public class CallFragment extends BaseFragment {
                                     statusTV.setText(R.string.call_outgoing);
                                 }else{
                                     statusTV.setText(R.string.call_incoming);
+                                    toggleSpeaker(speaker, speakerTV, true);
                                     initIncoming();
                                 }
                                 enableWakeLock();
@@ -325,6 +334,7 @@ public class CallFragment extends BaseFragment {
                                 break;
 
                             case IN_PROGRESS:
+                                toggleSpeaker(speaker, speakerTV, false);
                                 onConnected();
                                 startTimer();
                                 break;
@@ -348,7 +358,11 @@ public class CallFragment extends BaseFragment {
     }
 
     public void toggleSpeaker(TintImageView speaker, TextView speakerTV) {
-        speakerOn = !speakerOn;
+        toggleSpeaker(speaker, speakerTV, !speakerOn);
+    }
+
+    public void toggleSpeaker(TintImageView speaker, TextView speakerTV, boolean speakerOn) {
+        this.speakerOn = speakerOn;
         audioManager.setSpeakerphoneOn(speakerOn);
         checkSpeaker(speaker, speakerTV);
     }
@@ -528,7 +542,7 @@ public class CallFragment extends BaseFragment {
             builder.setAutoCancel(true);
             builder.setSmallIcon(R.drawable.ic_app_notify);
             builder.setPriority(NotificationCompat.PRIORITY_MAX);
-            builder.setContentTitle("return to call");
+            builder.setContentTitle(getActivity().getString(R.string.call_notification));
 
             Intent intent = new Intent(getActivity(), CallActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

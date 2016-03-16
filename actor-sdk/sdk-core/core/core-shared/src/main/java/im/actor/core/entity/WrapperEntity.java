@@ -13,9 +13,12 @@ import im.actor.runtime.bser.BserObject;
 import im.actor.runtime.bser.BserValues;
 import im.actor.runtime.bser.BserWriter;
 
-/**
- * Created by ex3ndr on 20.05.15.
- */
+// Disabling Bounds checks for speeding up calculations
+
+/*-[
+#define J2OBJC_DISABLE_ARRAY_BOUND_CHECKS 1
+]-*/
+
 public abstract class WrapperEntity<T extends BserObject> extends BserObject {
 
     private int recordField;

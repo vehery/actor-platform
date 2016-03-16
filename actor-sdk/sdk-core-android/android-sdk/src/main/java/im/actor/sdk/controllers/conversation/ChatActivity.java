@@ -43,10 +43,13 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 
+import im.actor.core.api.rpc.ResponseSeqDate;
 import im.actor.core.entity.MentionFilterResult;
 import im.actor.core.entity.Peer;
 import im.actor.core.entity.PeerType;
+import im.actor.core.network.RpcException;
 import im.actor.core.viewmodel.Command;
+import im.actor.core.viewmodel.CommandCallback;
 import im.actor.core.viewmodel.GroupVM;
 import im.actor.core.viewmodel.UserVM;
 import im.actor.runtime.Log;
@@ -199,6 +202,8 @@ public class ChatActivity extends ActorEditTextActivity {
     // Is Activity opened from Compose
     private boolean isCompose = false;
     private Intent intent;
+    private boolean textEditing = false;
+    private long currentEditRid;
 
     public static Intent build(Peer peer, boolean compose, Context context) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -278,6 +283,11 @@ public class ChatActivity extends ActorEditTextActivity {
                 goneView(quoteContainer);
                 quoteText.setText("");
                 currentQuote = "";
+                if(textEditing){
+                    messageEditText.setText("");
+                }
+                textEditing = false;
+
             }
         });
 
@@ -332,9 +342,9 @@ public class ChatActivity extends ActorEditTextActivity {
                         Toast.makeText(ChatActivity.this, R.string.toast_no_sdcard, Toast.LENGTH_LONG).show();
                     }else{
                         String externalPath = externalFile.getAbsolutePath();
-                        new File(externalPath + "/Actor/capture/").mkdirs();
+                        new File(externalPath + "/"+ ActorSDK.sharedActor().getAppName() +"/capture/").mkdirs();
 
-                        pending_fileName = externalPath + "/Actor/capture/capture_" + Randoms.randomId() + ".jpg";
+                        pending_fileName = externalPath + "/"+ ActorSDK.sharedActor().getAppName() +"/capture/capture_" + Randoms.randomId() + ".jpg";
                     }
                     if (ContextCompat.checkSelfPermission(ChatActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                         Log.d("Permissions", "camera - no permission :c");
@@ -352,9 +362,9 @@ public class ChatActivity extends ActorEditTextActivity {
                         Toast.makeText(ChatActivity.this, R.string.toast_no_sdcard, Toast.LENGTH_LONG).show();
                     }else{
                         String externalPath = externalFile.getAbsolutePath();
-                        new File(externalPath + "/Actor/capture/").mkdirs();
+                        new File(externalPath + "/"+ ActorSDK.sharedActor().getAppName() +"/capture/").mkdirs();
 
-                        pending_fileName = externalPath + "/Actor/capture/capture_" + Randoms.randomId() + ".mp4";
+                        pending_fileName = externalPath + "/"+ ActorSDK.sharedActor().getAppName() +"/capture/capture_" + Randoms.randomId() + ".mp4";
 
                         Intent i = new Intent(MediaStore.ACTION_VIDEO_CAPTURE)
                                 .putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(pending_fileName)));
@@ -716,7 +726,35 @@ public class ChatActivity extends ActorEditTextActivity {
             keyboardUtils.setImeVisibility(messageEditText, false);
         }
 
-        messenger().sendMessage(peer, rawText);
+        if(textEditing){
+            execute(messenger().updateMessage(peer, rawText, currentEditRid), new CommandCallback<ResponseSeqDate>() {
+                @Override
+                public void onResult(ResponseSeqDate res) {
+
+                }
+
+                @Override
+                public void onError(final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            RpcException re = (RpcException) e;
+                            String error = "";
+                            if(re.getTag().equals("NOT_IN_TIME_WINDOW")){
+                                error = getString(R.string.edit_message_error_slowpoke);
+                            }else if(re.getTag().equals("NOT_LAST_MESSAGE")){
+                                error = getString(R.string.edit_message_error_not_last);
+                            }
+                            Toast.makeText(ChatActivity.this, error, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
+            goneView(quoteContainer);
+            textEditing = false;
+        }else{
+            messenger().sendMessage(peer, rawText);
+        }
     }
 
     @Override
@@ -983,6 +1021,7 @@ public class ChatActivity extends ActorEditTextActivity {
     // Quotes
 
     public void addQuote(String quote, String rawQuote) {
+        textEditing = false;
         if (quote != null && !quote.isEmpty()) {
             quoteText.setText(quote);
         } else {
@@ -990,6 +1029,7 @@ public class ChatActivity extends ActorEditTextActivity {
         }
         currentQuote = rawQuote;
         hideShareMenu();
+        quoteText.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_editor_format_quote_gray), null, null, null);
         showView(quoteContainer);
     }
 
@@ -1144,6 +1184,20 @@ public class ChatActivity extends ActorEditTextActivity {
         if (pending_fileName != null) {
             outState.putString(STATE_FILE_NAME, pending_fileName);
         }
+    }
+
+    public void onEditTextMessage(long rid, String text) {
+        currentQuote = null;
+        forwardText = null;
+        forwardTextRaw = null;
+        textEditing = true;
+        currentEditRid = rid;
+        quoteText.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_content_create), null, null, null);
+        quoteText.setText(R.string.edit_message);
+        messageEditText.setText(text);
+        hideShareMenu();
+        showView(quoteContainer);
+
     }
 
     private class TextWatcherImp implements TextWatcher {

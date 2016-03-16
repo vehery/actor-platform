@@ -12,9 +12,10 @@ public class AAConversationContentController: SLKTextViewController, ARDisplayLi
 
     public let peer: ACPeer
     
+    private let delayLoad = false
+    
     private var displayList: ARBindedDisplayList!
     private var isStarted: Bool = AADevice.isiPad
-    private var isUpdating: Bool = false
     private var isVisible: Bool = false
     private var isLoaded: Bool = false
     private var isLoadedAfter: Bool = false
@@ -22,6 +23,10 @@ public class AAConversationContentController: SLKTextViewController, ARDisplayLi
     private let collectionViewLayout = AAMessagesFlowLayout()
     private var prevCount: Int = 0
     private var unreadMessageId: jlong = 0
+    
+    private var isUpdating: Bool = false
+    private var isBinded: Bool = false
+    private var pendingUpdates = [ARAppleListUpdate]()
     
     // Audio notes
     public var voicePlayer : AAModernConversationAudioPlayer!
@@ -56,46 +61,63 @@ public class AAConversationContentController: SLKTextViewController, ARDisplayLi
     public override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.collectionView.contentInset = UIEdgeInsets(top: 4, left: 0, bottom: 200, right: 0)
-        
         isVisible = true
         
         // Hack for delaying collection view init from first animation frame
         // This dramatically speed up controller opening
         
-        if (isStarted) {
-            self.willUpdate()
-            self.collectionViewLayout.beginUpdates(false, list: self.displayList.getProcessedList() as? AAPreprocessedList, unread: unreadMessageId)
-            self.collectionView.reloadData()
-            prevCount = getCount()
-            self.displayList.addAppleListener(self)
-            self.didUpdate()
-            return
-        } else {
-            self.collectionView.alpha = 0
-        }
-        
-        dispatch_async(dispatch_get_main_queue(),{
-            // What if controller is already closed?
-            if (!self.isVisible) {
+        if delayLoad {
+            
+            if (isStarted) {
+                if !isBinded {
+                    isBinded = true
+                    self.willUpdate()
+                    self.collectionViewLayout.beginUpdates(false, list: self.displayList.getProcessedList() as? AAPreprocessedList, unread: unreadMessageId)
+                    self.collectionView.reloadData()
+                    prevCount = getCount()
+                    self.displayList.addAppleListener(self)
+                    self.didUpdate()
+                }
                 return
+            } else {
+                self.collectionView.alpha = 0
             }
             
+            dispatch_async(dispatch_get_main_queue(),{
+                // What if controller is already closed?
+                if (!self.isVisible) {
+                    return
+                }
+                
+                self.isStarted = true
+                
+                UIView.animateWithDuration(0.6, animations: { () -> Void in self.collectionView.alpha = 1 }, completion: { (comp) -> Void in })
+                
+                if !self.isBinded {
+                    self.isBinded = true
+                    self.willUpdate()
+                    self.collectionViewLayout.beginUpdates(false, list: self.displayList.getProcessedList() as? AAPreprocessedList, unread: self.unreadMessageId)
+                    self.collectionView.reloadData()
+                    self.prevCount = self.getCount()
+                    self.displayList.addAppleListener(self)
+                    self.didUpdate()
+                }
+            })
+        } else {
             self.isStarted = true
             
-            UIView.animateWithDuration(0.6, animations: { () -> Void in
-                self.collectionView.alpha = 1
-                }, completion: { (comp) -> Void in
-                    self.navigationController?.view.layer.speed = 1
-            })
+            UIView.animateWithDuration(0.6, animations: { () -> Void in self.collectionView.alpha = 1 }, completion: { (comp) -> Void in })
             
-            self.willUpdate()
-            self.collectionViewLayout.beginUpdates(false, list: self.displayList.getProcessedList() as? AAPreprocessedList, unread: self.unreadMessageId)
-            self.collectionView.reloadData()
-            self.prevCount = self.getCount()
-            self.displayList.addAppleListener(self)
-            self.didUpdate()
-        });
+            if !self.isBinded {
+                self.isBinded = true
+                self.willUpdate()
+                self.collectionViewLayout.beginUpdates(false, list: self.displayList.getProcessedList() as? AAPreprocessedList, unread: self.unreadMessageId)
+                self.collectionView.reloadData()
+                self.prevCount = self.getCount()
+                self.displayList.addAppleListener(self)
+                self.didUpdate()
+            }
+        }
     }
     
     
@@ -163,13 +185,17 @@ public class AAConversationContentController: SLKTextViewController, ARDisplayLi
         return cell
     }
     
-    public override func viewWillDisappear(animated: Bool) {
-        super.viewWillDisappear(animated)
+    public override func viewDidDisappear(animated: Bool) {
+        super.viewDidDisappear(animated)
         
         isVisible = false
         
-        // Remove listener on exit
-        self.displayList.removeAppleListener(self)
+        if isBinded {
+            isBinded = false
+            
+            // Remove listener on exit
+            self.displayList.removeAppleListener(self)
+        }
     }
     
     // Model updates
@@ -199,22 +225,39 @@ public class AAConversationContentController: SLKTextViewController, ARDisplayLi
     
     public func onCollectionChangedWithChanges(modification: ARAppleListUpdate!) {
         
+//        if isUpdating {
+//            pendingUpdates.append(modification)
+//            return
+//        }
+        
         if modification.isLoadMore {
             UIView.setAnimationsEnabled(false)
         }
         
+//        NSLog("👮🏻 onCollectionChanged called was: \(prevCount)")
+        
         self.willUpdate()
+//        NSLog("👮🏻 willUpdate called")
+        
         let list = self.displayList.getProcessedList() as? AAPreprocessedList
-        self.collectionViewLayout.beginUpdates(modification.isLoadMore, list: list, unread: unreadMessageId)
+        
+        var isAppliedList = false
         
         if modification.nonUpdateCount() > 0 {
+            
             isUpdating = true
+//            NSLog("👮🏻 batch updates")
             self.collectionView.performBatchUpdates({ () -> Void in
+                
+//                NSLog("👮🏻 batch started")
+                
                 // Removed rows
                 if modification.removedCount() > 0 {
                     var rows = [NSIndexPath]()
                     for i in 0..<modification.removedCount() {
-                        rows.append(NSIndexPath(forRow: Int(modification.getRemoved(jint(i))), inSection: 0))
+                        let removedRow = Int(modification.getRemoved(jint(i)))
+                        rows.append(NSIndexPath(forRow: removedRow, inSection: 0))
+//                        NSLog("👮🏻 removed \(removedRow)")
                     }
                     self.collectionView.deleteItemsAtIndexPaths(rows)
                 }
@@ -223,8 +266,11 @@ public class AAConversationContentController: SLKTextViewController, ARDisplayLi
                 if modification.addedCount() > 0 {
                     var rows = [NSIndexPath]()
                     for i in 0..<modification.addedCount() {
-                        rows.append(NSIndexPath(forRow: Int(modification.getAdded(jint(i))), inSection: 0))
+                        let insertedRow = Int(modification.getAdded(jint(i)))
+                        rows.append(NSIndexPath(forRow: insertedRow, inSection: 0))
+//                        print("👮🏻 inserted \(insertedRow)")
                     }
+                    
                     self.collectionView.insertItemsAtIndexPaths(rows)
                 }
                 
@@ -232,13 +278,27 @@ public class AAConversationContentController: SLKTextViewController, ARDisplayLi
                 if modification.movedCount() > 0 {
                     for i in 0..<modification.movedCount() {
                         let mov = modification.getMoved(jint(i))
-                        self.collectionView.moveItemAtIndexPath(NSIndexPath(forRow: Int(mov.getSourceIndex()), inSection: 0), toIndexPath: NSIndexPath(forRow: Int(mov.getDestIndex()), inSection: 0))
+                        let sourceRow = Int(mov.getSourceIndex())
+                        let destRow = Int(mov.getDestIndex())
+                        self.collectionView.moveItemAtIndexPath(NSIndexPath(forRow: sourceRow, inSection: 0), toIndexPath: NSIndexPath(forRow: destRow, inSection: 0))
+//                        NSLog("👮🏻 moved \(sourceRow) -> \(destRow)")
                     }
                 }
                 
                 self.isUpdating = false
                 self.prevCount = self.getCount()
-            }, completion: nil)
+                self.collectionViewLayout.beginUpdates(modification.isLoadMore, list: list, unread: self.unreadMessageId)
+                isAppliedList = true
+//                NSLog("👮🏻 batch updates:end \(self.prevCount)")
+            }, completion: { (b) -> Void in
+//                NSLog("👮🏻 batch updates:completion")
+            })
+//            NSLog("👮🏻 batch updates:after")
+        }
+        
+        if !isAppliedList {
+            self.collectionViewLayout.beginUpdates(modification.isLoadMore, list: list, unread: self.unreadMessageId)
+            isAppliedList = true
         }
         
         var updated = [Int]()
@@ -297,10 +357,15 @@ public class AAConversationContentController: SLKTextViewController, ARDisplayLi
         }
         
         self.didUpdate()
+//        NSLog("👮🏻 didUpdate Called")
         
         if modification.isLoadMore {
             UIView.setAnimationsEnabled(true)
         }
+    }
+    
+    private func completeUpdates(modification: ARAppleListUpdate!) {
+        
     }
     
     public func willUpdate() {

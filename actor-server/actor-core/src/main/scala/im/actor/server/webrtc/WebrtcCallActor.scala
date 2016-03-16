@@ -162,19 +162,28 @@ private final class WebrtcCallActor extends StashingActor with ActorLogging with
     peerSettings: Option[ApiPeerSettings],
     isJoined:     Boolean
   ) {
-    def canPreConnect(pairPeerSettings: Option[ApiPeerSettings]): Boolean =
-      isJoined ||
-        (peerSettings.map(_.canPreConnect).isDefined && pairPeerSettings.map(_.canPreConnect).isDefined)
+    def canPreConnect(pairDevice: Device): Boolean =
+      (isJoined && pairDevice.isJoined) ||
+        (peerSettings.flatMap(_.canPreConnect).contains(true) && pairDevice.peerSettings.flatMap(_.canPreConnect).contains(true))
   }
 
   object Pair {
-    def apply(d1: EventBus.DeviceId, d2: EventBus.DeviceId) = {
-      require(d1 != d2)
-      if (d1 < d2) new Pair(d1, d2)
-      else new Pair(d2, d1)
+    def build(d1: EventBus.DeviceId, d2: EventBus.DeviceId) = {
+      if (d1 == d2) None
+      else if (d1 < d2) Some(new Pair(d1, d2))
+      else Some(new Pair(d2, d1))
     }
+
+    def buildUnsafe(d1: EventBus.DeviceId, d2: EventBus.DeviceId) =
+      build(d1, d2) getOrElse (throw new IllegalArgumentException(s"Attempt to pair with itself, deviceId: $d1"))
   }
-  class Pair private (val left: EventBus.DeviceId, val right: EventBus.DeviceId)
+  class Pair private (val left: EventBus.DeviceId, val right: EventBus.DeviceId) {
+    override def equals(obj: Any) = Option(obj) match {
+      case Some(pair: Pair) if pair.left == left && pair.right == right ⇒ true
+      case _ ⇒ false
+    }
+    override def hashCode = s"${left}_${right}".hashCode
+  }
 
   type SessionId = Long
 
@@ -239,9 +248,11 @@ private final class WebrtcCallActor extends StashingActor with ActorLogging with
         if (isConversationStarted) ApiServiceMessage("Call ended", Some(ApiServiceExPhoneCall(duration)))
         else ApiServiceMessage("Missed call", Some(ApiServiceExPhoneMissed))
 
+      log.debug("Senfing smsg {} {}", smsg, memberUserIds)
+
       (for {
         _ ← if (peer.`type`.isPrivate) FutureExt.ftraverse(memberUserIds.toSeq)(userId ⇒ dialogExt.sendMessage(
-          peer = ApiPeer(ApiPeerType.Private, callerUserId),
+          peer = ApiPeer(ApiPeerType.Private, (memberUserIds - userId).head),
           senderUserId = callerUserId,
           senderAuthId = None,
           senderAuthSid = 0,
@@ -265,13 +276,15 @@ private final class WebrtcCallActor extends StashingActor with ActorLogging with
 
     def connect(device: Device, pairDevice: Device): SessionId = {
       val sessionId = Random.nextLong()
+      log.debug(s"Sending NeedOffer to ${device.deviceId} with ${pairDevice.deviceId}")
       eventBusExt.post(
         EventBus.InternalClient(self),
         eventBusId,
         Seq(device.deviceId),
         ApiNeedOffer(pairDevice.deviceId, sessionId, pairDevice.peerSettings).toByteArray
       )
-      sessions += Pair(device.deviceId, pairDevice.deviceId) → sessionId
+
+      sessions += Pair.buildUnsafe(device.deviceId, pairDevice.deviceId) → sessionId
       sessionId
     }
 
@@ -295,8 +308,9 @@ private final class WebrtcCallActor extends StashingActor with ActorLogging with
               devices.view filterNot (_._1 == device.deviceId) map (_._2) filter (_.isJoined) map {
                 case pairDevice ⇒
                   val sessionId =
-                    sessions.getOrElse(Pair(device.deviceId, pairDevice.deviceId), connect(device, pairDevice))
+                    sessions.getOrElse(Pair.buildUnsafe(device.deviceId, pairDevice.deviceId), connect(device, pairDevice))
 
+                  log.debug("Sending EnableConnection to {} and {}", device.deviceId, pairDevice.deviceId)
                   eventBusExt.post(
                     EventBus.InternalClient(self),
                     eventBusId,
@@ -356,12 +370,15 @@ private final class WebrtcCallActor extends StashingActor with ActorLogging with
       case ebMessage: EventBus.Message ⇒
         ApiWebRTCSignaling.parseFrom(ebMessage.message).right foreach {
           case msg: ApiAdvertiseSelf ⇒
+            log.debug("AdvertiseSelf {}", msg)
             for (deviceId ← ebMessage.deviceId) yield {
               val newDevice = Device(deviceId, ebMessage.client, msg.peerSettings, isJoined = deviceId == callerDeviceId)
-              devices foreach {
-                case (pairDeviceId, pairDevice) ⇒
-                  if (pairDevice.canPreConnect(msg.peerSettings))
-                    connect(newDevice, pairDevice)
+              log.debug(s"newDevice ${newDevice.deviceId} ${newDevice.peerSettings}")
+              devices.values.view filterNot (_.deviceId == newDevice.deviceId) foreach { pairDevice ⇒
+                if (pairDevice.canPreConnect(newDevice)) {
+                  log.debug(s"canPreConnect is true for device ${pairDevice.deviceId} ${pairDevice.peerSettings}")
+                  connect(newDevice, pairDevice)
+                }
               }
               putDevice(deviceId, ebMessage.client, newDevice)
 
@@ -386,13 +403,15 @@ private final class WebrtcCallActor extends StashingActor with ActorLogging with
               leftDevice ← devices get pair.left
               rightDevice ← devices get pair.right
             } yield {
-              val chkPair = Pair(deviceId, msg.device)
-              if (pair.left == chkPair.left && pair.right == chkPair.right) {
-                sessions = sessions filterNot (_ == sessionId)
-                eventBusExt.post(EventBus.InternalClient(self), eventBusId, Seq(pair.left), ApiCloseSession(pair.right, sessionId).toByteArray)
-                eventBusExt.post(EventBus.InternalClient(self), eventBusId, Seq(pair.right), ApiCloseSession(pair.left, sessionId).toByteArray)
-                connect(leftDevice, rightDevice)
-              } else log.warning("Received OnRenegotiationNeeded for a wrong deviceId")
+              if (deviceId != msg.device) {
+                val chkPair = Pair.buildUnsafe(deviceId, msg.device)
+                if (pair.left == chkPair.left && pair.right == chkPair.right) {
+                  sessions = sessions filterNot (_ == sessionId)
+                  eventBusExt.post(EventBus.InternalClient(self), eventBusId, Seq(pair.left), ApiCloseSession(pair.right, sessionId).toByteArray)
+                  eventBusExt.post(EventBus.InternalClient(self), eventBusId, Seq(pair.right), ApiCloseSession(pair.left, sessionId).toByteArray)
+                  connect(leftDevice, rightDevice)
+                } else log.warning("Received OnRenegotiationNeeded for a wrong deviceId")
+              }
             }
           case _ ⇒
         }

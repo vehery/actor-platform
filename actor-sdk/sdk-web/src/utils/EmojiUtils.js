@@ -3,8 +3,8 @@
  */
 
 import { escape } from 'lodash';
-import emoji from 'js-emoji';
-import emojiDataCategories from 'emoji-data/emoji_categories.json';
+import emoji from 'actor-emoji';
+import emojiDataCategories from 'actor-emoji/emoji_categories';
 import { Path } from '../constants/ActorAppConstants';
 
 emoji.include_title = true;
@@ -91,6 +91,18 @@ export const escapeWithEmoji = (text) => {
   emoji.include_text = false;
   return emoji.replace_unified(escape(text));
 };
+
+export function processEmojiText(text) {
+  emoji.include_title = true;
+  emoji.include_text = true;
+  emoji.change_replace_mode('css');
+
+  let emojifiedText = text;
+  emojifiedText = emoji.replace_colons(text);
+  emojifiedText = emoji.replace_unified(emojifiedText);
+
+  return emojifiedText;
+}
 
 export default {
   emoji,

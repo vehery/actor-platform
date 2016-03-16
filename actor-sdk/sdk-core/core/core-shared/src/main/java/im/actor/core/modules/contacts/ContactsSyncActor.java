@@ -32,9 +32,8 @@ public class ContactsSyncActor extends ModuleActor {
 
     private final boolean ENABLE_LOG;
 
-    private ArrayList<Integer> contacts = new ArrayList<Integer>();
+    private ArrayList<Integer> contacts = new ArrayList<>();
 
-    private boolean isStarted = false;
     private boolean isInProgress = false;
     private boolean isInvalidated = false;
 
@@ -55,20 +54,17 @@ public class ContactsSyncActor extends ModuleActor {
                 DataInput dataInput = new DataInput(data, 0, data.length);
                 int count = dataInput.readInt();
                 for (int i = 0; i < count; i++) {
-                    contacts.add(dataInput.readInt());
+                    int uid = dataInput.readInt();
+                    if (!contacts.contains(uid)) {
+                        contacts.add(uid);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         notifyState();
-    }
-
-    public void startSync() {
-        if (!isStarted) {
-            isStarted = true;
-            self().send(new PerformSync());
-        }
+        self().send(new PerformSync());
     }
 
     public void performSync() {
@@ -108,13 +104,21 @@ public class ContactsSyncActor extends ModuleActor {
         }
         String hashValue = Crypto.hex(Crypto.SHA256(hashData));
 
-        Log.d(TAG, "Performing sync with hash: " + hashValue);
+        if (ENABLE_LOG) {
+            Log.d(TAG, "Performing sync with hash: " + hashValue);
+            Log.d(TAG, "Performing sync with uids: " + hash);
+        }
 
         request(new RequestGetContacts(hashValue), new RpcCallback<ResponseGetContacts>() {
             @Override
             public void onResult(ResponseGetContacts response) {
-                context().getWarmer().onContactsLoaded();
-                updates().onUpdateReceived(new im.actor.core.modules.updates.internal.ContactsLoaded(response));
+
+                if (ENABLE_LOG) {
+                    Log.d(TAG, "Sync received (0) " + response.getUsers().size() + " contacts");
+                }
+
+                updates().onUpdateReceived(
+                        new im.actor.core.modules.updates.internal.ContactsLoaded(response));
             }
 
             @Override
@@ -192,6 +196,9 @@ public class ContactsSyncActor extends ModuleActor {
         }
 
         for (int uid : uids) {
+            if (contacts.contains(uid)) {
+                continue;
+            }
             if (ENABLE_LOG) {
                 Log.d(TAG, "Adding: #" + uid);
             }
@@ -298,21 +305,13 @@ public class ContactsSyncActor extends ModuleActor {
         } else if (message instanceof UserChanged) {
             onUserChanged(((UserChanged) message).getUser());
         } else if (message instanceof PerformSync) {
-            if (isStarted) {
-                performSync();
-            }
-        } else if (message instanceof StartSync) {
-            startSync();
+            performSync();
         } else {
             drop(message);
         }
     }
 
     private static class PerformSync {
-
-    }
-
-    public static class StartSync {
 
     }
 
@@ -362,5 +361,9 @@ public class ContactsSyncActor extends ModuleActor {
         public User getUser() {
             return user;
         }
+    }
+
+    public static class StartSync {
+
     }
 }

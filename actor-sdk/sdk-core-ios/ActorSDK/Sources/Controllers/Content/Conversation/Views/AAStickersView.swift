@@ -3,15 +3,12 @@
 //
 
 import UIKit
-import YYKit
+import YYImage
 
 public struct AAStickersPack {
-    
     var pack_id: Int!
     var stickers: Array<ACSticker>!
-    
 }
-
 
 public class AAStickersViewCell : UICollectionViewCell {
     

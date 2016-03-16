@@ -1,12 +1,11 @@
 package im.actor.server.user
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.util.FastFuture
 import akka.pattern.pipe
 import im.actor.api.rpc.users.ApiUser
 import im.actor.server.ApiConversions._
 import im.actor.server.acl.ACLUtils
-
-import scala.concurrent.Future
 
 private[user] trait UserQueriesHandlers {
   self: UserProcessor ⇒
@@ -19,12 +18,12 @@ private[user] trait UserQueriesHandlers {
   protected def getApiStruct(state: UserState, clientUserId: Int, clientAuthId: Long)(implicit system: ActorSystem): Unit = {
     (for {
       localName ← if (clientUserId == state.id || clientUserId == 0)
-        Future.successful(None)
+        FastFuture.successful(None)
       else
         userExt.getLocalName(clientUserId, state.id)
     } yield GetApiStructResponse(ApiUser(
       id = userId,
-      accessHash = ACLUtils.userAccessHash(clientAuthId, userId, state.accessSalt, aclMD),
+      accessHash = ACLUtils.userAccessHash(clientAuthId, userId, state.accessSalt),
       name = state.name,
       localName = UserUtils.normalizeLocalName(localName),
       sex = Some(state.sex),

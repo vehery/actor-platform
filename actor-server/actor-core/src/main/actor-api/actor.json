@@ -5710,6 +5710,26 @@
           }
         },
         {
+          "type": "enum",
+          "content": {
+            "name": "ListLoadMode",
+            "values": [
+              {
+                "name": "Forward",
+                "id": 1
+              },
+              {
+                "name": "Backward",
+                "id": 2
+              },
+              {
+                "name": "Both",
+                "id": 3
+              }
+            ]
+          }
+        },
+        {
           "type": "rpc",
           "content": {
             "name": "LoadHistory",
@@ -5767,9 +5787,15 @@
               },
               {
                 "type": "reference",
-                "argument": "minDate",
+                "argument": "date",
                 "category": "full",
                 "description": "start date of messages for loading or 0 for loading from start"
+              },
+              {
+                "type": "reference",
+                "argument": "loadMode",
+                "category": "full",
+                "description": "Loading mode: Forward loading, backward or both ways"
               },
               {
                 "type": "reference",
@@ -5793,7 +5819,18 @@
                   "childType": "date"
                 },
                 "id": 3,
-                "name": "minDate"
+                "name": "date"
+              },
+              {
+                "type": {
+                  "type": "opt",
+                  "childType": {
+                    "type": "enum",
+                    "childType": "ListLoadMode"
+                  }
+                },
+                "id": 5,
+                "name": "loadMode"
               },
               {
                 "type": "int32",
@@ -5850,6 +5887,12 @@
                 "argument": "message",
                 "category": "full",
                 "description": "  Content of message"
+              },
+              {
+                "type": "reference",
+                "argument": "firstUnreadDate",
+                "category": "full",
+                "description": "  Date of first unread message"
               }
             ],
             "attributes": [
@@ -5916,6 +5959,17 @@
                 },
                 "id": 9,
                 "name": "state"
+              },
+              {
+                "type": {
+                  "type": "opt",
+                  "childType": {
+                    "type": "alias",
+                    "childType": "date"
+                  }
+                },
+                "id": 10,
+                "name": "firstUnreadDate"
               }
             ]
           }
@@ -11523,6 +11577,98 @@
                 },
                 "id": 1,
                 "name": "files"
+              }
+            ]
+          }
+        },
+        {
+          "type": "rpc",
+          "content": {
+            "name": "GetFileUrlBuilder",
+            "header": 2579,
+            "response": {
+              "type": "anonymous",
+              "header": 2580,
+              "doc": [
+                {
+                  "type": "reference",
+                  "argument": "baseUrl",
+                  "category": "full",
+                  "description": "  Base Url for files"
+                },
+                {
+                  "type": "reference",
+                  "argument": "algo",
+                  "category": "full",
+                  "description": "  Signature algorithm"
+                },
+                {
+                  "type": "reference",
+                  "argument": "seed",
+                  "category": "full",
+                  "description": "  Public-visible seed of signature"
+                },
+                {
+                  "type": "reference",
+                  "argument": "signatureSecret",
+                  "category": "full",
+                  "description": "  Signature Secret"
+                },
+                {
+                  "type": "reference",
+                  "argument": "timeout",
+                  "category": "full",
+                  "description": "  Timeout of url builder"
+                }
+              ],
+              "attributes": [
+                {
+                  "type": "string",
+                  "id": 1,
+                  "name": "baseUrl"
+                },
+                {
+                  "type": "string",
+                  "id": 2,
+                  "name": "algo"
+                },
+                {
+                  "type": "string",
+                  "id": 5,
+                  "name": "seed"
+                },
+                {
+                  "type": "bytes",
+                  "id": 3,
+                  "name": "signatureSecret"
+                },
+                {
+                  "type": {
+                    "type": "alias",
+                    "childType": "sec"
+                  },
+                  "id": 4,
+                  "name": "timeout"
+                }
+              ]
+            },
+            "doc": [
+              "Get File URL Builder that allows to build file urls from client side",
+              {
+                "type": "reference",
+                "argument": "supportedSignatureAlgorithms",
+                "category": "hidden",
+                "description": "Supported signature algorithms by client"
+              }
+            ],
+            "attributes": [
+              {
+                "type": {
+                  "type": "list",
+                  "childType": "string"
+                },
+                "id": 1,
+                "name": "supportedSignatureAlgorithms"
               }
             ]
           }

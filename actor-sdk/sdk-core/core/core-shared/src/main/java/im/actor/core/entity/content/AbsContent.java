@@ -46,9 +46,17 @@ import im.actor.runtime.bser.DataInput;
 import im.actor.runtime.bser.DataOutput;
 import im.actor.runtime.json.JSONObject;
 
+// Disabling Bounds checks for speeding up calculations
+
+/*-[
+#define J2OBJC_DISABLE_ARRAY_BOUND_CHECKS 1
+]-*/
+
 public abstract class AbsContent {
 
     private static ContentConverter[] converters = new ContentConverter[0];
+
+    private int updatedHash;
 
     public static void registerConverter(ContentConverter contentConverter) {
         ContentConverter[] nConverters = new ContentConverter[converters.length + 1];
@@ -203,10 +211,16 @@ public abstract class AbsContent {
         this.contentContainer = contentContainer;
     }
 
-    public void onIncoming(Peer peer, ModuleContext context) {
-    }
 
     public static ContentConverter[] getConverters() {
         return converters;
+    }
+
+    public int getUpdatedHash() {
+        return updatedHash;
+    }
+
+    public void setUpdatedHash(int updatedHash) {
+        this.updatedHash = updatedHash;
     }
 }

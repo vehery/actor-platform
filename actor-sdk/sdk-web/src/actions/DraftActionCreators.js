@@ -1,21 +1,26 @@
 /*
- * Copyright (C) 2015 Actor LLC. <https://actor.im>
+ * Copyright (C) 2015-2016 Actor LLC. <https://actor.im>
  */
 
 import { debounce } from 'lodash';
 import { dispatch } from '../dispatcher/ActorAppDispatcher';
 import { ActionTypes } from '../constants/ActorAppConstants';
+import ActorClient from '../utils/ActorClient';
+import DraftStore from '../stores/DraftStore';
 
-const DraftActionCreators = {
+export default {
   loadDraft(peer) {
-    dispatch(ActionTypes.DRAFT_LOAD, {
-      peer
-    });
+    const draft = ActorClient.loadDraft(peer);
+    dispatch(ActionTypes.DRAFT_LOAD, { draft });
   },
 
-  saveDraft: debounce((draft, saveNow = false) => {
-    dispatch(ActionTypes.DRAFT_SAVE, { draft, saveNow });
-  }, 300, {trailing: true})
-};
+  saveDraft(peer) {
+    const draft = DraftStore.getDraft();
+    ActorClient.saveDraft(peer, draft);
+    dispatch(ActionTypes.DRAFT_SAVE, { draft });
+  },
 
-export default DraftActionCreators;
+  changeDraft(draft) {
+    dispatch(ActionTypes.DRAFT_CHANGE, { draft });
+  }
+};

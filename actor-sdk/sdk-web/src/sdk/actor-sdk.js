@@ -3,11 +3,13 @@
  */
 
 import 'babel-polyfill';
+import 'setimmediate';
 import initPollyfils from '../utils/polyfills';
 
 import Actor from 'actor-js';
 import DelegateContainer from '../utils/DelegateContainer';
 import SharedContainer from '../utils/SharedContainer';
+import PeerUtils from '../utils/PeerUtils';
 import SDKDelegate from './actor-sdk-delegate';
 import { endpoints, rootElement, homePage, twitter, helpPhone, appName } from '../constants/ActorAppConstants'
 import Pace from 'pace';
@@ -21,6 +23,7 @@ import crosstab from 'crosstab';
 import { lightbox } from '../utils/ImageUtils'
 
 import LoginActionCreators from '../actions/LoginActionCreators';
+import {loggerAppend} from '../actions/LoggerActionCreators';
 
 import LoginStore from '../stores/LoginStore';
 
@@ -92,7 +95,10 @@ class ActorSDK {
 
     if (window.location.hash !== '#/deactivated') {
       if (crosstab.supported) crosstab.broadcast(ACTOR_INIT_EVENT, {});
-      window.messenger = Actor.create(this.endpoints);
+      window.messenger = Actor.create({
+        endpoints: this.endpoints,
+        logHandler: localStorage.debug ? loggerAppend : () => {}
+      });
     }
 
     const Login = (typeof this.delegate.components.login == 'function') ? this.delegate.components.login : DefaultLogin;
@@ -109,9 +115,17 @@ class ActorSDK {
         replaceState({
           pathname: '/auth',
           state: {nextPathname: nextState.location.pathname}
-        })
+        });
       }
     };
+
+    function checkPeer(nextState, replaceState) {
+      const peer = PeerUtils.stringToPeer(nextState.params.id);
+      if (!PeerUtils.hasPeer(peer)) {
+        console.error('Invalig peer', nextState);
+        replaceState('/im');
+      }
+    }
 
     /**
      * Method for pulling props to router components
@@ -135,7 +149,7 @@ class ActorSDK {
 
             <Route path="im" component={Main} onEnter={requireAuth}>
               <Route path="archive" component={Archive}/>
-              <Route path=":id" component={Dialog}/>
+              <Route path=":id" component={Dialog} onEnter={checkPeer}/>
               <IndexRoute component={Empty}/>
             </Route>
 

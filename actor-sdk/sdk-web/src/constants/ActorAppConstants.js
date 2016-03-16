@@ -61,6 +61,7 @@ export const ActionTypes = keymirror({
   MESSAGE_LIKE_ADD: null,
   MESSAGE_LIKE_REMOVE: null,
   MESSAGES_SET_SELECTED: null,
+  MESSAGES_LOAD_MORE: null,
 
   ACTIVITY_SHOW: null,
   ACTIVITY_HIDE: null,
@@ -126,6 +127,7 @@ export const ActionTypes = keymirror({
 
   DRAFT_LOAD: null,
   DRAFT_SAVE: null,
+  DRAFT_CHANGE: null,
 
   APP_UPDATE_MODAL_SHOW: null,
   APP_UPDATE_MODAL_HIDE: null,
@@ -197,6 +199,8 @@ export const ActionTypes = keymirror({
   CALL_CHANGED: null,
   CALL_ANSWER: null,
   CALL_END: null,
+  CALL_MUTE_TOGGLE: null,
+  CALL_FLOAT_TOGGLE: null,
 
   ARCHIVE_ADD: null,
   ARCHIVE_ADD_SUCCESS: null,
@@ -216,7 +220,10 @@ export const ActionTypes = keymirror({
   FAVORITE_REMOVE_ERROR: null,
 
   RECENT_CONTEXT_MENU_SHOW: null,
-  RECENT_CONTEXT_MENU_HIDE: null
+  RECENT_CONTEXT_MENU_HIDE: null,
+
+  LOGGER_APPEND: null,
+  LOGGER_TOGGLE: null
 });
 
 export const EventTypes = {
@@ -241,9 +248,23 @@ export const ConnectionStates = {
   UPDATING: 'updating'
 };
 
+export const MessageStates = {
+  PENDING: 'pending',
+  SENT: 'sent',
+  RECEIVED: 'received',
+  READ: 'read',
+  ERROR: 'error',
+  UNKNOWN: 'unknown'
+};
+
 export const PeerTypes = {
   USER: 'user',
   GROUP: 'group'
+};
+
+export const PeerTypePrefixes = {
+  USER: 'u',
+  GROUP: 'g'
 };
 
 export const ActivityTypes = keymirror({
@@ -287,6 +308,13 @@ export const AsyncActionStates = {
   PROCESSING: 1,
   SUCCESS: 2,
   FAILURE: 3
+};
+
+export const LoggerTypes = {
+  INFO: 'i',
+  ERROR: 'e',
+  WARNING: 'w',
+  DEBUG: 'd'
 };
 
 export const Path = {

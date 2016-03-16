@@ -20,6 +20,12 @@ import im.actor.runtime.storage.ListEngineDisplayListener;
 import im.actor.runtime.storage.ListEngineDisplayLoadCallback;
 import im.actor.runtime.storage.ListEngineItem;
 
+// Disabling Bounds checks for speeding up calculations
+
+/*-[
+#define J2OBJC_DISABLE_ARRAY_BOUND_CHECKS 1
+]-*/
+
 public class BindedDisplayList<T extends BserObject & ListEngineItem> extends DisplayList<T>
         implements im.actor.runtime.mvvm.PlatformDisplayList<T> {
 
@@ -334,14 +340,14 @@ public class BindedDisplayList<T extends BserObject & ListEngineItem> extends Di
 
         isLoadMoreForwardRequested = true;
         final int gen = currentGeneration;
-        Log.d(TAG, "Loading more items...");
+        // Log.d(TAG, "Loading more items...");
         final long start = System.currentTimeMillis();
         ListEngineDisplayLoadCallback<T> callback = cover(new ListEngineDisplayLoadCallback<T>() {
             @Override
             public void onLoaded(List<T> items, long topSortKey, long bottomSortKey) {
                 im.actor.runtime.Runtime.checkMainThread();
 
-                Log.d(TAG, "Items loaded in " + (System.currentTimeMillis() - start) + " ms");
+                // Log.d(TAG, "Items loaded in " + (System.currentTimeMillis() - start) + " ms");
 
                 window.completeForwardLoading();
 

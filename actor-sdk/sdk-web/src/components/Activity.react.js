@@ -3,6 +3,7 @@
  */
 
 import React, { Component } from 'react';
+import shallowCompare from 'react-addons-shallow-compare';
 import { Container } from 'flux/utils';
 import classnames from 'classnames';
 import { PeerTypes } from '../constants/ActorAppConstants';
@@ -29,41 +30,45 @@ class ActivitySection extends Component {
     };
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    if (!nextState.isOpen) {
+      return false;
+    }
+
+    return shallowCompare(this, nextProps, nextState);
+  }
+
+  componentDidUpdate() {
+    setImmediate(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
+  }
+
+  renderBody() {
+    const { peer, info } = this.state;
+
+    switch (peer.type) {
+      case PeerTypes.USER:
+        return <UserProfile user={info} />;
+      case PeerTypes.GROUP:
+        return <GroupProfile group={info}/>;
+      default:
+        return null;
+    }
+  }
+
   render() {
     const { peer, info, isOpen } = this.state;
-    setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 0);
-
-    if (peer !== null) {
-      const activityClassName = classnames('activity', {
-        'activity--shown': isOpen
-      });
-      let activityBody;
-
-      switch (peer.type) {
-        case PeerTypes.USER:
-          activityBody = <UserProfile user={info}/>;
-          break;
-        case PeerTypes.GROUP:
-          activityBody = <GroupProfile group={info}/>;
-          break;
-        default:
-      }
-
-      return (
-        <section className={activityClassName}>
-          {
-            isOpen
-              ? activityBody
-              : null
-          }
-        </section>
-      );
-    } else {
-      return null;
+    if (!isOpen || !peer) {
+      return <section className="activity" />;
     }
+
+    return (
+      <section className="activity activity--shown">
+        {this.renderBody()}
+      </section>
+    );
   }
 }
 
-export default Container.create(ActivitySection, {pure: false});
+export default Container.create(ActivitySection);

@@ -1,11 +1,11 @@
 package im.actor.server.session
 
-import akka.actor.{ ActorSystem, ActorRef }
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.testkit.TestProbe
 import com.google.protobuf.ByteString
 import im.actor.api.rpc.{ Request, RpcRequest, RpcResult }
 import im.actor.api.rpc.codecs._
-import im.actor.api.rpc.sequence.{ WeakUpdate, FatSeqUpdate, SeqUpdate }
+import im.actor.api.rpc.sequence.{ FatSeqUpdate, SeqUpdate, SeqUpdateTooLong, WeakUpdate }
 import im.actor.server.api.rpc.RpcResultCodec
 import im.actor.server.mtproto.codecs.protocol.MessageBoxCodec
 import im.actor.server.mtproto.protocol._
@@ -33,6 +33,9 @@ trait SessionSpecHelpers extends AbstractPatienceConfiguration with Matchers {
   protected def expectWeakUpdate(authId: Long, sessionId: Long)(implicit probe: TestProbe): WeakUpdate =
     expectUpdateBox(classOf[WeakUpdate], authId, sessionId, None)
 
+  protected def expectSeqUpdateTooLong(authId: Long, sessionId: Long, sendAckAt: Option[Duration] = Some(0.seconds))(implicit probe: TestProbe): SeqUpdateTooLong =
+    expectUpdateBox(classOf[SeqUpdateTooLong], authId, sessionId, sendAckAt)
+
   protected def expectUpdateBox[T <: im.actor.api.rpc.UpdateBox](clazz: Class[T], authId: Long, sessionId: Long, sendAckAt: Option[Duration])(implicit probe: TestProbe, m: Manifest[T]): T = {
     val mb = expectMessageBox()
 
@@ -52,7 +55,7 @@ trait SessionSpecHelpers extends AbstractPatienceConfiguration with Matchers {
     update.asInstanceOf[T]
   }
 
-  protected def expectRpcResult(authId: Long, sessionId: Long, sendAckAt: Option[Duration] = Some(0.seconds), expectAckFor: Set[Long] = Set.empty)(implicit probe: TestProbe, sessionRegion: SessionRegion): RpcResult = {
+  protected def expectRpcResult(authId: Long, sessionId: Long, sendAckAt: Option[Duration] = Some(0.seconds), expectAckFor: Set[Long] = Set.empty, ignoreAcks: Boolean = false)(implicit probe: TestProbe, sessionRegion: SessionRegion): RpcResult = {
     val messages = probe.receiveN(1 + expectAckFor.size, patienceConfig.timeout.totalNanos.nano).toSet
 
     if (messages.size != expectAckFor.size + 1) {
@@ -68,7 +71,8 @@ trait SessionSpecHelpers extends AbstractPatienceConfiguration with Matchers {
           }
       }
 
-      ackIds shouldEqual expectAckFor
+      if (!ignoreAcks)
+        ackIds shouldEqual expectAckFor
 
       rest match {
         case Vector((messageId, ProtoRpcResponse(_, rpcResultBytes))) ⇒

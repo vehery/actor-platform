@@ -6,6 +6,8 @@ import Foundation
 
 public class AATableViewCell: UITableViewCell {
     
+    private static let separatorColor = ActorSDK.sharedActor().style.vcSeparatorColor
+    
     private var topSeparator: UIView = UIView()
     private var bottomSeparator: UIView = UIView()
     
@@ -18,8 +20,8 @@ public class AATableViewCell: UITableViewCell {
     public override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        bottomSeparator.backgroundColor = appStyle.vcSeparatorColor
-        topSeparator.backgroundColor = appStyle.vcSeparatorColor
+        bottomSeparator.backgroundColor = AATableViewCell.separatorColor
+        topSeparator.backgroundColor = AATableViewCell.separatorColor
         
         backgroundColor = appStyle.cellBgColor
         
@@ -93,20 +95,32 @@ public class AATableViewCell: UITableViewCell {
     }
     
     public override func setHighlighted(highlighted: Bool, animated: Bool) {
-        super.setHighlighted(highlighted, animated: animated)
+        if self.highlighted != highlighted {
+            super.setHighlighted(highlighted, animated: animated)
+        }
         
         if !highlighted {
-            topSeparator.backgroundColor = appStyle.vcSeparatorColor
-            bottomSeparator.backgroundColor = appStyle.vcSeparatorColor
+            if topSeparator.backgroundColor != AATableViewCell.separatorColor {
+                topSeparator.backgroundColor = AATableViewCell.separatorColor
+            }
+            if bottomSeparator.backgroundColor != AATableViewCell.separatorColor {
+                bottomSeparator.backgroundColor = AATableViewCell.separatorColor
+            }
         }
     }
     
     public override func setSelected(selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
+        if self.selected != selected {
+            super.setSelected(selected, animated: animated)
+        }
         
         if !selected {
-            topSeparator.backgroundColor = appStyle.vcSeparatorColor
-            bottomSeparator.backgroundColor = appStyle.vcSeparatorColor
+            if topSeparator.backgroundColor != AATableViewCell.separatorColor {
+                topSeparator.backgroundColor = AATableViewCell.separatorColor
+            }
+            if bottomSeparator.backgroundColor != AATableViewCell.separatorColor {
+                bottomSeparator.backgroundColor = AATableViewCell.separatorColor
+            }
         }
     }
 }

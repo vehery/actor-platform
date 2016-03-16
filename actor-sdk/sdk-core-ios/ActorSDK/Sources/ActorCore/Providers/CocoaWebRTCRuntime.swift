@@ -6,41 +6,47 @@ import Foundation
 
 class CocoaWebRTCRuntime: NSObject, ARWebRTCRuntime {
     
-    private var peerConnectionFactory: RTCPeerConnectionFactory?
-    private var isInited = false
+    private var isInited: Bool = false
+    private var peerConnectionFactory: RTCPeerConnectionFactory!
     
     override init() {
 
     }
     
     func createPeerConnectionWithServers(webRTCIceServers: IOSObjectArray!, withSettings settings: ARWebRTCSettings!) -> ARPromise {
+        
         initRTC()
+        
         let servers: [ARWebRTCIceServer] = webRTCIceServers.toSwiftArray()
         return ARPromise { (resolver) -> () in
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) { () -> Void in
-                resolver.result(CocoaWebRTCPeerConnection(servers: servers, peerConnectionFactory: self.peerConnectionFactory!))
+                resolver.result(CocoaWebRTCPeerConnection(servers: servers, peerConnectionFactory: self.peerConnectionFactory))
             }
         }
     }
     
     func getUserAudio() -> ARPromise {
+        
         initRTC()
-        let audio = peerConnectionFactory!.audioTrackWithID("audio0")
-        let mediaStream = peerConnectionFactory!.mediaStreamWithLabel("ARDAMSa0")
+        
+        let audio = peerConnectionFactory.audioTrackWithID("audio0")
+        let mediaStream = peerConnectionFactory.mediaStreamWithLabel("ARDAMSa0")
         mediaStream.addAudioTrack(audio)
         return ARPromises.success(MediaStream(stream: mediaStream))
     }
     
-    func supportsPreConnections() -> jboolean {
-        return false
-    }
-    
-    private func initRTC() {
+    func initRTC() {
         if !isInited {
             isInited = true
-            peerConnectionFactory = RTCPeerConnectionFactory()
+            
             RTCPeerConnectionFactory.initializeSSL()
+            
+            peerConnectionFactory = RTCPeerConnectionFactory()
         }
+    }
+    
+    func supportsPreConnections() -> jboolean {
+        return false
     }
 }
 
@@ -113,6 +119,12 @@ class CocoaWebRTCPeerConnection: NSObject, ARWebRTCPeerConnection, RTCPeerConnec
     func addOwnStream(stream: ARWebRTCMediaStream) {
         if let str = stream as? MediaStream {
             peerConnection.addStream(str.stream)
+        }
+    }
+    
+    func removeOwnStream(stream: ARWebRTCMediaStream) {
+        if let str = stream as? MediaStream {
+            peerConnection.removeStream(str.stream)
         }
     }
     

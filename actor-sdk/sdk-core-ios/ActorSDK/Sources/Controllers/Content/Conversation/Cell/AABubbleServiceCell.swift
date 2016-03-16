@@ -9,7 +9,7 @@ public class AABubbleServiceCell : AABubbleCell {
     private static let serviceBubbleFont = UIFont.boldSystemFontOfSize(12)
     private static let maxServiceTextWidth: CGFloat = 260
     
-    private let serviceText = UILabel()
+    private let serviceText = YYLabel()
     
     private var bindedLayout: ServiceCellLayout!
     

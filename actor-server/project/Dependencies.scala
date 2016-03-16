@@ -5,7 +5,7 @@ import sbt._
 object Dependencies {
   object V {
     val actorCommons = "0.0.14"
-    val actorBotkit = "1.0.75"
+    val actorBotkit = "1.0.81"
     val akka = "2.4.2"
     val akkaHttpJson = "1.5.0"
     val cats = "0.3.0"
@@ -84,8 +84,8 @@ object Dependencies {
     val libPhoneNumber          = "com.googlecode.libphonenumber" % "libphonenumber"                 % "7.0.+"
     val icu4j                   = "com.ibm.icu"                   % "icu4j"                          % "56.1"
 
-    val scodecBits              = "org.scodec"                    %% "scodec-bits"                   % "1.1.0"
-    val scodecCore              = "org.scodec"                    %% "scodec-core"                   % "1.9.0"
+    val scodecBits              = "org.scodec"                    %% "scodec-bits"                   % "1.0.9"
+    val scodecCore              = "org.scodec"                    %% "scodec-core"                   % "1.8.1"
 
     val scopt                   = "com.github.scopt"              %% "scopt"                         % "3.3.0"
 

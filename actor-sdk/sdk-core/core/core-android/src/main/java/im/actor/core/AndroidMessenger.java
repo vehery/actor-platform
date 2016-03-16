@@ -38,15 +38,17 @@ import im.actor.core.utils.IOUtils;
 import im.actor.core.utils.ImageHelper;
 import im.actor.core.viewmodel.Command;
 import im.actor.core.viewmodel.CommandCallback;
-import im.actor.runtime.actors.Actor;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.actors.Props;
 import im.actor.runtime.android.AndroidContext;
+import im.actor.runtime.bser.BserCreator;
+import im.actor.runtime.bser.BserObject;
 import im.actor.runtime.eventbus.EventBus;
 import im.actor.runtime.generic.mvvm.BindedDisplayList;
 import im.actor.runtime.mvvm.Value;
 import im.actor.runtime.mvvm.ValueChangedListener;
+import im.actor.runtime.storage.ListEngineItem;
 import me.leolin.shortcutbadger.ShortcutBadger;
 
 import static im.actor.runtime.actors.ActorSystem.system;
@@ -61,6 +63,7 @@ public class AndroidMessenger extends im.actor.core.Messenger {
     private BindedDisplayList<Dialog> dialogList;
     private HashMap<Peer, BindedDisplayList<Message>> messagesLists = new HashMap<Peer, BindedDisplayList<Message>>();
     private HashMap<Peer, BindedDisplayList<Message>> docsLists = new HashMap<Peer, BindedDisplayList<Message>>();
+    private HashMap<String, BindedDisplayList> customLists = new HashMap<String, BindedDisplayList>();
 
     public AndroidMessenger(Context context, im.actor.core.Configuration configuration) {
         super(configuration);
@@ -464,6 +467,15 @@ public class AndroidMessenger extends im.actor.core.Messenger {
         }
 
         return docsLists.get(peer);
+    }
+
+    public <T extends BserObject & ListEngineItem> BindedDisplayList<T> getCustomDisplayList(final Peer peer, final String dataType, BserCreator<T> creator) {
+        String key = peer.getUnuqueId()+dataType;
+        if (!customLists.containsKey(key)) {
+            BindedDisplayList list = (BindedDisplayList) modules.getDisplayListsModule().getCustomSharedList(peer, dataType, creator);
+            customLists.put(key, list);
+        }
+        return customLists.get(key);
     }
 
     public EventBus getEvents() {

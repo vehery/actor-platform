@@ -7,6 +7,7 @@ export default {
       'wrong': 'Ошиблись?',
       'phone': 'Номер телефона',
       'email': 'Email адрес',
+      'phone_or_email': 'Номер телефона или Email адрес',
       'authCode': 'Код авторизации',
       'yourName': 'Ваше имя',
       'errors': {
@@ -184,7 +185,8 @@ export default {
     'profile': {
       'email': 'email',
       'phone': 'телефон',
-      'nickname': 'ник'
+      'nickname': 'ник',
+      'about': 'о себе'
     },
     'createdBy': 'создал',
     'addPeople': 'Пригласить',
@@ -281,9 +283,22 @@ export default {
       outgoing: 'Исходящий вызов',
       incoming: 'Входящий вызов',
       mute: 'Отключить звук',
+      unmute: 'Включить звук',
       answer: 'Ответить',
       decline: 'Отменить',
-      end: 'Завершить вызов'
+      end: 'Завершить вызов',
+      addUser: 'Добавить пользователя',
+      fullScreen: 'Полный экран',
+      video: 'Видео'
+    },
+
+    toolbar: {
+      callState: {
+        calling: 'звоню',
+        connecting: 'соединение',
+        in_progress: 'Звонок: {time}',
+        ended: 'завершен'
+      }
     }
   }
 };

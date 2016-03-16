@@ -59,6 +59,7 @@ import im.actor.runtime.generic.mvvm.BindedDisplayList;
 import im.actor.runtime.generic.mvvm.DisplayList;
 
 import static im.actor.sdk.util.ActorSDKMessenger.messenger;
+import static im.actor.sdk.util.ActorSDKMessenger.myUid;
 import static im.actor.sdk.util.ActorSDKMessenger.users;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -124,8 +125,9 @@ public class MessagesFragment extends DisplayListFragment<Message, MessageHolder
         BindedDisplayList<Message> res = messenger().getMessageDisplayList(peer);
         if (res.getListProcessor() == null) {
             res.setListProcessor(new ChatListProcessor(this));
+        }else{
+            ((ChatListProcessor)res.getListProcessor()).setFragment(this);
         }
-
         return res;
     }
 
@@ -271,6 +273,11 @@ public class MessagesFragment extends DisplayListFragment<Message, MessageHolder
                 actionMode.invalidate();
             }
             return true;
+        }else{
+            if(message.getContent() instanceof TextContent && message.getSenderId() == myUid() && message.getSortDate() >= messenger().loadFirstUnread(peer)){
+                ((ChatActivity)getActivity()).onEditTextMessage(message.getRid(), ((TextContent) message.getContent()).getText());
+                return true;
+            }
         }
         return false;
     }

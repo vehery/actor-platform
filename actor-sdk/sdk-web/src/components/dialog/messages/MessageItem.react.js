@@ -43,8 +43,7 @@ class MessageItem extends Component {
   static propTypes = {
     peer: PropTypes.object.isRequired,
     message: PropTypes.object.isRequired,
-    overlay: PropTypes.object.isRequired,
-    isShortMessage: PropTypes.bool,
+    isShort: PropTypes.bool.isRequired,
     isSelected: PropTypes.bool,
     onSelect: PropTypes.func
   };
@@ -54,12 +53,8 @@ class MessageItem extends Component {
     isExperimental: PropTypes.bool
   };
 
-  constructor(props) {
-    super(props);
-  }
-
   shouldComponentUpdate(nextProps, nextState) {
-    return (this.props.message !== nextProps.message || this.props.isShortMessage != nextProps.isShortMessage);
+    return (this.props.message !== nextProps.message || this.props.isShort !== nextProps.isShort);
   }
 
   onClick = () => {
@@ -83,10 +78,9 @@ class MessageItem extends Component {
   };
 
   render() {
-    const { message, overlay, peer, isSelected } = this.props;
+    const { message, peer, isShort, isSelected } = this.props;
     const { isHighlighted } = this.state;
     const { delegate, isExperimental } = this.context;
-    const isShortMessage = overlay.useShort;
 
     let Service, Text, Modern, Photo, Document, Voice, Contact, Location, Sticker;
     if (delegate.components.dialog && delegate.components.dialog.messages && delegate.components.dialog.messages.message !== null && typeof delegate.components.messages.message !== 'function') {
@@ -118,7 +112,7 @@ class MessageItem extends Component {
     const messageSender = escapeWithEmoji(message.sender.title);
 
     const messageClassName = classnames('message row', {
-      'message--same-sender': isShortMessage,
+      'message--same-sender': isShort,
       'message--active': isHighlighted,
       'message--selected': isSelected
     });
@@ -126,7 +120,7 @@ class MessageItem extends Component {
       'message__actions__menu--opened': isHighlighted
     });
 
-    if (isShortMessage) {
+    if (isShort) {
       leftBlock = (
         <div className="message__info text-right">
           <time className="message__timestamp">{message.date}</time>

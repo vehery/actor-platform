@@ -169,6 +169,7 @@ $sticker-max-size: 180px;
   }
   &__body {
     padding-right: 16px;
+    overflow: hidden;
   }
   &__sender {
     font-size: 15px;
@@ -708,6 +709,12 @@ $sticker-max-size: 180px;
 
       vertical-align: top;
     }
+
+    .hljs {
+      background-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
   }
   .photo {
     line-height: 0;
@@ -761,7 +768,7 @@ $sticker-max-size: 180px;
       color: rgba(0, 0, 0, .2);
       border-radius: $default-border-radius;
       background-color: white;
-      box-shadow: 0 0 0 1px rgba($body-base-color, .1);
+      border: 1px solid rgba($body-base-color, .1);
       i {
         line-height: $message-document-icon-size;
       }

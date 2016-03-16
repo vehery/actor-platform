@@ -12,7 +12,19 @@ public enum Route {
 
 public class AAAudioRouter {
     
-    public var currentRoute = Route.Speaker {
+    public var isManagingEnabled = false {
+        didSet(v) {
+            fixSession()
+        }
+    }
+    
+    public var isEnabled = false {
+        didSet(v) {
+            fixSession()
+        }
+    }
+    
+    public var currentRoute = Route.Receiver {
         didSet(v) {
             fixSession()
         }
@@ -24,7 +36,7 @@ public class AAAudioRouter {
         }
     }
     
-    public var category = AVAudioSessionCategoryPlayAndRecord {
+    public var category = AVAudioSessionCategorySoloAmbient {
         didSet(v) {
             fixSession()
         }
@@ -76,30 +88,35 @@ public class AAAudioRouter {
     private func fixSession() {
         let session = AVAudioSession.sharedInstance()
         
-        do {
-            
-            if session.category != category {
-                try session.setCategory(category)
-            }
-            
-            if session.mode != mode {
-                try AVAudioSession.sharedInstance().setMode(mode)
-            }
-            
-            if let route: AVAudioSessionRouteDescription = session.currentRoute {
-                for port in route.outputs {
-                    let portDescription: AVAudioSessionPortDescription = port as AVAudioSessionPortDescription
-                    if (self.currentRoute == .Receiver && portDescription.portType != AVAudioSessionPortBuiltInReceiver) {
-                        try session.overrideOutputAudioPort(.None)
-                    } else if (self.currentRoute == .Speaker && portDescription.portType != AVAudioSessionPortBuiltInSpeaker) {
-                        try session.overrideOutputAudioPort(AVAudioSessionPortOverride.Speaker)
-                    }
-                }
-            }
-            
-            try session.setActive(true)
-        } catch let error as NSError {
-            print("Audio Session: \(error.description)")
-        }
+//        if isManagingEnabled {
+//            do {
+//                if session.category != category {
+//                    try session.setCategory(category)
+//                }
+//                
+//                if session.mode != mode {
+//                    try AVAudioSession.sharedInstance().setMode(mode)
+//                }
+//                
+//                if let route: AVAudioSessionRouteDescription = session.currentRoute {
+//                    for port in route.outputs {
+//                        let portDescription: AVAudioSessionPortDescription = port as AVAudioSessionPortDescription
+//                        if (self.currentRoute == .Receiver && portDescription.portType != AVAudioSessionPortBuiltInReceiver) {
+//                            try session.overrideOutputAudioPort(.None)
+//                        } else if (self.currentRoute == .Speaker && portDescription.portType != AVAudioSessionPortBuiltInSpeaker) {
+//                            try session.overrideOutputAudioPort(AVAudioSessionPortOverride.Speaker)
+//                        }
+//                    }
+//                }
+//            } catch let error as NSError {
+//                print("Audio Session: \(error.description)")
+//            }
+//            
+//            do {
+//                try session.setActive(isEnabled)
+//            } catch let error as NSError {
+//                print("Audio Session: \(error.description)")
+//            }
+//        }
     }
 }

@@ -9,7 +9,7 @@ import ActorClient from '../utils/ActorClient';
 
 export default {
   cleanText() {
-    DraftActionCreators.saveDraft('', true);
+    DraftActionCreators.changeDraft('');
     dispatch(ActionTypes.COMPOSE_CLEAN);
   },
 
@@ -32,7 +32,7 @@ export default {
       ActorClient.onTyping(peer);
     }
 
-    DraftActionCreators.saveDraft(text);
+    DraftActionCreators.changeDraft(text);
     dispatch(ActionTypes.COMPOSE_TYPING, { peer, text, caretPosition });
   },
 

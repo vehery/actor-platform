@@ -30,6 +30,8 @@
     width: 100%;
     height: 100%;
 
+    pointer-events: none;
+
     border-radius: 100%;
   }
   &__placeholder {
@@ -42,7 +44,7 @@
     width: $default-avatar-size - 2px;
     height: $default-avatar-size - 2px;
 
-    cursor: default;
+    // cursor: default;
     text-align: center;
     text-transform: uppercase;
 

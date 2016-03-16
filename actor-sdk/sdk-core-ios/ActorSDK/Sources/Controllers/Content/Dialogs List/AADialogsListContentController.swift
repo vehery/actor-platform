@@ -13,6 +13,8 @@ public class AADialogsListContentController: AAContentTableController, UISearchB
     
     public init() {
         super.init(style: .Plain)
+        
+        unbindOnDissapear = true
     }
 
     public required init(coder aDecoder: NSCoder) {
@@ -21,7 +23,11 @@ public class AADialogsListContentController: AAContentTableController, UISearchB
     
     public override func tableDidLoad() {
         
+        managedTable.canEditAll = true
+        managedTable.canDeleteAll = true
+        managedTable.fixedHeight = 76
         tableView.estimatedRowHeight = 76
+        tableView.rowHeight = 76
         
         if enableSearch {
             search(AADialogSearchCell.self) { (s) -> () in
@@ -40,7 +46,14 @@ public class AADialogsListContentController: AAContentTableController, UISearchB
             
             s.binded { (r:AABindedRows<AADialogCell>) -> () in
                 
+                r.differental = true
+                
+                r.animated = true
+                
                 r.displayList = Actor.getDialogsDisplayList()
+                if r.displayList.getListProcessor() == nil {
+                   r.displayList.setListProcessor(AADialogListProcessor())
+                }
                 
                 r.selectAction = { (dialog: ACDialog) -> Bool in
                     if let d = self.delegate {

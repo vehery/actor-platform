@@ -52,7 +52,6 @@ import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.calls.CallsProcessor;
 import im.actor.core.modules.contacts.ContactsProcessor;
-import im.actor.core.modules.contacts.ContactsSyncActor;
 import im.actor.core.modules.encryption.EncryptedProcessor;
 import im.actor.core.modules.eventbus.EventBusProcessor;
 import im.actor.core.modules.groups.GroupsProcessor;
@@ -60,7 +59,6 @@ import im.actor.core.modules.messaging.MessagesProcessor;
 import im.actor.core.modules.updates.internal.ArchivedDialogLoaded;
 import im.actor.core.modules.updates.internal.ChangeContent;
 import im.actor.core.modules.updates.internal.CombinedDifference;
-import im.actor.core.modules.updates.internal.ContactsLoaded;
 import im.actor.core.modules.updates.internal.GetDiffCombiner;
 import im.actor.core.modules.updates.internal.GroupCreated;
 import im.actor.core.modules.updates.internal.InternalUpdate;
@@ -125,15 +123,10 @@ public class UpdateProcessor extends AbsModule {
             users.add(((LoggedIn) update).getAuth().getUser());
             applyRelated(users, new ArrayList<ApiGroup>(), true);
             runOnUiThread(((LoggedIn) update).getRunnable());
-        } else if (update instanceof ContactsLoaded) {
-            ContactsLoaded contactsLoaded = (ContactsLoaded) update;
-            applyRelated(contactsLoaded.getContacts().getUsers(), new ArrayList<ApiGroup>(), false);
-            context().getContactsModule().getContactSyncActor()
-                    .send(new ContactsSyncActor.ContactsLoaded(contactsLoaded.getContacts()));
         } else if (update instanceof UsersFounded) {
             final UsersFounded founded = (UsersFounded) update;
             applyRelated(((UsersFounded) update).getUsers(), new ArrayList<ApiGroup>(), false);
-            final ArrayList<UserVM> users = new ArrayList<UserVM>();
+            final ArrayList<UserVM> users = new ArrayList<>();
             for (ApiUser u : founded.getUsers()) {
                 users.add(context().getUsersModule().getUsers().get(u.getId()));
             }
@@ -145,7 +138,7 @@ public class UpdateProcessor extends AbsModule {
             });
         } else if (update instanceof GroupCreated) {
             final GroupCreated created = (GroupCreated) update;
-            ArrayList<ApiGroup> groups = new ArrayList<ApiGroup>();
+            ArrayList<ApiGroup> groups = new ArrayList<>();
             groups.add(created.getGroup());
             applyRelated(created.getUsers(), groups, false);
             runOnUiThread(new Runnable() {

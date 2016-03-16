@@ -17,55 +17,79 @@ public class AADialogCell: AATableViewCell, AABindedCell {
         return 76
     }
     
-    // Views
+    // Cached design
     
-    public let avatarView = AAAvatarView(frameSize: 48)
-    public let titleView = UILabel()
-    public let messageView = UILabel()
-    public let dateView = UILabel()
+    private static let counterBgImage = Imaging
+        .imageWithColor(ActorSDK.sharedActor().style.dialogCounterBgColor, size: CGSizeMake(18, 18))
+        .roundImage(18)
+        .resizableImageWithCapInsets(UIEdgeInsetsMake(9, 9, 9, 9))
+    private lazy var dialogTextActiveColor = ActorSDK.sharedActor().style.dialogTextActiveColor
+    private lazy var dialogTextColor = ActorSDK.sharedActor().style.dialogTextColor
+    private lazy var dialogStatusSending = ActorSDK.sharedActor().style.dialogStatusSending
+    private lazy var dialogStatusRead = ActorSDK.sharedActor().style.dialogStatusRead
+    private lazy var dialogStatusReceived = ActorSDK.sharedActor().style.dialogStatusReceived
+    private lazy var dialogStatusSent = ActorSDK.sharedActor().style.dialogStatusSent
+    private lazy var dialogStatusError = ActorSDK.sharedActor().style.dialogStatusError
+    private lazy var chatIconClock = ActorSDK.sharedActor().style.chatIconClock
+    private lazy var chatIconCheck2 = ActorSDK.sharedActor().style.chatIconCheck2
+    private lazy var chatIconCheck1 = ActorSDK.sharedActor().style.chatIconCheck1
+    private lazy var chatIconError = ActorSDK.sharedActor().style.chatIconError
+    
+    // Views
+
+    private var cellRenderer: AABackgroundCellRenderer<AADialogCellConfig, AADialogCellLayout>!
+    
+    public let avatarView = AAAvatarView()
+    public let titleView = YYLabel()
+    public let messageView = YYLabel()
+    
+    public let dateView = YYLabel()
     public let statusView = UIImageView()
-    public let counterView = UILabel()
+    public let counterView = YYLabel()
     public let counterViewBg = UIImageView()
+    
+    private var isEditing = false
+    
+    // Binding Data
+    
+    private var bindedItem: ACDialog?
     
     public override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+    
+        cellRenderer = AABackgroundCellRenderer<AADialogCellConfig, AADialogCellLayout>(renderer: cellRender, receiver: cellApply)
         
-        self.avatarView.layer.drawsAsynchronously       = true
-        self.titleView.layer.drawsAsynchronously        = true
-        self.dateView.layer.drawsAsynchronously         = true
-        self.statusView.layer.drawsAsynchronously       = true
-        self.counterViewBg.layer.drawsAsynchronously    = true
-        self.counterView.layer.drawsAsynchronously      = true
+        titleView.displaysAsynchronously = true
+        titleView.ignoreCommonProperties = true
+//        titleView.fadeOnAsynchronouslyDisplay = true
+        titleView.clearContentsBeforeAsynchronouslyDisplay = true
+    
+        messageView.displaysAsynchronously = true
+        messageView.ignoreCommonProperties = true
+//        messageView.fadeOnAsynchronouslyDisplay = true
+        messageView.clearContentsBeforeAsynchronouslyDisplay = true
         
-        ////////////////////////////////////////////////
+        dateView.displaysAsynchronously = true
+        dateView.ignoreCommonProperties = true
+//        dateView.fadeOnAsynchronouslyDisplay = true
+        dateView.clearContentsBeforeAsynchronouslyDisplay = true
         
-        self.contentView.addSubview(avatarView)
-        
-        titleView.font = UIFont.mediumSystemFontOfSize(17)
-        titleView.textColor = appStyle.dialogTitleColor
-        self.contentView.addSubview(titleView)
-        
-        messageView.font = UIFont.systemFontOfSize(16)
-        messageView.textColor = appStyle.dialogTextColor
-        self.contentView.addSubview(messageView)
-        
-        dateView.font = UIFont.systemFontOfSize(14)
-        dateView.textColor = appStyle.dialogDateColor
-        dateView.textAlignment = .Right
-        self.contentView.addSubview(dateView)
+        counterView.displaysAsynchronously = true
+        counterView.ignoreCommonProperties = true
+//        counterView.fadeOnAsynchronouslyDisplay = true
+        counterView.clearContentsBeforeAsynchronouslyDisplay = true
+
+        counterViewBg.image = AADialogCell.counterBgImage
         
         statusView.contentMode = .Center
+        
+        self.contentView.addSubview(avatarView)
+        self.contentView.addSubview(titleView)
+        self.contentView.addSubview(messageView)
+        self.contentView.addSubview(dateView)
         self.contentView.addSubview(statusView)
-        
-        counterViewBg.image = Imaging.imageWithColor(appStyle.dialogCounterBgColor, size: CGSizeMake(18, 18))
-            .roundImage(18).resizableImageWithCapInsets(UIEdgeInsetsMake(9, 9, 9, 9))
         self.contentView.addSubview(counterViewBg)
-        
-        counterView.font = UIFont.systemFontOfSize(14)
-        counterView.textColor = appStyle.dialogCounterColor
-        counterView.textAlignment = .Center
         self.contentView.addSubview(counterView)
-        
     }
 
     public required init(coder aDecoder: NSCoder) {
@@ -74,88 +98,377 @@ public class AADialogCell: AATableViewCell, AABindedCell {
     
     public func bind(item: ACDialog, table: AAManagedTable, index: Int, totalCount: Int) {
         
-        self.avatarView.bind(item.dialogTitle, id: item.peer.peerId, avatar: item.dialogAvatar)
+        //
+        // Checking dialog rebinding
+        //
         
-        self.titleView.text = item.dialogTitle
-        
-        self.messageView.text = Actor.getFormatter().formatDialogText(item)
-        if item.messageType.ordinal() != ACContentType.TEXT().ordinal() {
-            self.messageView.textColor = appStyle.dialogTextActiveColor
-        } else {
-            self.messageView.textColor = appStyle.dialogTextColor
+        // Nothing changed
+        if bindedItem == item {
+            return
         }
         
-        if (item.date > 0) {
-            self.dateView.text = Actor.getFormatter().formatShortDate(item.date)
-            self.dateView.hidden = false
-        } else {
-            self.dateView.hidden = true
-        }
-        
-        if (item.unreadCount != 0) {
-            self.counterView.text = "\(item.unreadCount)"
-            self.counterView.hidden = false
-            self.counterViewBg.hidden = false
-        } else {
-            self.counterView.hidden = true
-            self.counterViewBg.hidden = true
-        }
-  
-        if item.senderId == Actor.myUid() {
-            if item.isRead() {
-                self.statusView.tintColor = appStyle.dialogStatusRead
-                self.statusView.image = appStyle.chatIconCheck2
-            } else if item.isReceived() {
-                self.statusView.tintColor = appStyle.dialogStatusReceived
-                self.statusView.image = appStyle.chatIconCheck2
-            } else {
-                self.statusView.tintColor = appStyle.dialogStatusSent
-                self.statusView.image = appStyle.chatIconCheck1
+        var isRebind: Bool = false
+        if let b = bindedItem {
+            if b.peer.isEqual(item.peer).boolValue {
+                isRebind = true
             }
+        }
+        self.bindedItem = item
+        
+        //
+        // Avatar View
+        //
+        avatarView.bind(item.dialogTitle, id: Int(item.peer.peerId), avatar: item.dialogAvatar)
+        
+        
+        // Forcing Async Rendering.
+        // This flag can became false when cell was resized
+        if !titleView.displaysAsynchronously {
+            titleView.displaysAsynchronously = true
+        }
+        
+        if !messageView.displaysAsynchronously {
+            messageView.displaysAsynchronously = true
+        }
+
+        
+        // Reseting Text Layout on new peer binding
+        if !isRebind {
+            avatarView.alpha = 0
+            titleView.alpha = 0
+            messageView.alpha = 0
+            statusView.alpha = 0
+            dateView.alpha = 0
+            counterView.alpha = 0
+            counterViewBg.alpha = 0
+        } else {
+            titleView.clearContentsBeforeAsynchronouslyDisplay = false
+            messageView.clearContentsBeforeAsynchronouslyDisplay = false
+            dateView.clearContentsBeforeAsynchronouslyDisplay = false            
+            counterView.clearContentsBeforeAsynchronouslyDisplay = false
+        }
+        
+        
+        //
+        // Message State
+        //
+        let messageState = item.status.ordinal()
+        if (messageState == ACMessageState.PENDING().ordinal()) {
+            self.statusView.tintColor = dialogStatusSending
+            self.statusView.image = chatIconClock
+            self.statusView.hidden = false
+        } else if (messageState == ACMessageState.READ().ordinal()) {
+            self.statusView.tintColor = dialogStatusRead
+            self.statusView.image = chatIconCheck2
+            self.statusView.hidden = false
+        } else if (messageState == ACMessageState.RECEIVED().ordinal()) {
+            self.statusView.tintColor = dialogStatusReceived
+            self.statusView.image = chatIconCheck2
+            self.statusView.hidden = false
+        } else if (messageState == ACMessageState.SENT().ordinal()) {
+            self.statusView.tintColor = dialogStatusSent
+            self.statusView.image = chatIconCheck1
+            self.statusView.hidden = false
+        } else if (messageState == ACMessageState.ERROR().ordinal()) {
+            self.statusView.tintColor = dialogStatusError
+            self.statusView.image = chatIconError
             self.statusView.hidden = false
         } else {
             self.statusView.hidden = true
         }
         
+        // Cancelling Renderer and forcing layouting to start new rendering
+        cellRenderer.cancelRender()
+
         setNeedsLayout()
     }
     
-    public override func prepareForReuse() {
-        super.prepareForReuse()
+    public override func willTransitionToState(state: UITableViewCellStateMask) {
+        super.willTransitionToState(state)
         
-        self.avatarView.unbind(true)
+        if state.contains(UITableViewCellStateMask.ShowingEditControlMask) {
+            isEditing = true
+        } else {
+            isEditing = false
+        }
     }
     
     public override func layoutSubviews() {
-        super.layoutSubviews();
+        super.layoutSubviews()
         
         // We expect height == 76;
         let width = self.contentView.frame.width
         let leftPadding = CGFloat(76)
         let padding = CGFloat(14)
         
+        //
+        // Avatar View
+        //
+        
         avatarView.frame = CGRectMake(padding, padding, 48, 48)
         
-        titleView.frame = CGRectMake(leftPadding, 16, width - leftPadding - /*paddingRight*/(padding + 50), 21)
         
-        var messagePadding:CGFloat = 0
+        //
+        // Title
+        //
+        
+        let titleFrame = CGRectMake(leftPadding, 16, width - leftPadding - /*paddingRight*/(padding + 50), 21)
+        UIView.performWithoutAnimation {
+            self.titleView.frame = titleFrame
+        }
+        
+        
+        //
+        // Status Icon
+        //
+
         if (!self.statusView.hidden) {
-            messagePadding = 22
             statusView.frame = CGRectMake(leftPadding, 44, 20, 18)
         }
         
-        var unreadPadding = CGFloat(0)
-        if (!self.counterView.hidden) {
-            counterView.frame = CGRectMake(0, 0, 1000, 1000)
-            counterView.sizeToFit()
-            let unreadW = max(counterView.frame.width + 8, 18)
-            counterView.frame = CGRectMake(width - padding - unreadW, 44, unreadW, 18)
-            counterViewBg.frame = counterView.frame
-            unreadPadding = unreadW
-        }
-
-        messageView.frame = CGRectMake(leftPadding+messagePadding, 44, width - leftPadding - /*paddingRight*/padding - messagePadding - unreadPadding, 18)
         
-        dateView.frame = CGRectMake(width - /*width*/60 - /*paddingRight*/padding , 18, 60, 18)
+        //
+        // Rest of Elements are layouted on the last phase
+        //
+        
+        if bindedItem != nil {
+            let config = AADialogCellConfig(
+                item: bindedItem!,
+                isStatusVisible: !statusView.hidden,
+                titleWidth: titleFrame.width,
+                contentWidth: width)
+            
+            if cellRenderer.requestRender(config) {
+                
+                // Disable async rendering on frame resize to avoid blinking on resize
+                titleView.displaysAsynchronously = false
+                titleView.clearContentsBeforeAsynchronouslyDisplay = false
+                messageView.displaysAsynchronously = false
+                messageView.clearContentsBeforeAsynchronouslyDisplay = false
+                dateView.displaysAsynchronously = false
+                dateView.clearContentsBeforeAsynchronouslyDisplay = false
+                counterView.displaysAsynchronously = false
+                counterView.clearContentsBeforeAsynchronouslyDisplay = false
+            }
+        }
+    }
+    
+    private func cellRender(config: AADialogCellConfig) -> AADialogCellLayout! {
+        
+        //
+        // Title Layouting
+        //
+        
+        let title = NSMutableAttributedString(string: config.item.dialogTitle)
+        title.yy_font = UIFont.mediumSystemFontOfSize(17)
+        title.yy_color = appStyle.dialogTitleColor
+        let titleContainer = YYTextContainer(size: CGSize(width: config.titleWidth, height: 1000))
+        titleContainer.maximumNumberOfRows = 1
+        titleContainer.truncationType = .End
+        let titleLayout = YYTextLayout(container: titleContainer, text: title)!
+        
+        
+        //
+        // Message Status
+        //
+        
+        var messagePadding: CGFloat = 0
+        if config.isStatusVisible {
+            messagePadding = 22
+        }
+        
+        
+        //
+        // Counter
+        //
+        
+        var unreadPadding: CGFloat = 0
+        let counterLayout: YYTextLayout?
+        if config.item.unreadCount > 0 {
+            let counter = NSMutableAttributedString(string: "\(config.item.unreadCount)")
+            counter.yy_font = UIFont.systemFontOfSize(14)
+            counter.yy_color = appStyle.dialogCounterColor
+            counterLayout = YYTextLayout(containerSize: CGSize(width: 1000, height: 1000), text: counter)!
+            unreadPadding = max(counterLayout!.textBoundingSize.width + 8, 18)
+        } else {
+            counterLayout = nil
+        }
+        
+        
+        //
+        // Message
+        //
+        
+        let message = NSMutableAttributedString(string: Actor.getFormatter().formatDialogText(config.item))
+        message.yy_font = UIFont.systemFontOfSize(16)
+        if config.item.messageType.ordinal() != ACContentType.TEXT().ordinal() {
+            message.yy_color = dialogTextActiveColor
+        } else {
+            message.yy_color = dialogTextColor
+        }
+        let messageWidth = config.contentWidth - 76 - 14 - messagePadding - unreadPadding
+        let messageContainer = YYTextContainer(size: CGSize(width: messageWidth, height: 1000))
+        messageContainer.maximumNumberOfRows = 1
+        messageContainer.truncationType = .End
+        let messageLayout = YYTextLayout(container: messageContainer, text: message)!
+        
+        
+        //
+        // Date
+        //
+        
+        let dateStr: String
+        if config.item.date > 0 {
+            dateStr = Actor.getFormatter().formatShortDate(config.item.date)
+        } else {
+            dateStr = ""
+        }
+        let dateAtrStr = NSMutableAttributedString(string: dateStr)
+        dateAtrStr.yy_color = appStyle.dialogDateColor
+        dateAtrStr.yy_font = UIFont.systemFontOfSize(14)
+        let dateContainer = YYTextContainer(size: CGSize(width: 60, height: 1000))
+        let dateLayout = YYTextLayout(container: dateContainer, text: dateAtrStr)!
+        
+        return AADialogCellLayout(titleLayout: titleLayout, messageLayout: messageLayout, messageWidth: messageWidth, counterLayout: counterLayout, dateLayout: dateLayout)
+    }
+    
+    private func cellApply(render: AADialogCellLayout!) {
+        
+        //
+        // Avatar
+        //
+        
+        presentView(avatarView)
+        
+        
+        //
+        // Title
+        //
+        self.titleView.textLayout = render.titleLayout
+        presentView(titleView)
+        
+        
+        let leftPadding: CGFloat
+        if isEditing {
+            leftPadding = 8
+        } else {
+            leftPadding = 14
+        }
+        
+        
+        //
+        // Date
+        //
+        
+        dateView.textLayout = render.dateLayout
+        let dateWidth = render.dateLayout.textBoundingSize.width
+        dateView.frame = CGRectMake(contentView.width - dateWidth - leftPadding, 18, dateWidth, 18)
+        presentView(dateView)
+        
+        
+        //
+        // Message
+        //
+        
+        var padding: CGFloat = 76
+        if !statusView.hidden {
+            padding += 22
+        }
+        let messageViewFrame = CGRectMake(padding, 44, render.messageWidth, 18)
+        UIView.performWithoutAnimation {
+            self.messageView.frame = messageViewFrame
+        }
+        messageView.textLayout = render.messageLayout
+        presentView(messageView)
+        
+        
+        //
+        // Message State
+        //
+        if !self.statusView.hidden {
+            presentView(self.statusView)
+        }
+        
+        
+        //
+        // Counter
+        //
+        
+        if render.counterLayout != nil {
+            self.counterView.textLayout = render.counterLayout
+            
+            let textW = render.counterLayout!.textBoundingSize.width
+            let unreadW = max(textW + 8, 18)
+            
+            counterView.frame = CGRectMake(contentView.width - leftPadding - unreadW + (unreadW - textW) / 2, 44, textW, 18)
+            counterViewBg.frame = CGRectMake(contentView.width - leftPadding - unreadW, 44, unreadW, 18)
+            
+            presentView(counterView)
+            presentView(counterViewBg)
+        } else {
+            
+            dismissView(counterView)
+            dismissView(counterViewBg)
+        }
+    }
+    
+    private func presentView(view: UIView) {
+        view.alpha = 1
+    }
+    
+    private func dismissView(view: UIView) {
+        view.alpha = 0
     }
 }
+
+//
+// Rendering
+//
+
+private class AADialogCellConfig {
+    
+    let item: ACDialog
+    let titleWidth: CGFloat
+    let isStatusVisible: Bool
+    let contentWidth: CGFloat
+    
+    init(item: ACDialog, isStatusVisible: Bool, titleWidth: CGFloat, contentWidth: CGFloat) {
+        self.item = item
+        self.titleWidth = titleWidth
+        self.contentWidth = contentWidth
+        self.isStatusVisible = isStatusVisible
+    }
+}
+
+extension AADialogCellConfig: Equatable {
+    
+}
+
+private func ==(lhs: AADialogCellConfig, rhs: AADialogCellConfig) -> Bool {
+    return rhs.titleWidth == lhs.titleWidth && rhs.contentWidth == lhs.contentWidth
+}
+
+private class AADialogCellLayout {
+    
+    let titleLayout: YYTextLayout
+    let counterLayout: YYTextLayout?
+    let messageLayout: YYTextLayout
+    let messageWidth: CGFloat
+    let dateLayout: YYTextLayout
+    
+    init(
+        titleLayout: YYTextLayout,
+        messageLayout: YYTextLayout,
+        messageWidth: CGFloat,
+        counterLayout: YYTextLayout?,
+        dateLayout: YYTextLayout) {
+            self.titleLayout = titleLayout
+            self.counterLayout = counterLayout
+            self.messageLayout = messageLayout
+            self.messageWidth = messageWidth
+            self.dateLayout = dateLayout
+    }
+}
+
+
+

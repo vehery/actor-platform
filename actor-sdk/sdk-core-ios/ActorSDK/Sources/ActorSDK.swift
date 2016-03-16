@@ -5,6 +5,8 @@
 import Foundation
 import JDStatusBarNotification
 import PushKit
+import SafariServices
+import DZNWebViewController
 
 @objc public class ActorSDK: NSObject, PKPushRegistryDelegate {
 
@@ -40,9 +42,8 @@ import PushKit
 
     /// Server Endpoints
     public var endpoints = [
-        "tls://front1-mtproto-api-rev2.actor.im",
-        "tls://front2-mtproto-api-rev2.actor.im"
-        
+        "tcp://front1-mtproto-api-rev3.actor.im:443",
+        "tcp://front2-mtproto-api-rev3.actor.im:443"
     ] {
         didSet {
             trustedKeys = []
@@ -79,9 +80,15 @@ import PushKit
     
     /// Invitation URL for apps
     public var inviteUrl: String = "https://actor.im/dl"
+
+    /// Privacy Policy URL
+    public var privacyPolicyUrl: String? = "https://actor.im/privacy"
+    
+    /// Terms of Service URL
+    public var termsOfServiceUrl: String? = "https://actor.im/tos"
     
     /// App name in loc. strings
-    public var appNameInLocStrings: String = "Actor"
+    public var appName: String = "Actor"
     
     /// Use background on welcome screen
     public var useBackgroundOnWelcomeScreen: Bool? = false
@@ -188,14 +195,13 @@ import PushKit
         // builder.setEnableFilesLogging(true)
         
         // Application name
-        if (appNameInLocStrings != "Actor") {
-            builder.setCustomAppName(AALocalized(appNameInLocStrings))
-        }
+        builder.setCustomAppName(appName)
         
         // Config
         builder.setPhoneBookImportEnabled(jboolean(enablePhoneBookImport))
         builder.setVoiceCallsEnabled(jboolean(enableCalls))
         builder.setIsEnabledGroupedChatList(false)
+        // builder.setEnableFilesLogging(true)
         
         // Creating messenger
         messenger = ACCocoaMessenger(configuration: builder.build())
@@ -431,17 +437,12 @@ import PushKit
             }
             window.rootViewController = controller!
         } else {
-            var controller: UIViewController! = delegate.actorControllerForAuthStart()
+            let controller: UIViewController! = delegate.actorControllerForAuthStart()
             if controller == nil {
-                if self.authStrategy == .PhoneOnly {
-                    controller = AAAuthNavigationController(rootViewController: AAAuthPhoneViewController())
-                } else if self.authStrategy == .EmailOnly {
-                    controller = AAAuthNavigationController(rootViewController: AAEmailAuthViewController())
-                } else {
-                    // ???
-                }
+                window.rootViewController = AAWelcomeController()
+            } else {
+                window.rootViewController = controller
             }
-            window.rootViewController = controller!
         }
         
         // Bind Status Bar connecting
@@ -518,7 +519,29 @@ import PushKit
                 return
             }
             
-            UIApplication.sharedApplication().openURL(u)
+            if let bindedController = bindedToWindow?.rootViewController {
+                // Dismiss Old Presented Controller to show new one
+                if let presented = bindedController.presentedViewController {
+                    presented.dismissViewControllerAnimated(true, completion: nil)
+                }
+                
+                // Building Controller for Web preview
+                let controller: UIViewController
+                if #available(iOS 9.0, *) {
+                    controller = SFSafariViewController(URL: u)
+                } else {
+                    controller = AANavigationController(rootViewController: DZNWebViewController(URL: u))
+                }
+                if AADevice.isiPad {
+                    controller.modalPresentationStyle = .FullScreen
+                }
+                
+                // Presenting controller
+                bindedController.presentViewController(controller, animated: true, completion: nil)
+            } else {
+                // Just Fallback. Might never happend
+                UIApplication.sharedApplication().openURL(u)
+            }
         }
     }
     
@@ -767,4 +790,5 @@ public enum AAAutoPush {
 public enum AAAuthStrategy {
     case PhoneOnly
     case EmailOnly
+    case PhoneEmail
 }

@@ -531,6 +531,15 @@ object BotMessages {
 
   final case class ResponseDownloadFile(fileBytes: Array[Byte]) extends ResponseBody
 
+  @key("UploadFile")
+  final case class UploadFile(@beanGetter bytes: Array[Byte]) extends RequestBody {
+    override type Response = ResponseUploadFile
+    override def readResponse(obj: Js.Obj): Response = readJs[Response](obj)
+    override val service: String = Services.Files
+  }
+
+  final case class ResponseUploadFile(@beanGetter location: FileLocation) extends ResponseBody
+
   @key("AddSticker")
   final case class AddSticker(
     @beanGetter ownerUserId: Int,

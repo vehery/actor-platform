@@ -155,9 +155,6 @@ private[user] final class UserProcessor
   protected implicit val seqUpdatesExt: SeqUpdatesExtension = SeqUpdatesExtension(system)
   protected implicit val socialRegion: SocialManagerRegion = SocialExtension(system).region
 
-  // For GetApiStruct
-  protected val aclMD = ACLUtils.getMDInstance()
-
   protected implicit val timeout: Timeout = Timeout(10.seconds)
 
   protected val userId = self.path.name.toInt
@@ -200,7 +197,8 @@ private[user] final class UserProcessor
         state.copy(timeZone = timeZone)
       case UserEvents.PreferredLanguagesChanged(_, preferredLanguages) ⇒
         state.copy(preferredLanguages = preferredLanguages)
-      case _: UserEvents.Created ⇒ state
+      case _: UserEvents.Created        ⇒ state
+      case _: UserEvents.DialogsChanged ⇒ state
     }
   }
 

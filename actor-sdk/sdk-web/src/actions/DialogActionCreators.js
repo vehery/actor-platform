@@ -13,8 +13,10 @@ import TypingActionCreators from './TypingActionCreators';
 import DialogInfoActionCreators from './DialogInfoActionCreators';
 import OnlineActionCreators from './OnlineActionCreators';
 import GroupProfileActionCreators from './GroupProfileActionCreators';
+import DraftActionCreators from './DraftActionCreators';
 
 import DialogStore from '../stores/DialogStore';
+import MessageStore from '../stores/MessageStore';
 
 let messagesBinding = null;
 
@@ -28,7 +30,8 @@ const DialogActionCreators = {
 
     // Unbind from previous peer
     if (currentPeer !== null) {
-      dispatch(ActionTypes.UNBIND_DIALOG_PEER);
+      DraftActionCreators.saveDraft(currentPeer);
+      dispatch(ActionTypes.UNBIND_DIALOG_PEER, { peer: currentPeer });
 
       this.onConversationClosed(currentPeer);
       messagesBinding && messagesBinding.unbind();
@@ -49,10 +52,12 @@ const DialogActionCreators = {
 
     if (peer !== null) {
       dispatch(ActionTypes.BIND_DIALOG_PEER, { peer });
+      DraftActionCreators.loadDraft(peer);
 
       this.onConversationOpen(peer);
       messagesBinding = ActorClient.bindMessages(peer, MessageActionCreators.setMessages);
       ActorClient.bindTyping(peer, TypingActionCreators.setTyping);
+
       switch(peer.type) {
         case PeerTypes.USER:
           ActorClient.bindUser(peer.id, DialogInfoActionCreators.setDialogInfo);
@@ -139,6 +144,14 @@ const DialogActionCreators = {
       success: ActionTypes.GROUP_HIDE_SUCCESS,
       failure: ActionTypes.GROUP_HIDE_ERROR
     }, { peer });
+  },
+
+  loadMoreMessages(peer) {
+    if (MessageStore.isAllRendered()) {
+      this.onChatEnd(peer);
+    } else {
+      dispatch(ActionTypes.MESSAGES_LOAD_MORE);
+    }
   }
 };
 

@@ -7,6 +7,7 @@ export default {
       'wrong': 'Wrong?',
       'phone': 'Phone number',
       'email': 'Email address',
+      'phone_or_email': 'Phone number or Email address',
       'authCode': 'Auth code',
       'yourName': 'Your name',
       'errors': {
@@ -185,7 +186,8 @@ export default {
     'profile': {
       'email': 'email',
       'phone': 'phone',
-      'nickname': 'nickname'
+      'nickname': 'nickname',
+      'about': 'about'
     },
     'createdBy': 'сreated by',
     'addPeople': 'Add people',
@@ -262,7 +264,7 @@ export default {
         'addPeople': 'add people',
         'favourites': 'Favorites',
         'groups': 'Groups',
-        'privates': 'Privates',
+        'privates': 'Direct Messages',
       },
       'group': {
         'empty': 'Create your first group conversation'
@@ -281,13 +283,27 @@ export default {
         'text': 'Oops, we have detected another tab with {appName}, so we had to deactivate this one to prevent some dangerous things happening.'
       }
     },
+
     call: {
       outgoing: 'Outgoing call',
       incoming: 'Incoming call',
       mute: 'Mute',
+      unmute: 'Unmute',
       answer: 'Answer',
       decline: 'Decline',
-      end: 'End call'
+      end: 'End call',
+      addUser: 'Add user',
+      fullScreen: 'Fullscreen',
+      video: 'Video'
+    },
+
+    toolbar: {
+      callState: {
+        calling: 'calling',
+        connecting: 'connecting',
+        in_progress: 'On call: {time}',
+        ended: 'ended'
+      }
     }
   }
 };

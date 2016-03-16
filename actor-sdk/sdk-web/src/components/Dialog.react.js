@@ -2,17 +2,21 @@
  * Copyright (C) 2015-2016 Actor LLC. <https://actor.im>
  */
 
-import { debounce, forEach } from 'lodash';
+import { debounce, map, isFunction } from 'lodash';
 
 import React, { Component, PropTypes } from 'react';
+import { Container } from 'flux/utils';
 import { findDOMNode } from 'react-dom';
 import PeerUtils from '../utils/PeerUtils';
 
 import DefaultMessages from './dialog/MessagesSection.react';
 import DefaultTyping from './dialog/TypingSection.react';
 import DefaultCompose from './dialog/ComposeSection.react';
+import DialogFooter from './dialog/DialogFooter.react';
 import DefaultToolbar from './Toolbar.react';
 import DefaultActivity from './Activity.react';
+import DefaultCall from './Call.react';
+import DefaultLogger from './dev/LoggerSection.react';
 import ConnectionState from './common/ConnectionState.react';
 
 import ActivityStore from '../stores/ActivityStore';
@@ -23,27 +27,8 @@ import DialogActionCreators from '../actions/DialogActionCreators';
 
 // On which scrollTop value start loading older messages
 const loadMessagesScrollTop = 100;
-const initialRenderMessagesCount = 20;
-const renderMessagesStep = 20;
 
-let renderMessagesCount = initialRenderMessagesCount;
 let lastScrolledFromBottom = 0;
-
-const getStateFromStores = () => {
-  const messages = MessageStore.getAll();
-  const overlay = MessageStore.getOverlay();
-  const messagesToRender = (messages.length > renderMessagesCount) ? messages.slice(messages.length - renderMessagesCount) : messages;
-  const overlayToRender = (overlay.length > renderMessagesCount) ? overlay.slice(overlay.length - renderMessagesCount) : overlay;
-
-  return {
-    peer: DialogStore.getCurrentPeer(),
-    messages,
-    overlay,
-    messagesToRender,
-    overlayToRender,
-    isMember: DialogStore.isMember()
-  };
-};
 
 class DialogSection extends Component {
   static contextTypes = {
@@ -54,23 +39,29 @@ class DialogSection extends Component {
     params: PropTypes.object
   };
 
+  static getStores() {
+    return [ActivityStore, MessageStore, DialogStore]
+  }
+
+  static calculateState() {
+    return {
+      peer: DialogStore.getCurrentPeer(),
+      isMember: DialogStore.isMember(),
+      messages: MessageStore.getMessagesToRender(),
+      overlay: MessageStore.getOverlayToRender(),
+      isActivityOpen: ActivityStore.isOpen()
+    };
+  }
+
   constructor(props) {
     super(props);
 
-    this.state = getStateFromStores();
-
-    ActivityStore.addListener(this.fixScrollTimeout);
-    MessageStore.addListener(this.onMessagesChange);
-    DialogStore.addListener(this.onChange);
-  }
-
-  componentWillMount() {
-    const peer = PeerUtils.stringToPeer(this.props.params.id);
+    const peer = PeerUtils.stringToPeer(props.params.id);
     DialogActionCreators.selectDialogPeer(peer);
   }
 
   componentDidMount() {
-    const peer = PeerUtils.stringToPeer(this.props.params.id);
+    const { peer } = this.state;
     if (peer) {
       this.fixScroll();
       this.loadMessagesByScroll();
@@ -82,6 +73,7 @@ class DialogSection extends Component {
     if (this.props.params.id !== params.id) {
       const peer = PeerUtils.stringToPeer(params.id);
       DialogActionCreators.selectDialogPeer(peer);
+      lastScrolledFromBottom = 0;
       if (peer) {
         this.fixScroll();
         this.loadMessagesByScroll();
@@ -89,121 +81,109 @@ class DialogSection extends Component {
     }
   }
 
-  componentDidUpdate() {
-    this.fixScroll();
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.isActivityOpen !== this.state.isActivityOpen) {
+      this.fixScrollTimeout();
+    } else {
+      this.fixScroll();
+    }
   }
 
   componentWillUnmount() {
+    // Unbind from current peer
     DialogActionCreators.selectDialogPeer(null);
   }
 
-  fixScrollTimeout = () => {
-    setTimeout(this.fixScroll, 50);
-  };
+  getScrollArea() {
+    const scrollNode = findDOMNode(this.refs.messagesSection.refs.messagesScroll.refs.scroll);
+    return scrollNode.getElementsByClassName('ss-scrollarea')[0];
+  }
 
   fixScroll = () => {
-    const scrollNode = findDOMNode(this.refs.messagesSection.refs.messagesScroll.refs.scroll);
-    const node = scrollNode.getElementsByClassName('ss-scrollarea')[0];
+    const node = this.getScrollArea();
     if (node) {
       node.scrollTop = node.scrollHeight - lastScrolledFromBottom - node.offsetHeight;
     }
   };
 
-  onChange = () => {
-    lastScrolledFromBottom = 0;
-    renderMessagesCount = initialRenderMessagesCount;
-    this.setState(getStateFromStores());
+  fixScrollTimeout = () => {
+    setTimeout(this.fixScroll, 50);
   };
 
-  onMessagesChange = debounce(() => {
-    this.setState(getStateFromStores());
-  }, 10, {maxWait: 50, leading: true});
-
   loadMessagesByScroll = debounce(() => {
-    const { peer, messages, messagesToRender } = this.state;
+    const { peer } = this.state;
 
     if (peer) {
-      const scrollNode = findDOMNode(this.refs.messagesSection.refs.messagesScroll.refs.scroll);
-      const node = scrollNode.getElementsByClassName('ss-scrollarea')[0];
-      let scrollTop = node.scrollTop;
-      lastScrolledFromBottom = node.scrollHeight - scrollTop - node.offsetHeight; // was node.scrollHeight - scrollTop
+      const node = this.getScrollArea();
+      lastScrolledFromBottom = node.scrollHeight - node.scrollTop - node.offsetHeight;
 
-      if (node.scrollTop < loadMessagesScrollTop) {
-
-        if (messages.length > messagesToRender.length) {
-          renderMessagesCount += renderMessagesStep;
-
-          if (renderMessagesCount > messages.length) {
-            renderMessagesCount = messages.length;
-          }
-
-          this.setState(getStateFromStores());
-        } else {
-            DialogActionCreators.onChatEnd(peer);
-        }
-      }
+      if (node.scrollTop < loadMessagesScrollTop) DialogActionCreators.loadMoreMessages(peer);
     }
   }, 5, {maxWait: 30});
 
+  getComponents() {
+    const { dialog, logger } = this.context.delegate.components;
+    const LoggerSection = logger || DefaultLogger;
+    if (dialog && !isFunction(dialog)) {
+      const activity = dialog.activity || [
+        DefaultActivity,
+        DefaultCall,
+        LoggerSection
+      ];
 
-  render() {
-    const { peer, isMember, messagesToRender, overlayToRender } = this.state;
-    const { delegate } = this.context;
-
-    let activity = [],
-        ToolbarSection,
-        TypingSection,
-        ComposeSection,
-        MessagesSection;
-
-    if (delegate.components.dialog !== null && typeof delegate.components.dialog !== 'function') {
-      ToolbarSection = delegate.components.dialog.toolbar || DefaultToolbar;
-      MessagesSection = (typeof delegate.components.dialog.messages == 'function') ? delegate.components.dialog.messages : DefaultMessages;
-      TypingSection = delegate.components.dialog.typing || DefaultTyping;
-      ComposeSection = delegate.components.dialog.compose || DefaultCompose;
-
-      if (delegate.components.dialog.activity) {
-        forEach(delegate.components.dialog.activity, (Activity, index) => activity.push(<Activity key={index}/>));
-      } else {
-        activity.push(<DefaultActivity key={1}/>);
-      }
-    } else {
-      ToolbarSection = DefaultToolbar;
-      MessagesSection = DefaultMessages;
-      TypingSection = DefaultTyping;
-      ComposeSection = DefaultCompose;
-      activity.push(<DefaultActivity key={1}/>);
+      return {
+        LoggerSection,
+        ToolbarSection: dialog.toolbar || DefaultToolbar,
+        MessagesSection: isFunction(dialog.messages) ? dialog.messages : DefaultMessages,
+        TypingSection: dialog.typing || DefaultTyping,
+        ComposeSection: dialog.compose || DefaultCompose,
+        activity: map(activity, (Activity, index) => <Activity key={index} />)
+      };
     }
 
-    const mainScreen = peer ? (
-      <section className="dialog">
-        <ConnectionState/>
-        <div className="messages">
-          <MessagesSection messages={messagesToRender}
-                           overlay={overlayToRender}
-                           peer={peer}
-                           ref="messagesSection"
-                           onScroll={this.loadMessagesByScroll}/>
+    return {
+      LoggerSection,
+      ToolbarSection: DefaultToolbar,
+      MessagesSection: DefaultMessages,
+      TypingSection: DefaultTyping,
+      ComposeSection: DefaultCompose,
+      activity: [
+        <DefaultActivity key={1} />,
+        <DefaultCall key={2} />,
+        <LoggerSection key={3} />
+      ]
+    };
+  }
 
-        </div>
-        {
-          isMember
-            ? <footer className="dialog__footer">
-                <TypingSection/>
-                <ComposeSection/>
-              </footer>
-            : <footer className="dialog__footer dialog__footer--disabled row center-xs middle-xs ">
-                <h3>You are not a member</h3>
-              </footer>
-        }
-      </section>
-    ) : null;
+  render() {
+    const { peer, isMember, messages, overlay } = this.state;
+
+    const {
+      ToolbarSection,
+      MessagesSection,
+      TypingSection,
+      ComposeSection,
+      activity
+    } = this.getComponents();
 
     return (
       <section className="main">
-        <ToolbarSection/>
+        <ToolbarSection />
         <div className="flexrow">
-          {mainScreen}
+          <section className="dialog">
+            <ConnectionState/>
+            <div className="messages">
+              <MessagesSection
+                isMember={isMember}
+                messages={messages}
+                overlay={overlay}
+                peer={peer}
+                ref="messagesSection"
+                onScroll={this.loadMessagesByScroll}
+              />
+            </div>
+            <DialogFooter isMember={isMember} components={{TypingSection, ComposeSection}} />
+          </section>
           {activity}
         </div>
       </section>
@@ -211,4 +191,4 @@ class DialogSection extends Component {
   }
 }
 
-export default DialogSection;
+export default Container.create(DialogSection);
