@@ -5,13 +5,13 @@ import java.util.List;
 import im.actor.core.entity.Peer;
 import im.actor.core.entity.Reaction;
 
-public class RouterMessageReactionsChanged {
+public class RouterMessageReactionsUpdated {
 
     private Peer peer;
     private long rid;
     private List<Reaction> reactions;
 
-    public RouterMessageReactionsChanged(Peer peer, long rid, List<Reaction> reactions) {
+    public RouterMessageReactionsUpdated(Peer peer, long rid, List<Reaction> reactions) {
         this.peer = peer;
         this.rid = rid;
         this.reactions = reactions;

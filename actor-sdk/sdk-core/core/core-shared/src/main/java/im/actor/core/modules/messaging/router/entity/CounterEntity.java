@@ -1,4 +1,4 @@
-package im.actor.core.modules.messaging.counters.entity;
+package im.actor.core.modules.messaging.router.entity;
 
 import java.io.IOException;
 

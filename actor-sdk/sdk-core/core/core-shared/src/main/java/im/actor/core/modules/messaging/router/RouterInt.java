@@ -16,19 +16,20 @@ import im.actor.core.entity.Reaction;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.router.messages.RouterChatClear;
+import im.actor.core.modules.messaging.router.messages.RouterChatClosed;
 import im.actor.core.modules.messaging.router.messages.RouterChatDelete;
+import im.actor.core.modules.messaging.router.messages.RouterChatOpen;
 import im.actor.core.modules.messaging.router.messages.RouterGroupedChanged;
 import im.actor.core.modules.messaging.router.messages.RouterHistoryLoaded;
 import im.actor.core.modules.messaging.router.messages.RouterMessageContentChanged;
 import im.actor.core.modules.messaging.router.messages.RouterMessageError;
-import im.actor.core.modules.messaging.router.messages.RouterMessageReactionsChanged;
+import im.actor.core.modules.messaging.router.messages.RouterMessageReactionsUpdated;
 import im.actor.core.modules.messaging.router.messages.RouterMessageRead;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReadByMe;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReceive;
 import im.actor.core.modules.messaging.router.messages.RouterMessageSent;
 import im.actor.core.modules.messaging.router.messages.RouterMessages;
 import im.actor.core.modules.messaging.router.messages.RouterMessagesDeleted;
-import im.actor.runtime.Log;
 import im.actor.runtime.actors.Actor;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorInterface;
@@ -160,7 +161,7 @@ public class RouterInt extends ActorInterface {
 
     public void onMessageReactionsChanged(Peer peer, long rid, List<Reaction> reactions) {
         if (isValidPeer(peer)) {
-            send(new RouterMessageReactionsChanged(peer, rid, reactions));
+            send(new RouterMessageReactionsUpdated(peer, rid, reactions));
         }
     }
 
@@ -187,6 +188,17 @@ public class RouterInt extends ActorInterface {
         }
     }
 
+    public void onChatOpen(Peer peer) {
+        if (isValidPeer(peer)) {
+            send(new RouterChatOpen(peer));
+        }
+    }
+
+    public void onChatClosed(Peer peer) {
+        if (isValidPeer(peer)) {
+            send(new RouterChatClosed(peer));
+        }
+    }
 
     //
     // Dialogs

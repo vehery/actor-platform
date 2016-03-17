@@ -1,7 +1,6 @@
-package im.actor.core.modules.messaging.counters.entity;
+package im.actor.core.modules.messaging.router.entity;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import im.actor.core.entity.Peer;

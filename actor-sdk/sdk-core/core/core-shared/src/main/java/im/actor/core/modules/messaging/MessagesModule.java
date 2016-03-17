@@ -918,15 +918,15 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
     @Override
     public void onBusEvent(Event event) {
 
-//        // Need to be here as events can be sent when no actor is created yet.
-//        if (event instanceof PeerChatOpened) {
-//            Peer peer = ((PeerChatOpened) event).getPeer();
-//            assumeConvActor(peer);
-//            conversationActors.get(peer).onConversationVisible();
-//        } else if (event instanceof PeerChatClosed) {
-//            Peer peer = ((PeerChatClosed) event).getPeer();
-//            assumeConvActor(peer);
-//            conversationActors.get(peer).onConversationHidden();
-//        }
+        // Need to be here as events can be sent when no actor is created yet.
+        if (event instanceof PeerChatOpened) {
+            Peer peer = ((PeerChatOpened) event).getPeer();
+            assumeConvActor(peer);
+            getRouter().onChatOpen(peer);
+        } else if (event instanceof PeerChatClosed) {
+            Peer peer = ((PeerChatClosed) event).getPeer();
+            assumeConvActor(peer);
+            getRouter().onChatClosed(peer);
+        }
     }
 }

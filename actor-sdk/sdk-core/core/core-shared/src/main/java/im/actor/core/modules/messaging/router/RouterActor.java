@@ -2,34 +2,29 @@ package im.actor.core.modules.messaging.router;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import im.actor.core.api.ApiDialogGroup;
 import im.actor.core.api.ApiDialogShort;
-import im.actor.core.entity.Avatar;
-import im.actor.core.entity.DialogSpec;
-import im.actor.core.entity.Group;
 import im.actor.core.entity.Message;
 import im.actor.core.entity.Peer;
-import im.actor.core.entity.PeerType;
 import im.actor.core.entity.Reaction;
-import im.actor.core.entity.User;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.conversation.ConversationInt;
-import im.actor.core.modules.messaging.counters.CountersInt;
-import im.actor.core.modules.messaging.counters.messages.Counters;
 import im.actor.core.modules.messaging.dialogs.DialogsInt;
 import im.actor.core.modules.messaging.dialogs.messages.DialogGroup;
 import im.actor.core.modules.messaging.dialogs.messages.DialogGroups;
-import im.actor.core.modules.messaging.entity.GroupedItem;
 import im.actor.core.modules.messaging.router.messages.RouterChatClear;
+import im.actor.core.modules.messaging.router.messages.RouterChatClosed;
 import im.actor.core.modules.messaging.router.messages.RouterChatDelete;
+import im.actor.core.modules.messaging.router.messages.RouterChatOpen;
 import im.actor.core.modules.messaging.router.messages.RouterGroupedChanged;
 import im.actor.core.modules.messaging.router.messages.RouterHistoryLoaded;
 import im.actor.core.modules.messaging.router.messages.RouterMessageContentChanged;
 import im.actor.core.modules.messaging.router.messages.RouterMessageError;
-import im.actor.core.modules.messaging.router.messages.RouterMessageReactionsChanged;
+import im.actor.core.modules.messaging.router.messages.RouterMessageReactionsUpdated;
 import im.actor.core.modules.messaging.router.messages.RouterMessageRead;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReadByMe;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReceive;
@@ -37,23 +32,27 @@ import im.actor.core.modules.messaging.router.messages.RouterMessageSent;
 import im.actor.core.modules.messaging.router.messages.RouterMessages;
 import im.actor.core.modules.messaging.router.messages.RouterMessagesDeleted;
 import im.actor.core.util.ModuleActor;
-import im.actor.core.viewmodel.DialogGroupVM;
-import im.actor.core.viewmodel.DialogSmall;
-import im.actor.core.viewmodel.generics.ArrayListDialogSmall;
 import im.actor.runtime.*;
-import im.actor.runtime.collections.ManagedList;
 import im.actor.runtime.function.Consumer;
-import im.actor.runtime.function.Function;
 import im.actor.runtime.promise.Promise;
 import im.actor.runtime.promise.PromisesArray;
 import im.actor.runtime.storage.IoResult;
 
 public class RouterActor extends ModuleActor {
 
+    private HashSet<Peer> openedChats = new HashSet<>();
+    private CountersManager countersManager;
+
     public RouterActor(ModuleContext context) {
         super(context);
     }
 
+    @Override
+    public void preStart() {
+        super.preStart();
+
+        countersManager = new CountersManager(context());
+    }
 
     //
     // Messages
@@ -62,18 +61,25 @@ public class RouterActor extends ModuleActor {
     public void onMessages(Peer peer, List<Message> messages) {
         final long start = im.actor.runtime.Runtime.getActorTime();
         Message topServerMessage = null;
+        int addedMessages = 0;
+        boolean isOpened = openedChats.contains(peer);
         for (Message m : messages) {
             if (m.isOnServer()) {
                 if (topServerMessage == null || m.getSortDate() > topServerMessage.getSortDate()) {
                     topServerMessage = m;
                 }
+                if (!isOpened) {
+                    addedMessages++;
+                }
             }
         }
-        ArrayList<Promise<IoResult>> results = new ArrayList<>();
 
-        if (topServerMessage != null) {
-            results.add(dialogs().onInMessage(peer, topServerMessage, -1));
+        ArrayList<Promise<IoResult>> results = new ArrayList<>();
+        if (addedMessages > 0) {
+            int counter = countersManager.incrementCounters(peer, addedMessages);
+            results.add(dialogs().onInMessage(peer, topServerMessage, counter));
         }
+
         results.add(chat(peer).onMessages(messages));
 
         PromisesArray.ofPromises(results).zipIo().then(new Consumer<IoResult>() {
@@ -160,6 +166,19 @@ public class RouterActor extends ModuleActor {
         }).done(self());
     }
 
+    public void onChatOpen(Peer peer) {
+        if (!openedChats.contains(peer)) {
+            openedChats.add(peer);
+            if (countersManager.onCountersReset(peer)) {
+                dialogs().onCountersChanged(peer, 0);
+            }
+        }
+    }
+
+    public void onChatClosed(Peer peer) {
+        openedChats.remove(peer);
+    }
+
 
     //
     // Dialogs
@@ -177,13 +196,8 @@ public class RouterActor extends ModuleActor {
             }
             updatedGroups.add(new DialogGroup(g.getTitle(), g.getKey(), peers));
         }
-        counters().onCountersReceived(counters);
-        counters().askCounters().then(new Consumer<Counters>() {
-            @Override
-            public void apply(Counters counters) {
-                dialogs().onGroupsChanged(new DialogGroups(updatedGroups, counters));
-            }
-        }).done(self());
+        countersManager.onCountersReceived(counters);
+        dialogs().onGroupsChanged(new DialogGroups(updatedGroups, countersManager.getCounters()));
     }
 
 
@@ -199,9 +213,6 @@ public class RouterActor extends ModuleActor {
         return getDialogs();
     }
 
-    private CountersInt counters() {
-        return context().getMessagesModule().getCounters();
-    }
 
     //
     // Messages
@@ -222,8 +233,8 @@ public class RouterActor extends ModuleActor {
             RouterMessageContentChanged contentChanged = (RouterMessageContentChanged) message;
             onMessageContentChanged(contentChanged.getPeer(), contentChanged.getRid(),
                     contentChanged.getContent());
-        } else if (message instanceof RouterMessageReactionsChanged) {
-            RouterMessageReactionsChanged reactionsChanged = (RouterMessageReactionsChanged) message;
+        } else if (message instanceof RouterMessageReactionsUpdated) {
+            RouterMessageReactionsUpdated reactionsChanged = (RouterMessageReactionsUpdated) message;
             onReactionsChanged(reactionsChanged.getPeer(), reactionsChanged.getRid(), reactionsChanged.getReactions());
         } else if (message instanceof RouterChatClear) {
             RouterChatClear chatClear = (RouterChatClear) message;
@@ -249,6 +260,12 @@ public class RouterActor extends ModuleActor {
         } else if (message instanceof RouterGroupedChanged) {
             RouterGroupedChanged groupedChanged = (RouterGroupedChanged) message;
             onGroupedUpdated(groupedChanged.getGroups());
+        } else if (message instanceof RouterChatOpen) {
+            RouterChatOpen chatOpen = (RouterChatOpen) message;
+            onChatOpen(chatOpen.getPeer());
+        } else if (message instanceof RouterChatClosed) {
+            RouterChatClosed chatClosed = (RouterChatClosed) message;
+            onChatClosed(chatClosed.getPeer());
         } else {
             super.onReceive(message);
         }
