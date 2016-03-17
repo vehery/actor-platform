@@ -40,6 +40,8 @@ import im.actor.runtime.storage.IoResult;
 
 public class RouterActor extends ModuleActor {
 
+    private static final String TAG = "Router";
+
     private HashSet<Peer> openedChats = new HashSet<>();
     private CountersManager countersManager;
 
@@ -74,8 +76,12 @@ public class RouterActor extends ModuleActor {
             }
         }
 
+        Log.d(TAG, "Messages");
         ArrayList<Promise<IoResult>> results = new ArrayList<>();
         if (addedMessages > 0) {
+
+            Log.d(TAG, "Messages: added " + addedMessages);
+
             int counter = countersManager.incrementCounters(peer, addedMessages);
             results.add(dialogs().onInMessage(peer, topServerMessage, counter));
         }
@@ -85,7 +91,7 @@ public class RouterActor extends ModuleActor {
         PromisesArray.ofPromises(results).zipIo().then(new Consumer<IoResult>() {
             @Override
             public void apply(IoResult ioResult) {
-                Log.d("Router", "onMessages: " + (im.actor.runtime.Runtime.getActorTime() - start) + " ms");
+                Log.d(TAG, "onMessages: " + (im.actor.runtime.Runtime.getActorTime() - start) + " ms");
             }
         }).done(self());
     }

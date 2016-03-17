@@ -53,6 +53,7 @@ public class WarmerActor extends ModuleActor {
     }
 
     private void onAllDialogsLoaded() {
+        context().getUpdatesModule().getUpdateActor().send(new SequenceActor.StartSequence());
         context().getContactsModule().getContactSyncActor().send(new ContactsSyncActor.StartSync());
     }
 
@@ -61,7 +62,6 @@ public class WarmerActor extends ModuleActor {
             isContactsLoaded = true;
             context().getContactsModule().getBookImportActor().send(new BookImportActor.StartSync());
             context().getEncryption().getKeyManagerInt().start();
-            context().getUpdatesModule().getUpdateActor().send(new SequenceActor.StartSequence());
         }
     }
 

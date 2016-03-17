@@ -2,6 +2,7 @@ package im.actor.core.modules.messaging.dialogs;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import im.actor.core.api.rpc.RequestLoadGroupedDialogs;
@@ -13,7 +14,6 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.PeerType;
 import im.actor.core.entity.User;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.counters.messages.Counters;
 import im.actor.core.modules.messaging.dialogs.messages.DialogGroup;
 import im.actor.core.modules.messaging.entity.GroupedItem;
 import im.actor.core.modules.messaging.entity.GroupedStorage;
@@ -101,7 +101,7 @@ public class DialogsGroupedActor extends ModuleActor {
         }
     }
 
-    private void onGroupedChanged(List<DialogGroup> groupedItems, Counters counters) {
+    private void onGroupedChanged(List<DialogGroup> groupedItems, HashMap<Peer, Integer> counters) {
         if (!isStarted) {
             isStarted = true;
             if (isPersistenceEnabled()) {
@@ -165,13 +165,13 @@ public class DialogsGroupedActor extends ModuleActor {
         context().getWarmer().onGroupedDialogsLoaded();
     }
 
-    private void applyGroups(List<DialogGroup> dialogGroups, Counters counters) {
+    private void applyGroups(List<DialogGroup> dialogGroups, HashMap<Peer, Integer> counters) {
 
         // Writing missing specs
 
         ArrayList<DialogSpec> updatedSpecs = new ArrayList<>();
-        for (Peer peer : counters.getCounters().keySet()) {
-            int counter = counters.getCounters().get(peer);
+        for (Peer peer : counters.keySet()) {
+            int counter = counters.get(peer);
             updatedSpecs.add(new DialogSpec(peer, false, counter));
         }
         specs.getEngine().addOrUpdateItems(updatedSpecs);
@@ -215,9 +215,9 @@ public class DialogsGroupedActor extends ModuleActor {
     public static class GroupedDialogsChanged {
 
         private List<DialogGroup> items;
-        private Counters counters;
+        private HashMap<Peer, Integer> counters;
 
-        public GroupedDialogsChanged(List<DialogGroup> items, Counters counters) {
+        public GroupedDialogsChanged(List<DialogGroup> items, HashMap<Peer, Integer> counters) {
             this.items = items;
             this.counters = counters;
         }
@@ -226,7 +226,7 @@ public class DialogsGroupedActor extends ModuleActor {
             return items;
         }
 
-        public Counters getCounters() {
+        public HashMap<Peer, Integer> getCounters() {
             return counters;
         }
     }

@@ -1,15 +1,16 @@
 package im.actor.core.modules.messaging.dialogs.messages;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import im.actor.core.modules.messaging.counters.messages.Counters;
+import im.actor.core.entity.Peer;
 
 public class DialogGroups {
 
     private ArrayList<DialogGroup> groups;
-    private Counters counters;
+    private HashMap<Peer, Integer> counters;
 
-    public DialogGroups(ArrayList<DialogGroup> groups, Counters counters) {
+    public DialogGroups(ArrayList<DialogGroup> groups, HashMap<Peer, Integer> counters) {
         this.groups = groups;
         this.counters = counters;
     }
@@ -18,7 +19,7 @@ public class DialogGroups {
         return groups;
     }
 
-    public Counters getCounters() {
+    public HashMap<Peer, Integer> getCounters() {
         return counters;
     }
 }

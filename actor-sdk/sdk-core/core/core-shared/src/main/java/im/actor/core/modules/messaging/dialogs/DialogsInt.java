@@ -1,8 +1,5 @@
 package im.actor.core.modules.messaging.dialogs;
 
-import java.util.List;
-
-import im.actor.core.api.ApiDialogGroup;
 import im.actor.core.entity.Dialog;
 import im.actor.core.entity.Group;
 import im.actor.core.entity.Message;
@@ -10,7 +7,6 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.User;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.counters.messages.Counters;
 import im.actor.core.modules.messaging.dialogs.messages.DialogClear;
 import im.actor.core.modules.messaging.dialogs.messages.DialogDelete;
 import im.actor.core.modules.messaging.dialogs.messages.DialogCounterChanged;
@@ -52,6 +48,7 @@ public class DialogsInt extends ActorInterface {
                 return new DialogsActor(dialogs, context);
             }
         });
+        setDest(dialogsActor);
         this.dialogsGroupedActor = system().actorOf("actor/dialogs/grouped", new ActorCreator() {
             @Override
             public DialogsGroupedActor create() {

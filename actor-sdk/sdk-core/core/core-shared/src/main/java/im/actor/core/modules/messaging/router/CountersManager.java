@@ -6,7 +6,6 @@ import java.util.HashMap;
 import im.actor.core.entity.Peer;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.counters.messages.Counters;
 import im.actor.core.modules.messaging.router.entity.CounterEntity;
 import im.actor.core.modules.messaging.router.entity.CountersStorage;
 
@@ -37,13 +36,13 @@ public class CountersManager extends AbsModule {
         return entity.getCounter();
     }
 
-    public Counters getCounters() {
+    public HashMap<Peer, Integer> getCounters() {
         HashMap<Peer, Integer> counters = new HashMap<>();
         for (Peer p : storage.getCounters().keySet()) {
             int count = storage.getCounters().get(p).getCounter();
             counters.put(p, count);
         }
-        return new Counters(counters);
+        return counters;
     }
 
     public boolean onCountersReceived(HashMap<Peer, Integer> counters) {
