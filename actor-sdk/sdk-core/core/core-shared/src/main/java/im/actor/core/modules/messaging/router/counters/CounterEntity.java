@@ -1,4 +1,4 @@
-package im.actor.core.modules.messaging.router.entity;
+package im.actor.core.modules.messaging.router.counters;
 
 import java.io.IOException;
 
@@ -29,6 +29,10 @@ public class CounterEntity extends BserObject {
 
     public int getCounter() {
         return counter;
+    }
+
+    public long getTopUnreadMessage() {
+        return topUnreadMessage;
     }
 
     @Override

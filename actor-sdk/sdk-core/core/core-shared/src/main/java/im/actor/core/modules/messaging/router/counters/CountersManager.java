@@ -1,13 +1,14 @@
-package im.actor.core.modules.messaging.router;
+package im.actor.core.modules.messaging.router.counters;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import im.actor.core.entity.Peer;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.router.entity.CounterEntity;
-import im.actor.core.modules.messaging.router.entity.CountersStorage;
+import im.actor.core.modules.messaging.router.counters.CounterEntity;
+import im.actor.core.modules.messaging.router.counters.CountersStorage;
 
 public class CountersManager extends AbsModule {
 
@@ -45,19 +46,21 @@ public class CountersManager extends AbsModule {
         return counters;
     }
 
-    public boolean onCountersReceived(HashMap<Peer, Integer> counters) {
+    public boolean onCountersReceived(ArrayList<CounterDesc> counterDescs) {
         boolean isChanged = false;
-        for (Peer p : counters.keySet()) {
-            int counter = counters.get(p);
-            CounterEntity entity = storage.getCounters().get(p);
+        for (CounterDesc desc : counterDescs) {
+            Peer peer = desc.getPeer();
+            int counter = desc.getCounter();
+            long topDate = desc.getDate();
+            CounterEntity entity = storage.getCounters().get(desc.getPeer());
             if (counter != 0 && entity == null) {
-                storage.getCounters().put(p, new CounterEntity(p, counter, 0));
+                storage.getCounters().put(peer, new CounterEntity(peer, counter, topDate));
                 isChanged = true;
             } else if (entity != null && entity.getCounter() != counter) {
-                storage.getCounters().put(p, new CounterEntity(p, counter, 0));
+                storage.getCounters().put(peer, new CounterEntity(peer, counter, topDate));
                 isChanged = true;
             } else if (counter == 0 && entity != null) {
-                storage.getCounters().remove(p);
+                storage.getCounters().remove(peer);
                 isChanged = true;
             }
         }
@@ -72,12 +75,13 @@ public class CountersManager extends AbsModule {
         return res;
     }
 
-    public boolean onCountersReset(Peer peer) {
-        if (storage.getCounters().remove(peer) != null) {
+    public long onCountersReset(Peer peer) {
+        CounterEntity entity = storage.getCounters().remove(peer);
+        if (entity != null) {
             saveStorage();
-            return true;
+            return entity.getTopUnreadMessage();
         }
-        return false;
+        return -1;
     }
 
     private void saveStorage() {

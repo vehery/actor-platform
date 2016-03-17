@@ -1,4 +1,4 @@
-package im.actor.core.modules.messaging.router.entity;
+package im.actor.core.modules.messaging.router.counters;
 
 import java.io.IOException;
 import java.util.HashMap;

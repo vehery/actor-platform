@@ -12,10 +12,15 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.Reaction;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
+import im.actor.core.modules.messaging.actions.CursorActor;
+import im.actor.core.modules.messaging.actions.CursorReaderActor;
+import im.actor.core.modules.messaging.actions.CursorReceiverActor;
 import im.actor.core.modules.messaging.conversation.ConversationInt;
 import im.actor.core.modules.messaging.dialogs.DialogsInt;
 import im.actor.core.modules.messaging.dialogs.messages.DialogGroup;
 import im.actor.core.modules.messaging.dialogs.messages.DialogGroups;
+import im.actor.core.modules.messaging.router.counters.CounterDesc;
+import im.actor.core.modules.messaging.router.counters.CountersManager;
 import im.actor.core.modules.messaging.router.messages.RouterChatClear;
 import im.actor.core.modules.messaging.router.messages.RouterChatClosed;
 import im.actor.core.modules.messaging.router.messages.RouterChatDelete;
@@ -80,6 +85,11 @@ public class RouterActor extends ModuleActor {
         if (addedMessages > 0) {
             int counter = countersManager.incrementCounters(peer, addedMessages, topServerMessage.getSortDate());
             results.add(dialogs().onInMessage(peer, topServerMessage, counter));
+        }
+
+        if (isOpened && topServerMessage != null) {
+            context().getMessagesModule().getPlainReadActor()
+                    .send(new CursorReaderActor.MarkRead(peer, topServerMessage.getSortDate()));
         }
 
         results.add(chat(peer).onMessages(messages));
@@ -171,8 +181,11 @@ public class RouterActor extends ModuleActor {
     public void onChatOpen(Peer peer) {
         if (!openedChats.contains(peer)) {
             openedChats.add(peer);
-            if (countersManager.onCountersReset(peer)) {
+            long date = countersManager.onCountersReset(peer);
+            if (date > 0) {
                 dialogs().onCountersChanged(peer, 0);
+                context().getMessagesModule().getPlainReadActor()
+                        .send(new CursorReaderActor.MarkRead(peer, date));
             }
         }
     }
@@ -182,19 +195,18 @@ public class RouterActor extends ModuleActor {
     }
 
 
-
     //
     // Dialogs
     //
 
     public void onGroupedUpdated(List<ApiDialogGroup> groups) {
-        final ArrayList<DialogGroup> updatedGroups = new ArrayList<>();
-        HashMap<Peer, Integer> counters = new HashMap<>();
+        ArrayList<DialogGroup> updatedGroups = new ArrayList<>();
+        ArrayList<CounterDesc> counters = new ArrayList<>();
         for (ApiDialogGroup g : groups) {
             ArrayList<Peer> peers = new ArrayList<>();
             for (ApiDialogShort dialogShort : g.getDialogs()) {
                 Peer peer = Peer.fromApiPeer(dialogShort.getPeer());
-                counters.put(peer, dialogShort.getCounter());
+                counters.add(new CounterDesc(peer, dialogShort.getCounter(), dialogShort.getDate()));
                 peers.add(peer);
             }
             updatedGroups.add(new DialogGroup(g.getTitle(), g.getKey(), peers));

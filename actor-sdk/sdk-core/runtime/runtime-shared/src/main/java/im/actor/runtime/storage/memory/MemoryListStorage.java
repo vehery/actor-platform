@@ -1,6 +1,8 @@
 package im.actor.runtime.storage.memory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -54,13 +56,17 @@ public class MemoryListStorage implements ListStorage {
 
     @Override
     public List<ListEngineRecord> loadAllItems() {
-        Log.d("MemoryListStorage", "loadAllItems:" + records);
         ArrayList<ListEngineRecord> res = new ArrayList<>();
         for (long id : records.keySet()) {
             Record record = records.get(id);
-            Log.d("MemoryListStorage", "loadAllItems:" + id);
             res.add(new ListEngineRecord(id, record.getOrder(), record.getQuery(), record.getData()));
         }
+        Collections.sort(res, new Comparator<ListEngineRecord>() {
+            @Override
+            public int compare(ListEngineRecord lhs, ListEngineRecord rhs) {
+                return lhs.getOrder() < rhs.getOrder() ? -1 : (lhs.getOrder() == rhs.getOrder() ? 0 : 1);
+            }
+        });
         return res;
     }
 
