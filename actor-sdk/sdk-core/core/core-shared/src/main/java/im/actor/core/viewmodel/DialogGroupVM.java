@@ -4,7 +4,7 @@ import com.google.j2objc.annotations.Property;
 
 import im.actor.core.viewmodel.generics.ArrayListDialogSmall;
 
-public class DialogGroup {
+public class DialogGroupVM {
 
     @Property("readonly, nonatomic")
     private String title;
@@ -13,7 +13,7 @@ public class DialogGroup {
     @Property("readonly, nonatomic")
     private ArrayListDialogSmall dialogs;
 
-    public DialogGroup(String title, String key, ArrayListDialogSmall dialogs) {
+    public DialogGroupVM(String title, String key, ArrayListDialogSmall dialogs) {
         this.title = title;
         this.key = key;
         this.dialogs = dialogs;

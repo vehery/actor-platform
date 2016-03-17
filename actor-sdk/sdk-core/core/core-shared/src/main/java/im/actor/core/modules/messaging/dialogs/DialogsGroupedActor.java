@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import im.actor.core.api.ApiDialogGroup;
-import im.actor.core.api.ApiDialogShort;
 import im.actor.core.api.rpc.RequestLoadGroupedDialogs;
 import im.actor.core.api.rpc.ResponseLoadGroupedDialogs;
 import im.actor.core.entity.Avatar;
@@ -15,17 +13,17 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.PeerType;
 import im.actor.core.entity.User;
 import im.actor.core.modules.ModuleContext;
+import im.actor.core.modules.messaging.counters.messages.Counters;
+import im.actor.core.modules.messaging.dialogs.messages.DialogGroup;
 import im.actor.core.modules.messaging.entity.GroupedItem;
 import im.actor.core.modules.messaging.entity.GroupedStorage;
 import im.actor.core.util.ModuleActor;
-import im.actor.core.viewmodel.DialogGroup;
+import im.actor.core.viewmodel.DialogGroupVM;
 import im.actor.core.viewmodel.DialogSmall;
 import im.actor.core.viewmodel.DialogSpecVM;
 import im.actor.core.viewmodel.generics.ArrayListDialogSmall;
 import im.actor.runtime.function.Consumer;
 import im.actor.runtime.mvvm.MVVMCollection;
-
-import static im.actor.core.modules.messaging.entity.EntityConverter.convert;
 
 public class DialogsGroupedActor extends ModuleActor {
 
@@ -34,7 +32,7 @@ public class DialogsGroupedActor extends ModuleActor {
 
     private GroupedStorage storage;
     private MVVMCollection<DialogSpec, DialogSpecVM> specs;
-    private boolean isInited;
+    private boolean isStarted;
 
     public DialogsGroupedActor(ModuleContext context) {
         super(context);
@@ -59,7 +57,7 @@ public class DialogsGroupedActor extends ModuleActor {
             if (!isLoaded) {
                 loadGroupedDialogs();
             } else {
-                isInited = true;
+                isStarted = true;
                 notifyVM();
             }
         } else {
@@ -86,7 +84,7 @@ public class DialogsGroupedActor extends ModuleActor {
     //
 
     private void onCounterChanged(Peer peer, int counter) {
-        if (isInited) {
+        if (isStarted) {
             DialogSpec spec = new DialogSpec(peer, false, counter);
             specs.getEngine().addOrUpdateItem(spec);
             notifyVM(peer);
@@ -96,22 +94,22 @@ public class DialogsGroupedActor extends ModuleActor {
     }
 
     private void onPeerInfoChanged(Peer peer) {
-        if (isInited) {
+        if (isStarted) {
             notifyVM(peer);
         } else {
             stash();
         }
     }
 
-    private void onGroupedChanged(List<ApiDialogGroup> groupedItems) {
-        if (!isInited) {
-            isInited = true;
+    private void onGroupedChanged(List<DialogGroup> groupedItems, Counters counters) {
+        if (!isStarted) {
+            isStarted = true;
             if (isPersistenceEnabled()) {
                 preferences().putBool(PREFERENCE_GROUPED_LOADED, true);
             }
             unstashAll();
         }
-        applyGroups(groupedItems);
+        applyGroups(groupedItems, counters);
     }
 
 
@@ -136,12 +134,11 @@ public class DialogsGroupedActor extends ModuleActor {
     }
 
     private void notifyVM() {
-
-        ArrayList<DialogGroup> groups = new ArrayList<DialogGroup>();
+        ArrayList<DialogGroupVM> groups = new ArrayList<>();
         for (GroupedItem i : storage.getGroups()) {
             ArrayListDialogSmall dialogSmalls = new ArrayListDialogSmall();
             for (Peer p : i.getPeers()) {
-                DialogSpec spec = specs.getEngine().getValue(p.getUnuqueId());
+
                 String title;
                 Avatar avatar;
                 if (p.getPeerType() == PeerType.GROUP) {
@@ -155,40 +152,35 @@ public class DialogsGroupedActor extends ModuleActor {
                 } else {
                     continue;
                 }
-
-                dialogSmalls.add(new DialogSmall(p, title, avatar, spec.getCounter()));
+                DialogSpec spec = specs.getEngine().getValue(p.getUnuqueId());
+                if (spec != null) {
+                    dialogSmalls.add(new DialogSmall(p, title, avatar, spec.getCounter()));
+                } else {
+                    dialogSmalls.add(new DialogSmall(p, title, avatar, 0));
+                }
             }
-            groups.add(new DialogGroup(i.getTitle(), i.getKey(), dialogSmalls));
+            groups.add(new DialogGroupVM(i.getTitle(), i.getKey(), dialogSmalls));
         }
         context().getMessagesModule().getDialogGroupsVM().getGroupsValueModel().change(groups);
         context().getWarmer().onGroupedDialogsLoaded();
     }
 
-    private void applyGroups(List<ApiDialogGroup> dialogGroups) {
+    private void applyGroups(List<DialogGroup> dialogGroups, Counters counters) {
 
         // Writing missing specs
 
-        ArrayList<DialogSpec> updatedSpecs = new ArrayList<DialogSpec>();
-        for (ApiDialogGroup g : dialogGroups) {
-            for (ApiDialogShort s : g.getDialogs()) {
-                Peer peer = convert(s.getPeer());
-                if (specs.getEngine().getValue(peer.getUnuqueId()) == null) {
-                    updatedSpecs.add(new DialogSpec(peer, false, s.getCounter()));
-                }
-            }
+        ArrayList<DialogSpec> updatedSpecs = new ArrayList<>();
+        for (Peer peer : counters.getCounters().keySet()) {
+            int counter = counters.getCounters().get(peer);
+            updatedSpecs.add(new DialogSpec(peer, false, counter));
         }
         specs.getEngine().addOrUpdateItems(updatedSpecs);
 
         // Updating storage
 
         storage.getGroups().clear();
-        for (ApiDialogGroup g : dialogGroups) {
-            ArrayList<Peer> peers = new ArrayList<Peer>();
-            for (ApiDialogShort s : g.getDialogs()) {
-                Peer peer = convert(s.getPeer());
-                peers.add(peer);
-            }
-            storage.getGroups().add(new GroupedItem(g.getKey(), g.getTitle(), peers));
+        for (DialogGroup g : dialogGroups) {
+            storage.getGroups().add(new GroupedItem(g.getKey(), g.getTitle(), g.getPeers()));
         }
         if (isPersistenceEnabled()) {
             preferences().putBytes(PREFERENCE_GROUPED, storage.toByteArray());
@@ -214,7 +206,7 @@ public class DialogsGroupedActor extends ModuleActor {
             onCounterChanged(counterChanged.getPeer(), counterChanged.getCounter());
         } else if (message instanceof GroupedDialogsChanged) {
             GroupedDialogsChanged g = (GroupedDialogsChanged) message;
-            onGroupedChanged(g.getItems());
+            onGroupedChanged(g.getItems(), g.getCounters());
         } else {
             super.onReceive(message);
         }
@@ -222,14 +214,20 @@ public class DialogsGroupedActor extends ModuleActor {
 
     public static class GroupedDialogsChanged {
 
-        private List<ApiDialogGroup> items;
+        private List<DialogGroup> items;
+        private Counters counters;
 
-        public GroupedDialogsChanged(List<ApiDialogGroup> items) {
+        public GroupedDialogsChanged(List<DialogGroup> items, Counters counters) {
             this.items = items;
+            this.counters = counters;
         }
 
-        public List<ApiDialogGroup> getItems() {
+        public List<DialogGroup> getItems() {
             return items;
+        }
+
+        public Counters getCounters() {
+            return counters;
         }
     }
 
@@ -248,6 +246,7 @@ public class DialogsGroupedActor extends ModuleActor {
     }
 
     public static class CounterChanged {
+
         private Peer peer;
         private int counter;
 

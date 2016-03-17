@@ -10,9 +10,11 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.User;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
+import im.actor.core.modules.messaging.counters.messages.Counters;
 import im.actor.core.modules.messaging.dialogs.messages.DialogClear;
 import im.actor.core.modules.messaging.dialogs.messages.DialogDelete;
 import im.actor.core.modules.messaging.dialogs.messages.DialogCounterChanged;
+import im.actor.core.modules.messaging.dialogs.messages.DialogGroups;
 import im.actor.core.modules.messaging.dialogs.messages.DialogReadByMe;
 import im.actor.core.modules.messaging.dialogs.messages.DialogsRead;
 import im.actor.core.modules.messaging.dialogs.messages.DialogsReceive;
@@ -144,9 +146,10 @@ public class DialogsInt extends ActorInterface {
     // Grouped Dialogs
     //
 
-    public void onGroupsChanged(List<ApiDialogGroup> groups) {
+    public void onGroupsChanged(DialogGroups dialogGroups) {
         if (dialogsGroupedActor != null) {
-            dialogsGroupedActor.send(new DialogsGroupedActor.GroupedDialogsChanged(groups));
+            dialogsGroupedActor.send(new DialogsGroupedActor
+                    .GroupedDialogsChanged(dialogGroups.getGroups(), dialogGroups.getCounters()));
         }
     }
 }

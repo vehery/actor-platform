@@ -2,6 +2,7 @@ package im.actor.core.modules.messaging.entity;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import im.actor.core.entity.Peer;
 import im.actor.runtime.bser.BserObject;
@@ -12,9 +13,9 @@ public class GroupedItem extends BserObject {
 
     private String key;
     private String title;
-    private ArrayList<Peer> peers = new ArrayList<Peer>();
+    private List<Peer> peers = new ArrayList<>();
 
-    public GroupedItem(String key, String title, ArrayList<Peer> peers) {
+    public GroupedItem(String key, String title, List<Peer> peers) {
         this.key = key;
         this.title = title;
         this.peers = peers;
@@ -32,7 +33,7 @@ public class GroupedItem extends BserObject {
         return title;
     }
 
-    public ArrayList<Peer> getPeers() {
+    public List<Peer> getPeers() {
         return peers;
     }
 

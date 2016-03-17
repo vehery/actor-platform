@@ -2,19 +2,14 @@ package im.actor.core.modules.messaging.counters;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import im.actor.core.api.ApiDialogGroup;
-import im.actor.core.api.ApiDialogShort;
 import im.actor.core.entity.Peer;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.counters.entity.CounterEntity;
 import im.actor.core.modules.messaging.counters.entity.CountersStorage;
 import im.actor.core.modules.messaging.counters.messages.Counters;
 import im.actor.core.modules.messaging.counters.messages.CountersGet;
-import im.actor.core.modules.messaging.counters.messages.CountersGroupedUpdated;
-import im.actor.core.modules.messaging.dialogs.DialogsInt;
+import im.actor.core.modules.messaging.counters.messages.CountersReceived;
 import im.actor.core.util.ModuleActor;
 import im.actor.runtime.promise.Promise;
 import im.actor.runtime.promise.Promises;
@@ -44,19 +39,19 @@ public class CountersActor extends ModuleActor {
         }
     }
 
-    public void onGroupedUpdated(List<ApiDialogGroup> groups) {
-        for (ApiDialogGroup g : groups) {
-            for (ApiDialogShort d : g.getDialogs()) {
-                Peer peer = convert(d.getPeer());
-                if (d.getCounter() > 0) {
-                    storage.getCounters().put(peer, new CounterEntity(peer, d.getCounter()));
-                } else {
-                    storage.getCounters().remove(peer);
-                }
+    public void onCountersReceived(HashMap<Peer, Integer> counters) {
+        for (Peer p : counters.keySet()) {
+            int counter = counters.get(p);
+            if (counter > 0) {
+                storage.getCounters().put(p, new CounterEntity(p, counter));
+            } else {
+                storage.getCounters().remove(p);
             }
         }
         saveStorage();
     }
+
+    public void onInMessage
 
     public Counters getCounters() {
         HashMap<Peer, Integer> counters = new HashMap<>();
@@ -82,9 +77,9 @@ public class CountersActor extends ModuleActor {
 
     @Override
     public void onReceive(Object message) {
-        if (message instanceof CountersGroupedUpdated) {
-            CountersGroupedUpdated countersGroupedUpdated = (CountersGroupedUpdated) message;
-            onGroupedUpdated(countersGroupedUpdated.getGroups());
+        if (message instanceof CountersReceived) {
+            CountersReceived received = (CountersReceived) message;
+            onCountersReceived(received.getCounters());
         } else {
             super.onReceive(message);
         }

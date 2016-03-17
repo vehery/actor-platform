@@ -1,17 +1,16 @@
 package im.actor.core.modules.messaging.counters;
 
-import java.util.List;
+import java.util.HashMap;
 
-import im.actor.core.api.ApiDialogGroup;
+import im.actor.core.entity.Peer;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.counters.messages.Counters;
 import im.actor.core.modules.messaging.counters.messages.CountersGet;
-import im.actor.core.modules.messaging.counters.messages.CountersGroupedUpdated;
-import im.actor.core.modules.messaging.dialogs.DialogsInt;
+import im.actor.core.modules.messaging.counters.messages.CountersDiff;
+import im.actor.core.modules.messaging.counters.messages.CountersReceived;
 import im.actor.runtime.actors.Actor;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorInterface;
-import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.promise.Promise;
 
 import static im.actor.runtime.actors.ActorSystem.system;
@@ -27,8 +26,12 @@ public class CountersInt extends ActorInterface {
         }));
     }
 
-    public void onGroupedChatsUpdated(List<ApiDialogGroup> groups) {
-        send(new CountersGroupedUpdated(groups));
+    public void onCountersReceived(HashMap<Peer, Integer> counters) {
+        send(new CountersReceived(counters));
+    }
+
+    public void onIncomingMessages(HashMap<Peer, Integer> messages) {
+        send(new CountersDiff(messages));
     }
 
     public Promise<Counters> askCounters() {

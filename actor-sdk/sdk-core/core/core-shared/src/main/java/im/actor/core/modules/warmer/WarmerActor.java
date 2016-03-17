@@ -20,7 +20,6 @@ public class WarmerActor extends ModuleActor {
     @Override
     public void preStart() {
         isDialogsLoaded = false;
-        isGroupedDialogsLoaded = !config().isEnabledGroupedChatList();
     }
 
     public void onSequenceStarted() {

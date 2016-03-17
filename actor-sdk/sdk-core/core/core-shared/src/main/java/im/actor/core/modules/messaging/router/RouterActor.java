@@ -1,17 +1,28 @@
 package im.actor.core.modules.messaging.router;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import im.actor.core.api.ApiDialogGroup;
+import im.actor.core.api.ApiDialogShort;
+import im.actor.core.entity.Avatar;
+import im.actor.core.entity.DialogSpec;
+import im.actor.core.entity.Group;
 import im.actor.core.entity.Message;
 import im.actor.core.entity.Peer;
+import im.actor.core.entity.PeerType;
 import im.actor.core.entity.Reaction;
+import im.actor.core.entity.User;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.conversation.ConversationInt;
 import im.actor.core.modules.messaging.counters.CountersInt;
+import im.actor.core.modules.messaging.counters.messages.Counters;
 import im.actor.core.modules.messaging.dialogs.DialogsInt;
+import im.actor.core.modules.messaging.dialogs.messages.DialogGroup;
+import im.actor.core.modules.messaging.dialogs.messages.DialogGroups;
+import im.actor.core.modules.messaging.entity.GroupedItem;
 import im.actor.core.modules.messaging.router.messages.RouterChatClear;
 import im.actor.core.modules.messaging.router.messages.RouterChatDelete;
 import im.actor.core.modules.messaging.router.messages.RouterGroupedChanged;
@@ -26,8 +37,13 @@ import im.actor.core.modules.messaging.router.messages.RouterMessageSent;
 import im.actor.core.modules.messaging.router.messages.RouterMessages;
 import im.actor.core.modules.messaging.router.messages.RouterMessagesDeleted;
 import im.actor.core.util.ModuleActor;
+import im.actor.core.viewmodel.DialogGroupVM;
+import im.actor.core.viewmodel.DialogSmall;
+import im.actor.core.viewmodel.generics.ArrayListDialogSmall;
 import im.actor.runtime.*;
+import im.actor.runtime.collections.ManagedList;
 import im.actor.runtime.function.Consumer;
+import im.actor.runtime.function.Function;
 import im.actor.runtime.promise.Promise;
 import im.actor.runtime.promise.PromisesArray;
 import im.actor.runtime.storage.IoResult;
@@ -144,14 +160,32 @@ public class RouterActor extends ModuleActor {
         }).done(self());
     }
 
+
     //
     // Dialogs
     //
 
     public void onGroupedUpdated(List<ApiDialogGroup> groups) {
-        counters().onGroupedChatsUpdated(groups);
-        dialogs().onGroupsChanged(groups);
+        final ArrayList<DialogGroup> updatedGroups = new ArrayList<>();
+        HashMap<Peer, Integer> counters = new HashMap<>();
+        for (ApiDialogGroup g : groups) {
+            ArrayList<Peer> peers = new ArrayList<>();
+            for (ApiDialogShort dialogShort : g.getDialogs()) {
+                Peer peer = Peer.fromApiPeer(dialogShort.getPeer());
+                counters.put(peer, dialogShort.getCounter());
+                peers.add(peer);
+            }
+            updatedGroups.add(new DialogGroup(g.getTitle(), g.getKey(), peers));
+        }
+        counters().onCountersReceived(counters);
+        counters().askCounters().then(new Consumer<Counters>() {
+            @Override
+            public void apply(Counters counters) {
+                dialogs().onGroupsChanged(new DialogGroups(updatedGroups, counters));
+            }
+        }).done(self());
     }
+
 
     //
     // Tools

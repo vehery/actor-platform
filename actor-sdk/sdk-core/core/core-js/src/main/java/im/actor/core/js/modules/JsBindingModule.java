@@ -42,7 +42,7 @@ import im.actor.core.viewmodel.AppStateVM;
 import im.actor.core.viewmodel.CallMember;
 import im.actor.core.viewmodel.CallState;
 import im.actor.core.viewmodel.CallVM;
-import im.actor.core.viewmodel.DialogGroup;
+import im.actor.core.viewmodel.DialogGroupVM;
 import im.actor.core.viewmodel.DialogSmall;
 import im.actor.core.viewmodel.GroupTypingVM;
 import im.actor.core.viewmodel.GroupVM;
@@ -106,17 +106,17 @@ public class JsBindingModule extends AbsModule implements JsFileLoadedListener {
 
     public JsBindedValue<JsArray<JsDialogGroup>> getDialogsGroupedList() {
         if (dialogsGroupedList == null) {
-            ValueModel<ArrayList<DialogGroup>> dialogGroups =
+            ValueModel<ArrayList<DialogGroupVM>> dialogGroups =
                     context().getMessagesModule().getDialogGroupsVM().getGroupsValueModel();
             dialogsGroupedList = new JsBindedValue<>();
-            dialogGroups.subscribe(new ValueChangedListener<ArrayList<DialogGroup>>() {
+            dialogGroups.subscribe(new ValueChangedListener<ArrayList<DialogGroupVM>>() {
                 @Override
-                public void onChanged(ArrayList<DialogGroup> val, Value<ArrayList<DialogGroup>> valueModel) {
+                public void onChanged(ArrayList<DialogGroupVM> val, Value<ArrayList<DialogGroupVM>> valueModel) {
                     if (val == null) {
                         dialogsGroupedList.changeValue(JsArray.createArray().<JsArray<JsDialogGroup>>cast());
                     } else {
                         JsArray<JsDialogGroup> res = JsArray.createArray().cast();
-                        for (DialogGroup g : val) {
+                        for (DialogGroupVM g : val) {
                             JsArray<JsDialogShort> resd = JsArray.createArray().cast();
                             for (DialogSmall ds : g.getDialogs()) {
                                 resd.push(JsDialogShort.create(messenger.buildPeerInfo(ds.getPeer()), ds.getCounter()));
@@ -417,10 +417,10 @@ public class JsBindingModule extends AbsModule implements JsFileLoadedListener {
         //
 
         if (dialogsGroupedList != null) {
-            ArrayList<DialogGroup> groups = context().getMessagesModule().getDialogGroupsVM().getGroupsValueModel().get();
+            ArrayList<DialogGroupVM> groups = context().getMessagesModule().getDialogGroupsVM().getGroupsValueModel().get();
             if (groups != null) {
                 outer:
-                for (DialogGroup g : groups) {
+                for (DialogGroupVM g : groups) {
                     for (DialogSmall ds : g.getDialogs()) {
                         if (checkAvatar(ds.getAvatar(), fileId)) {
                             context().getMessagesModule().getDialogGroupsVM().getGroupsValueModel().forceNotify();

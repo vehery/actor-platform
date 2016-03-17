@@ -83,7 +83,6 @@ public class JsFacade implements Exportable {
         configuration.setPhoneBookProvider(new JsPhoneBookProvider());
         configuration.setNotificationProvider(new JsNotificationsProvider());
         configuration.setCallsProvider(new JsCallsProvider());
-        configuration.setIsEnabledGroupedChatList(true);
         configuration.setIsEnablePersistence(false);
 
         // Setting locale
