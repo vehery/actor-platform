@@ -61,6 +61,7 @@ public class RouterActor extends ModuleActor {
         countersManager = new CountersManager(context());
     }
 
+
     //
     // Messages
     //
@@ -85,6 +86,8 @@ public class RouterActor extends ModuleActor {
         if (addedMessages > 0) {
             int counter = countersManager.incrementCounters(peer, addedMessages, topServerMessage.getSortDate());
             results.add(dialogs().onInMessage(peer, topServerMessage, counter));
+            context().getMessagesModule().getPlainReceiverActor()
+                    .send(new CursorReceiverActor.MarkReceived(peer, topServerMessage.getDate()));
         }
 
         if (isOpened && topServerMessage != null) {
