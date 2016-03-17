@@ -358,8 +358,9 @@ public class JsBindingModule extends AbsModule implements JsFileLoadedListener {
 
     public JsDisplayList<JsMessage, Message> getSharedMessageList(Peer peer) {
         if (!messageLists.containsKey(peer)) {
-            messageLists.put(peer,
-                    (JsDisplayList<JsMessage, Message>) context().getDisplayListsModule().getMessagesSharedList(peer));
+            JsDisplayList<JsMessage, Message> displayList =
+                    (JsDisplayList<JsMessage, Message>) context().getDisplayListsModule().getMessagesSharedList(peer);
+            messageLists.put(peer, displayList);
         }
 
         return messageLists.get(peer);

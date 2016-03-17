@@ -35,7 +35,7 @@ public class JsMessagesBind implements Exportable, JsDisplayListCallback<JsMessa
         this.conversationVM = conversationVM;
         this.conversationVM.getIsLoaded().subscribe(this);
         this.bind = displayList.subscribe(this, true);
-        this.bind.initAll();
+        // this.bind.initAll();
 
         notifySubscriber();
         this.isLocked = false;
