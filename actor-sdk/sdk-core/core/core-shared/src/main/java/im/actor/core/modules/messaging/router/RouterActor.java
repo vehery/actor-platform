@@ -76,13 +76,9 @@ public class RouterActor extends ModuleActor {
             }
         }
 
-        Log.d(TAG, "Messages");
         ArrayList<Promise<IoResult>> results = new ArrayList<>();
         if (addedMessages > 0) {
-
-            Log.d(TAG, "Messages: added " + addedMessages);
-
-            int counter = countersManager.incrementCounters(peer, addedMessages);
+            int counter = countersManager.incrementCounters(peer, addedMessages, topServerMessage.getSortDate());
             results.add(dialogs().onInMessage(peer, topServerMessage, counter));
         }
 
@@ -184,6 +180,7 @@ public class RouterActor extends ModuleActor {
     public void onChatClosed(Peer peer) {
         openedChats.remove(peer);
     }
+
 
 
     //

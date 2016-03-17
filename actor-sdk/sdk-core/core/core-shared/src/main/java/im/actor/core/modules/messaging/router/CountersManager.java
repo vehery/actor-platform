@@ -51,10 +51,10 @@ public class CountersManager extends AbsModule {
             int counter = counters.get(p);
             CounterEntity entity = storage.getCounters().get(p);
             if (counter != 0 && entity == null) {
-                storage.getCounters().put(p, new CounterEntity(p, counter));
+                storage.getCounters().put(p, new CounterEntity(p, counter, 0));
                 isChanged = true;
             } else if (entity != null && entity.getCounter() != counter) {
-                storage.getCounters().put(p, new CounterEntity(p, counter));
+                storage.getCounters().put(p, new CounterEntity(p, counter, 0));
                 isChanged = true;
             } else if (counter == 0 && entity != null) {
                 storage.getCounters().remove(p);
@@ -65,9 +65,9 @@ public class CountersManager extends AbsModule {
         return isChanged;
     }
 
-    public int incrementCounters(Peer peer, int count) {
+    public int incrementCounters(Peer peer, int count, long topMessage) {
         int res = getCounter(peer) + count;
-        storage.getCounters().put(peer, new CounterEntity(peer, res));
+        storage.getCounters().put(peer, new CounterEntity(peer, res, topMessage));
         saveStorage();
         return res;
     }
