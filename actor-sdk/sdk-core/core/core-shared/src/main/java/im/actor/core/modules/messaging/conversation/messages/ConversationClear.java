@@ -1,5 +1,5 @@
 package im.actor.core.modules.messaging.conversation.messages;
 
-public class ClearConversation {
+public class ConversationClear {
 
 }

@@ -3,19 +3,24 @@ package im.actor.core.modules.messaging.router;
 import java.util.ArrayList;
 import java.util.List;
 
+import im.actor.core.api.ApiDialogGroup;
 import im.actor.core.entity.Message;
 import im.actor.core.entity.Peer;
 import im.actor.core.entity.Reaction;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.conversation.ConversationInt;
+import im.actor.core.modules.messaging.counters.CountersInt;
 import im.actor.core.modules.messaging.dialogs.DialogsInt;
 import im.actor.core.modules.messaging.router.messages.RouterChatClear;
 import im.actor.core.modules.messaging.router.messages.RouterChatDelete;
+import im.actor.core.modules.messaging.router.messages.RouterGroupedChanged;
+import im.actor.core.modules.messaging.router.messages.RouterHistoryLoaded;
 import im.actor.core.modules.messaging.router.messages.RouterMessageContentChanged;
 import im.actor.core.modules.messaging.router.messages.RouterMessageError;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReactionsChanged;
 import im.actor.core.modules.messaging.router.messages.RouterMessageRead;
+import im.actor.core.modules.messaging.router.messages.RouterMessageReadByMe;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReceive;
 import im.actor.core.modules.messaging.router.messages.RouterMessageSent;
 import im.actor.core.modules.messaging.router.messages.RouterMessages;
@@ -63,6 +68,10 @@ public class RouterActor extends ModuleActor {
         }).done(self());
     }
 
+    public void onHistoryMessages(Peer peer, List<Message> messages) {
+        chat(peer).onHistoryLoaded(messages);
+    }
+
 
     //
     // Message States
@@ -94,6 +103,9 @@ public class RouterActor extends ModuleActor {
         dialogs().onChatReceive(peer, date);
     }
 
+    public void onChatReadByMe(Peer peer, long date) {
+        dialogs().onChatReadByMe(peer, date);
+    }
 
     //
     // Content updating
@@ -132,6 +144,14 @@ public class RouterActor extends ModuleActor {
         }).done(self());
     }
 
+    //
+    // Dialogs
+    //
+
+    public void onGroupedUpdated(List<ApiDialogGroup> groups) {
+        counters().onGroupedChatsUpdated(groups);
+        dialogs().onGroupsChanged(groups);
+    }
 
     //
     // Tools
@@ -145,6 +165,9 @@ public class RouterActor extends ModuleActor {
         return getDialogs();
     }
 
+    private CountersInt counters() {
+        return context().getMessagesModule().getCounters();
+    }
 
     //
     // Messages
@@ -183,6 +206,15 @@ public class RouterActor extends ModuleActor {
         } else if (message instanceof RouterMessageRead) {
             RouterMessageRead messageRead = (RouterMessageRead) message;
             onChatRead(messageRead.getPeer(), messageRead.getReadDate());
+        } else if (message instanceof RouterHistoryLoaded) {
+            RouterHistoryLoaded historyLoaded = (RouterHistoryLoaded) message;
+            onHistoryMessages(historyLoaded.getPeer(), historyLoaded.getMessages());
+        } else if (message instanceof RouterMessageReadByMe) {
+            RouterMessageReadByMe readByMe = (RouterMessageReadByMe) message;
+            onChatReadByMe(readByMe.getPeer(), readByMe.getReadDate());
+        } else if (message instanceof RouterGroupedChanged) {
+            RouterGroupedChanged groupedChanged = (RouterGroupedChanged) message;
+            onGroupedUpdated(groupedChanged.getGroups());
         } else {
             super.onReceive(message);
         }

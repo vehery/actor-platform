@@ -13,8 +13,8 @@ import im.actor.core.entity.Reaction;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.entity.content.DocumentContent;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.conversation.messages.ClearConversation;
-import im.actor.core.modules.messaging.conversation.messages.HistoryLoaded;
+import im.actor.core.modules.messaging.conversation.messages.ConversationClear;
+import im.actor.core.modules.messaging.conversation.messages.ConversationHistory;
 import im.actor.core.modules.messaging.conversation.messages.MessageContentUpdated;
 import im.actor.core.modules.messaging.conversation.messages.MessageError;
 import im.actor.core.modules.messaging.conversation.messages.MessageReactionsChanged;
@@ -39,7 +39,6 @@ public class ConversationActor extends ModuleActor {
     private final Peer peer;
 
     private ListEngine<Message> messages;
-    private ListEngine<Message> docs;
 
     public ConversationActor(Peer peer, ModuleContext context) {
         super(context);
@@ -49,7 +48,6 @@ public class ConversationActor extends ModuleActor {
     @Override
     public void preStart() {
         messages = context().getMessagesModule().getConversationEngine(peer);
-        docs = context().getMessagesModule().getConversationDocsEngine(peer);
     }
 
 
@@ -70,10 +68,7 @@ public class ConversationActor extends ModuleActor {
         if (ignorePresent) {
             updatedMessages = updatedMessages.filter(IS_NOT_PRESENT);
         }
-        ManagedList<Message> updatedDocsMessages = updatedMessages.filter(IS_DOCUMENT);
-
         messages.addOrUpdateItems(updatedMessages);
-        docs.addOrUpdateItems(updatedDocsMessages);
 
         return IoResult.OK();
     }
@@ -85,18 +80,13 @@ public class ConversationActor extends ModuleActor {
 
     @Verified
     private Promise<Message> onMessageSent(long rid, long date) {
+
         Message msg = messages.getValue(rid);
-        // If we have pending message
         if (msg != null) {
-            // Updating message
             Message updatedMsg = msg
                     .changeAllDate(date)
                     .changeState(MessageState.SENT);
-
             messages.addOrUpdateItem(updatedMsg);
-            if (updatedMsg.getContent() instanceof DocumentContent) {
-                docs.addOrUpdateItem(updatedMsg);
-            }
             return Promises.success(updatedMsg);
         } else {
             return Promises.failure(new RuntimeException("No message found"));
@@ -105,18 +95,12 @@ public class ConversationActor extends ModuleActor {
 
     @Verified
     private void onMessageError(long rid) {
-        Message msg = messages.getValue(rid);
-        // If we have pending or sent message
-        if (msg != null) {
 
-            // Updating message
+        Message msg = messages.getValue(rid);
+        if (msg != null) {
             Message updatedMsg = msg
                     .changeState(MessageState.ERROR);
-
             messages.addOrUpdateItem(updatedMsg);
-            if (updatedMsg.getContent() instanceof DocumentContent) {
-                docs.addOrUpdateItem(updatedMsg);
-            }
         }
     }
 
@@ -126,18 +110,12 @@ public class ConversationActor extends ModuleActor {
 
     @Verified
     private void onMessageContentUpdated(long rid, AbsContent content) {
-        Message message = messages.getValue(rid);
-        // Ignore if we already doesn't have this message
-        if (message != null) {
 
-            // Updating message
-            Message updatedMsg = message.changeContent(content);
+        Message message = messages.getValue(rid);
+        if (message != null) {
+            Message updatedMsg = message
+                    .changeContent(content);
             messages.addOrUpdateItem(updatedMsg);
-            if (updatedMsg.getContent() instanceof DocumentContent) {
-                docs.addOrUpdateItem(updatedMsg);
-            } else if (message.getContent() instanceof DocumentContent) {
-                docs.removeItem(rid);
-            }
         }
     }
 
@@ -145,15 +123,10 @@ public class ConversationActor extends ModuleActor {
     private void onMessageReactionsUpdated(long rid, List<Reaction> reactions) {
 
         Message message = messages.getValue(rid);
-
         if (message != null) {
-
-            Message updatedMsg = message.changeReactions(reactions);
-
+            Message updatedMsg = message
+                    .changeReactions(reactions);
             messages.addOrUpdateItem(updatedMsg);
-            if (updatedMsg.getContent() instanceof DocumentContent) {
-                docs.addOrUpdateItem(updatedMsg);
-            }
         }
     }
 
@@ -164,18 +137,16 @@ public class ConversationActor extends ModuleActor {
 
     @Verified
     private Promise<Message> onMessagesDeleted(List<Long> rids) {
+
         long[] rids2 = JavaUtil.unboxList(rids);
-
         messages.removeItems(rids2);
-        docs.removeItems(rids2);
-
         return Promises.success(messages.getHeadValue());
     }
 
     @Verified
     private void onClearConversation() {
+
         messages.clear();
-        docs.clear();
     }
 
 
@@ -202,15 +173,15 @@ public class ConversationActor extends ModuleActor {
 
     @Override
     public void onReceive(Object message) {
-        if (message instanceof HistoryLoaded) {
-            onMessages(((HistoryLoaded) message).getMessages(), true).done(self());
+        if (message instanceof ConversationHistory) {
+            onMessages(((ConversationHistory) message).getMessages(), true).done(self());
         } else if (message instanceof MessageContentUpdated) {
             MessageContentUpdated contentUpdated = (MessageContentUpdated) message;
             onMessageContentUpdated(contentUpdated.getRid(), contentUpdated.getContent());
         } else if (message instanceof MessageError) {
             MessageError messageError = (MessageError) message;
             onMessageError(messageError.getRid());
-        } else if (message instanceof ClearConversation) {
+        } else if (message instanceof ConversationClear) {
             onClearConversation();
         } else if (message instanceof MessagesDeleted) {
             onMessagesDeleted(((MessagesDeleted) message).getRids());

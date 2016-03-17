@@ -58,8 +58,6 @@ public class ConfigurationBuilder {
 
     private CallsProvider callsProvider;
 
-    private boolean isEnabledGroupedChatList = true;
-
     private boolean isEnablePersistence = true;
 
 
@@ -72,18 +70,6 @@ public class ConfigurationBuilder {
     @ObjectiveCName("setIsEnablePersistence:")
     public ConfigurationBuilder setIsEnablePersistence(boolean isEnablePersistence) {
         this.isEnablePersistence = isEnablePersistence;
-        return this;
-    }
-
-    /**
-     * Setting if grouped chat list support enabled
-     *
-     * @param isEnabledGroupedChatList if grouped chat list enabled
-     * @return this
-     */
-    @ObjectiveCName("setIsEnabledGroupedChatList:")
-    public ConfigurationBuilder setIsEnabledGroupedChatList(boolean isEnabledGroupedChatList) {
-        this.isEnabledGroupedChatList = isEnabledGroupedChatList;
         return this;
     }
 
@@ -410,7 +396,6 @@ public class ConfigurationBuilder {
                 isPhoneBookImportEnabled,
                 callsProvider,
                 voiceCallsEnabled,
-                isEnabledGroupedChatList,
                 isEnablePersistence);
     }
 }

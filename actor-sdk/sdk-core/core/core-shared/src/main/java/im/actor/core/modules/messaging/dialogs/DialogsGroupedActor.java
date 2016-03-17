@@ -74,12 +74,7 @@ public class DialogsGroupedActor extends ModuleActor {
                 updates().executeRelatedResponse(response.getUsers(), response.getGroups(), self(), new Runnable() {
                     @Override
                     public void run() {
-                        applyGroups(response.getDialogs());
-                        if (isPersistenceEnabled()) {
-                            preferences().putBool(PREFERENCE_GROUPED_LOADED, true);
-                        }
-                        isInited = false;
-                        unstashAll();
+                        context().getMessagesModule().getRouter().onChatGroupsChanged(response.getDialogs());
                     }
                 });
             }
@@ -109,11 +104,14 @@ public class DialogsGroupedActor extends ModuleActor {
     }
 
     private void onGroupedChanged(List<ApiDialogGroup> groupedItems) {
-        if (isInited) {
-            applyGroups(groupedItems);
-        } else {
-            stash();
+        if (!isInited) {
+            isInited = true;
+            if (isPersistenceEnabled()) {
+                preferences().putBool(PREFERENCE_GROUPED_LOADED, true);
+            }
+            unstashAll();
         }
+        applyGroups(groupedItems);
     }
 
 

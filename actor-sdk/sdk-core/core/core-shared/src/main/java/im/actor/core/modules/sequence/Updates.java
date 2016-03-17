@@ -16,7 +16,6 @@ import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.updates.internal.ExecuteAfter;
 import im.actor.core.modules.updates.internal.InternalUpdate;
-import im.actor.core.modules.updates.internal.RelatedResponse;
 import im.actor.core.network.parser.Update;
 import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.eventbus.BusSubscriber;
@@ -78,10 +77,7 @@ public class Updates extends AbsModule implements BusSubscriber {
         }
     }
 
-//    public void onUpdateReceived(Object update, Long delay) {
-//        updateActor.send(update, delay);
-//    }
-
+    @Deprecated
     public void executeAfter(int seq, Runnable runnable) {
         updateActor.send(new ExecuteAfter(seq, runnable));
     }

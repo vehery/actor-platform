@@ -7,6 +7,7 @@ package im.actor.runtime.bser;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import im.actor.runtime.collections.SparseArray;
@@ -155,7 +156,7 @@ public class BserWriter {
         }
     }
 
-    public <T extends BserObject> void writeRepeatedObj(int fieldNumber, @NotNull List<T> values) throws IOException {
+    public <T extends BserObject> void writeRepeatedObj(int fieldNumber, @NotNull Collection<T> values) throws IOException {
         if (values == null) {
             throw new IllegalArgumentException("Values can not be null");
         }

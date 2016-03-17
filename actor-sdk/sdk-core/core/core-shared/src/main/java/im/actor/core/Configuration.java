@@ -57,8 +57,6 @@ public class Configuration {
     @Property("readonly, nonatomic")
     private final CallsProvider callsProvider;
     @Property("readonly, nonatomic")
-    private final boolean isEnabledGroupedChatList;
-    @Property("readonly, nonatomic")
     private final boolean isEnablePersistence;
 
     Configuration(ConnectionEndpoint[] endpoints,
@@ -80,7 +78,6 @@ public class Configuration {
                   boolean enablePhoneBookImport,
                   CallsProvider callsProvider,
                   boolean voiceCallsEnabled,
-                  boolean isEnabledGroupedChatList,
                   boolean isEnablePersistence) {
         this.endpoints = endpoints;
         this.phoneBookProvider = phoneBookProvider;
@@ -101,7 +98,6 @@ public class Configuration {
         this.enablePhoneBookImport = enablePhoneBookImport;
         this.callsProvider = callsProvider;
         this.voiceCallsEnabled = voiceCallsEnabled;
-        this.isEnabledGroupedChatList = isEnabledGroupedChatList;
         this.isEnablePersistence = isEnablePersistence;
     }
 
@@ -274,15 +270,6 @@ public class Configuration {
      */
     public String[] getPreferredLanguages() {
         return preferredLanguages;
-    }
-
-    /**
-     * Get If Grouped Chat List enabled
-     *
-     * @return is grouped chat list enabled
-     */
-    public boolean isEnabledGroupedChatList() {
-        return isEnabledGroupedChatList;
     }
 
     /**

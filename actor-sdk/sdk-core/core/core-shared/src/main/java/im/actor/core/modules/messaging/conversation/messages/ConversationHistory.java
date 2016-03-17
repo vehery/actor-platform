@@ -4,10 +4,10 @@ import java.util.List;
 
 import im.actor.core.entity.Message;
 
-public class HistoryLoaded {
+public class ConversationHistory {
     private List<Message> messages;
 
-    public HistoryLoaded(List<Message> messages) {
+    public ConversationHistory(List<Message> messages) {
         this.messages = messages;
     }
 

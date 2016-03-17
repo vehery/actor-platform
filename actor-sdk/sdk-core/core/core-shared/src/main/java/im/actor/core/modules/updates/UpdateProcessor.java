@@ -13,7 +13,6 @@ import im.actor.core.api.ApiDialogShort;
 import im.actor.core.api.ApiGroup;
 import im.actor.core.api.ApiPeerType;
 import im.actor.core.api.ApiUser;
-import im.actor.core.api.rpc.ResponseLoadArchived;
 import im.actor.core.api.updates.UpdateChatClear;
 import im.actor.core.api.updates.UpdateChatDelete;
 import im.actor.core.api.updates.UpdateChatGroupsChanged;
@@ -56,14 +55,12 @@ import im.actor.core.modules.encryption.EncryptedProcessor;
 import im.actor.core.modules.eventbus.EventBusProcessor;
 import im.actor.core.modules.groups.GroupsProcessor;
 import im.actor.core.modules.messaging.MessagesProcessor;
-import im.actor.core.modules.updates.internal.ArchivedDialogLoaded;
 import im.actor.core.modules.updates.internal.ChangeContent;
 import im.actor.core.modules.updates.internal.CombinedDifference;
 import im.actor.core.modules.updates.internal.GetDiffCombiner;
 import im.actor.core.modules.updates.internal.GroupCreated;
 import im.actor.core.modules.updates.internal.InternalUpdate;
 import im.actor.core.modules.updates.internal.LoggedIn;
-import im.actor.core.modules.updates.internal.MessagesHistoryLoaded;
 import im.actor.core.modules.updates.internal.RelatedResponse;
 import im.actor.core.modules.updates.internal.StickersLoaded;
 import im.actor.core.modules.updates.internal.UsersFounded;
@@ -72,8 +69,6 @@ import im.actor.core.network.parser.Update;
 import im.actor.core.viewmodel.UserVM;
 
 public class UpdateProcessor extends AbsModule {
-
-    private static final String TAG = "Updates";
 
     private SettingsProcessor settingsProcessor;
     private UsersProcessor usersProcessor;
@@ -110,16 +105,8 @@ public class UpdateProcessor extends AbsModule {
     }
 
     public void processInternalUpdate(InternalUpdate update) {
-        if (update instanceof ArchivedDialogLoaded) {
-            ResponseLoadArchived dialogs = ((ArchivedDialogLoaded) update).getDialogs();
-            applyRelated(dialogs.getUsers(), dialogs.getGroups(), false);
-            messagesProcessor.onArchivedDialogsLoaded(((ArchivedDialogLoaded) update).getDialogs());
-        } else if (update instanceof MessagesHistoryLoaded) {
-            MessagesHistoryLoaded historyLoaded = (MessagesHistoryLoaded) update;
-            applyRelated(historyLoaded.getLoadHistory().getUsers(), new ArrayList<ApiGroup>(), false);
-            messagesProcessor.onMessagesLoaded(historyLoaded.getPeer(), historyLoaded.getLoadHistory());
-        } else if (update instanceof LoggedIn) {
-            ArrayList<ApiUser> users = new ArrayList<ApiUser>();
+        if (update instanceof LoggedIn) {
+            ArrayList<ApiUser> users = new ArrayList<>();
             users.add(((LoggedIn) update).getAuth().getUser());
             applyRelated(users, new ArrayList<ApiGroup>(), true);
             runOnUiThread(((LoggedIn) update).getRunnable());

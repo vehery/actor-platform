@@ -35,7 +35,7 @@ public class ConversationInt extends ActorInterface {
     }
 
     public void onHistoryLoaded(List<Message> messages) {
-        send(new HistoryLoaded(messages));
+        send(new ConversationHistory(messages));
     }
 
 
@@ -61,6 +61,6 @@ public class ConversationInt extends ActorInterface {
     }
 
     public void clearChat() {
-        send(new ClearConversation());
+        send(new ConversationClear());
     }
 }

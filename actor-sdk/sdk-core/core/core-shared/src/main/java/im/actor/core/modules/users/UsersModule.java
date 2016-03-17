@@ -22,6 +22,7 @@ import im.actor.core.network.RpcException;
 import im.actor.core.network.RpcInternalException;
 import im.actor.core.viewmodel.Command;
 import im.actor.core.viewmodel.CommandCallback;
+import im.actor.core.viewmodel.PromiseCallback;
 import im.actor.core.viewmodel.UserVM;
 import im.actor.runtime.Storage;
 import im.actor.runtime.mvvm.MVVMCollection;

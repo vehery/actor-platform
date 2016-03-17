@@ -6,7 +6,6 @@ import im.actor.core.api.ApiDialogGroup;
 import im.actor.core.entity.Dialog;
 import im.actor.core.entity.Group;
 import im.actor.core.entity.Message;
-import im.actor.core.entity.MessageState;
 import im.actor.core.entity.Peer;
 import im.actor.core.entity.User;
 import im.actor.core.entity.content.AbsContent;
@@ -14,13 +13,13 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.dialogs.messages.DialogClear;
 import im.actor.core.modules.messaging.dialogs.messages.DialogDelete;
 import im.actor.core.modules.messaging.dialogs.messages.DialogCounterChanged;
+import im.actor.core.modules.messaging.dialogs.messages.DialogReadByMe;
 import im.actor.core.modules.messaging.dialogs.messages.DialogsRead;
 import im.actor.core.modules.messaging.dialogs.messages.DialogsReceive;
 import im.actor.core.modules.messaging.dialogs.messages.GroupChanged;
 import im.actor.core.modules.messaging.dialogs.messages.InMessage;
 import im.actor.core.modules.messaging.dialogs.messages.MessageContentChanged;
 import im.actor.core.modules.messaging.dialogs.messages.MessageDeleted;
-import im.actor.core.modules.messaging.dialogs.messages.MessageStateChanged;
 import im.actor.core.modules.messaging.dialogs.messages.UserChanged;
 import im.actor.core.viewmodel.DialogGroupsVM;
 import im.actor.runtime.Storage;
@@ -51,24 +50,19 @@ public class DialogsInt extends ActorInterface {
                 return new DialogsActor(dialogs, context);
             }
         });
+        this.dialogsGroupedActor = system().actorOf("actor/dialogs/grouped", new ActorCreator() {
+            @Override
+            public DialogsGroupedActor create() {
+                return new DialogsGroupedActor(context);
+            }
+        });
+
         this.dialogsHistory = system().actorOf("actor/dialogs/history", new ActorCreator() {
             @Override
             public DialogsHistoryActor create() {
                 return new DialogsHistoryActor(dialogsActor, context);
             }
         });
-
-        if (context.getConfiguration().isEnabledGroupedChatList()) {
-            this.dialogsGroupedActor = system().actorOf("actor/dialogs/grouped", new ActorCreator() {
-                @Override
-                public DialogsGroupedActor create() {
-                    return new DialogsGroupedActor(context);
-                }
-            });
-        } else {
-            this.dialogsGroupedActor = null;
-        }
-        setDest(dialogsHistory);
     }
 
     public ListEngine<Dialog> getDialogs() {
@@ -102,6 +96,10 @@ public class DialogsInt extends ActorInterface {
         dialogsHistory.send(new DialogsRead(peer, readDate));
     }
 
+    public void onChatReadByMe(Peer peer, long readDate) {
+        dialogsHistory.send(new DialogReadByMe(peer, readDate));
+    }
+
     public void onChatReceive(Peer peer, long receiveDate) {
         dialogsHistory.send(new DialogsReceive(peer, receiveDate));
     }
@@ -118,12 +116,14 @@ public class DialogsInt extends ActorInterface {
         dialogsHistory.send(new DialogDelete(peer));
     }
 
-    public void onGroupChanged(Group group) {
-        dialogsHistory.send(new GroupChanged(group));
-        if (dialogsGroupedActor != null) {
-            dialogsGroupedActor.send(new DialogsGroupedActor.PeerInformationChanged(group.peer()));
-        }
+    public void loadMore() {
+        dialogsHistory.send(new DialogsHistoryActor.LoadMore());
     }
+
+
+    //
+    // Entity Updates
+    //
 
     public void onUserChanged(User user) {
         dialogsHistory.send(new UserChanged(user));
@@ -132,9 +132,17 @@ public class DialogsInt extends ActorInterface {
         }
     }
 
-    public void loadMore() {
-        dialogsHistory.send(new DialogsHistoryActor.LoadMore());
+    public void onGroupChanged(Group group) {
+        dialogsHistory.send(new GroupChanged(group));
+        if (dialogsGroupedActor != null) {
+            dialogsGroupedActor.send(new DialogsGroupedActor.PeerInformationChanged(group.peer()));
+        }
     }
+
+
+    //
+    // Grouped Dialogs
+    //
 
     public void onGroupsChanged(List<ApiDialogGroup> groups) {
         if (dialogsGroupedActor != null) {

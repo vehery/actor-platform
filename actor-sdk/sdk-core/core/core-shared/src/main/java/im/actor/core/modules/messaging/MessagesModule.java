@@ -54,6 +54,7 @@ import im.actor.core.modules.messaging.actions.SenderActor;
 import im.actor.core.modules.messaging.conversation.ConversationActor;
 import im.actor.core.modules.messaging.conversation.ConversationHistoryActor;
 import im.actor.core.modules.messaging.conversation.ConversationInt;
+import im.actor.core.modules.messaging.counters.CountersInt;
 import im.actor.core.modules.messaging.dialogs.DialogsInt;
 import im.actor.core.modules.messaging.router.RouterInt;
 import im.actor.core.modules.updates.internal.ChangeContent;
@@ -84,6 +85,8 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
     private RouterInt router;
     private DialogsInt dialogs;
+    private CountersInt counters;
+
     private ActorRef archivedDialogsActor;
     private ActorRef plainReadActor;
     private ActorRef plainReceiverActor;
@@ -98,7 +101,6 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
     private final MVVMCollection<DialogSpec, DialogSpecVM> dialogDescKeyValue;
 
-
     public MessagesModule(final ModuleContext context) {
         super(context);
 
@@ -110,6 +112,7 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
         this.dialogs = new DialogsInt(context());
         this.router = new RouterInt(context());
+        this.counters = new CountersInt(context());
 
         this.archivedDialogsActor = system().actorOf("actor/dialogs/archived", new ActorCreator() {
             @Override
@@ -143,6 +146,10 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
     public DialogsInt getDialogs() {
         return dialogs;
+    }
+
+    public CountersInt getCounters() {
+        return counters;
     }
 
     public RouterInt getRouter() {

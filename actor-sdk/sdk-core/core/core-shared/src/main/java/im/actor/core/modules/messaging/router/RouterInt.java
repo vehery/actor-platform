@@ -17,10 +17,13 @@ import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.router.messages.RouterChatClear;
 import im.actor.core.modules.messaging.router.messages.RouterChatDelete;
+import im.actor.core.modules.messaging.router.messages.RouterGroupedChanged;
+import im.actor.core.modules.messaging.router.messages.RouterHistoryLoaded;
 import im.actor.core.modules.messaging.router.messages.RouterMessageContentChanged;
 import im.actor.core.modules.messaging.router.messages.RouterMessageError;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReactionsChanged;
 import im.actor.core.modules.messaging.router.messages.RouterMessageRead;
+import im.actor.core.modules.messaging.router.messages.RouterMessageReadByMe;
 import im.actor.core.modules.messaging.router.messages.RouterMessageReceive;
 import im.actor.core.modules.messaging.router.messages.RouterMessageSent;
 import im.actor.core.modules.messaging.router.messages.RouterMessages;
@@ -54,14 +57,13 @@ public class RouterInt extends ActorInterface {
     //
 
     public void onMessages(Peer peer, List<Message> messages) {
-        send(new RouterMessages(peer, messages));
+        if (isValidPeer(peer)) {
+            send(new RouterMessages(peer, messages));
+        }
     }
 
     public void onMessages(ApiPeer _peer, List<UpdateMessage> messages) {
         Peer peer = convert(_peer);
-        if (!isValidPeer(peer)) {
-            return;
-        }
 
         ArrayList<Message> nMessages = new ArrayList<>();
         for (UpdateMessage u : messages) {
@@ -88,9 +90,6 @@ public class RouterInt extends ActorInterface {
 
     public void onMessage(ApiPeer _peer, int senderUid, long date, long rid, ApiMessage content) {
         Peer peer = convert(_peer);
-        if (!isValidPeer(peer)) {
-            return;
-        }
 
         AbsContent msgContent;
         try {
@@ -103,6 +102,11 @@ public class RouterInt extends ActorInterface {
         onMessage(peer, new Message(rid, date, senderUid, MessageState.SENT, msgContent));
     }
 
+    public void onMessagesLoaded(Peer peer, List<Message> messages) {
+        if (isValidPeer(peer)) {
+            send(new RouterHistoryLoaded(peer, messages));
+        }
+    }
 
     //
     // Send States
@@ -139,7 +143,7 @@ public class RouterInt extends ActorInterface {
 
     public void onChatReadByMe(Peer peer, long readDate) {
         if (isValidPeer(peer)) {
-            // send(new RouterMessageReceive(peer, receiveDate));
+            send(new RouterMessageReadByMe(peer, readDate));
         }
     }
 
@@ -189,9 +193,7 @@ public class RouterInt extends ActorInterface {
     //
 
     public void onChatGroupsChanged(List<ApiDialogGroup> groups) {
-        if (context.getConfiguration().isEnabledGroupedChatList()) {
-            context.getMessagesModule().getDialogs().onGroupsChanged(groups);
-        }
+        send(new RouterGroupedChanged(groups));
     }
 
 
