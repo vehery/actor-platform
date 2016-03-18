@@ -2,7 +2,7 @@
  * Copyright (C) 2014-2015 Actor LLC. <https://actor.im>
  */
 
-package im.actor.core.modules.internal;
+package im.actor.core.modules.groups;
 
 import java.util.ArrayList;
 import java.util.HashMap;

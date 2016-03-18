@@ -31,13 +31,6 @@ public class EntityConverter {
         }
     }
 
-//    public static Avatar convert(im.actor.model.api.Avatar avatar) {
-//        if (avatar == null) {
-//            return null;
-//        }
-//        return new Avatar(avatar);
-//    }
-
     public static Group convert(ApiGroup group) {
         return new Group(group);
     }
@@ -55,7 +48,6 @@ public class EntityConverter {
     public static Peer convert(ApiPeer peer) {
         return new Peer(convert(peer.getType()), peer.getId());
     }
-
 
     public static FastThumb convert(ApiFastThumb fastThumb) {
         if (fastThumb == null) {

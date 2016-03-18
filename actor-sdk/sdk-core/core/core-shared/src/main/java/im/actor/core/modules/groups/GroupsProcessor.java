@@ -286,6 +286,8 @@ public class GroupsProcessor extends AbsModule {
 
     @Verified
     private void onGroupDescChanged(Group group) {
-        context().getMessagesModule().getDialogs().onGroupChanged(group);
+        context().getMessagesModule()
+                .getRouter()
+                .onGroupChanged(group);
     }
 }

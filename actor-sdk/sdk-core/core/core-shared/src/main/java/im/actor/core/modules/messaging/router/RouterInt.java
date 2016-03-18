@@ -8,17 +8,20 @@ import im.actor.core.api.ApiDialogGroup;
 import im.actor.core.api.ApiMessage;
 import im.actor.core.api.ApiPeer;
 import im.actor.core.api.updates.UpdateMessage;
+import im.actor.core.entity.Group;
 import im.actor.core.entity.Message;
 import im.actor.core.entity.MessageState;
 import im.actor.core.entity.Peer;
 import im.actor.core.entity.PeerType;
 import im.actor.core.entity.Reaction;
+import im.actor.core.entity.User;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.router.messages.RouterChatClear;
 import im.actor.core.modules.messaging.router.messages.RouterChatClosed;
 import im.actor.core.modules.messaging.router.messages.RouterChatDelete;
 import im.actor.core.modules.messaging.router.messages.RouterChatOpen;
+import im.actor.core.modules.messaging.router.messages.RouterGroupChanged;
 import im.actor.core.modules.messaging.router.messages.RouterGroupedChanged;
 import im.actor.core.modules.messaging.router.messages.RouterHistoryLoaded;
 import im.actor.core.modules.messaging.router.messages.RouterMessageContentChanged;
@@ -30,6 +33,7 @@ import im.actor.core.modules.messaging.router.messages.RouterMessageReceive;
 import im.actor.core.modules.messaging.router.messages.RouterMessageSent;
 import im.actor.core.modules.messaging.router.messages.RouterMessages;
 import im.actor.core.modules.messaging.router.messages.RouterMessagesDeleted;
+import im.actor.core.modules.messaging.router.messages.RouterUserChanged;
 import im.actor.runtime.actors.Actor;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorInterface;
@@ -206,6 +210,16 @@ public class RouterInt extends ActorInterface {
 
     public void onChatGroupsChanged(List<ApiDialogGroup> groups) {
         send(new RouterGroupedChanged(groups));
+    }
+
+    // Peers
+
+    public void onUserChanged(User user) {
+        send(new RouterUserChanged(user));
+    }
+
+    public void onGroupChanged(Group group) {
+        send(new RouterGroupChanged(group));
     }
 
 

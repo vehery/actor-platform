@@ -15,7 +15,7 @@ import im.actor.core.modules.internal.DisplayLists;
 import im.actor.core.modules.encryption.EncryptionModule;
 import im.actor.core.modules.internal.ExternalModule;
 import im.actor.core.modules.internal.FilesModule;
-import im.actor.core.modules.internal.GroupsModule;
+import im.actor.core.modules.groups.GroupsModule;
 import im.actor.core.modules.internal.MentionsModule;
 import im.actor.core.modules.internal.NotificationsModule;
 import im.actor.core.modules.internal.PresenceModule;
