@@ -8,14 +8,6 @@ import React, { Component, PropTypes } from 'react';
 import { Container } from 'flux/utils';
 import PeerUtils from '../utils/PeerUtils';
 
-import DefaultMessages from './dialog/MessagesSection.react';
-import DefaultTyping from './dialog/TypingSection.react';
-import DefaultCompose from './dialog/ComposeSection.react';
-import DialogFooter from './dialog/DialogFooter.react';
-import DefaultToolbar from './Toolbar.react';
-import DefaultActivity from './Activity.react';
-import DefaultCall from './Call.react';
-import DefaultLogger from './dev/LoggerSection.react';
 import ConnectionState from './common/ConnectionState.react';
 
 import ActivityStore from '../stores/ActivityStore';
@@ -25,12 +17,11 @@ import MessageStore from '../stores/MessageStore';
 import DialogActionCreators from '../actions/DialogActionCreators';
 
 class DialogSection extends Component {
-  static contextTypes = {
-    delegate: PropTypes.object
-  };
-
   static propTypes = {
-    params: PropTypes.object
+    delegate: PropTypes.object.isRequired,
+    params: PropTypes.shape({
+      id: PropTypes.string.isRequired
+    }).isRequired
   };
 
   static getStores() {
@@ -50,6 +41,8 @@ class DialogSection extends Component {
 
   constructor(props) {
     super(props);
+
+    this.components = props.delegate.components.dialog;
 
     const peer = PeerUtils.stringToPeer(props.params.id);
     DialogActionCreators.selectDialogPeer(peer);
@@ -79,57 +72,23 @@ class DialogSection extends Component {
     }
   }
 
-  getComponents() {
-    const { dialog, logger } = this.context.delegate.components;
-    const LoggerSection = logger || DefaultLogger;
-    if (dialog && !isFunction(dialog)) {
-      const activity = dialog.activity || [
-        DefaultActivity,
-        DefaultCall,
-        LoggerSection
-      ];
-
-      return {
-        LoggerSection,
-        ToolbarSection: dialog.toolbar || DefaultToolbar,
-        MessagesSection: isFunction(dialog.messages) ? dialog.messages : DefaultMessages,
-        TypingSection: dialog.typing || DefaultTyping,
-        ComposeSection: dialog.compose || DefaultCompose,
-        activity: map(activity, (Activity, index) => <Activity key={index} />)
-      };
-    }
-
-    return {
-      LoggerSection,
-      ToolbarSection: DefaultToolbar,
-      MessagesSection: DefaultMessages,
-      TypingSection: DefaultTyping,
-      ComposeSection: DefaultCompose,
-      activity: [
-        <DefaultActivity key={1} />,
-        <DefaultCall key={2} />,
-        <LoggerSection key={3} />
-      ]
-    };
+  renderActivity() {
+    return this.components.activity.map((Activity, index) => (
+      <Activity key={index} />
+    ))
   }
 
   render() {
     const { peer, isMember, messages, overlay, messagesCount } = this.state;
 
-    const {
-      ToolbarSection,
-      MessagesSection,
-      TypingSection,
-      ComposeSection,
-      activity
-    } = this.getComponents();
+    const { Toolbar, MessagesSection, DialogFooter } = this.components;
 
     return (
       <section className="main">
-        <ToolbarSection />
+        <Toolbar />
         <div className="flexrow">
           <section className="dialog">
-            <ConnectionState/>
+            <ConnectionState />
             <MessagesSection
               peer={peer}
               messages={messages}
@@ -138,9 +97,9 @@ class DialogSection extends Component {
               isMember={isMember}
               onLoadMore={this.onLoadMoreMessages}
             />
-            <DialogFooter isMember={isMember} components={{TypingSection, ComposeSection}} />
+            <DialogFooter isMember={isMember} />
           </section>
-          {activity}
+          {this.renderActivity()}
         </div>
       </section>
     );

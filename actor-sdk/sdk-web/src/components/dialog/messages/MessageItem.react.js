@@ -2,7 +2,6 @@
  * Copyright (C) 2015-2016 Actor LLC. <https://actor.im>
  */
 
-import { escape } from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import { Container } from 'flux/utils';
 import classnames from 'classnames';
@@ -20,18 +19,20 @@ import AvatarItem from '../../common/AvatarItem.react';
 import State from './State.react';
 import Reactions from './Reactions.react';
 
-// Default message content components
-import DefaultService from './Service.react';
-import DefaultText from './Text.react';
-import DefaultPhoto from './Photo.react.js';
-import DefaultDocument from './Document.react';
-import DefaultVoice from './Voice.react';
-import DefaultContact from './Contact.react';
-import DefaultLocation from './Location.react.js';
-import DefaultModern from './Modern.react.js';
-import DefaultSticker from './Sticker.react.js';
-
 class MessageItem extends Component {
+  static contextTypes = {
+    delegate: PropTypes.object.isRequired,
+    isExperimental: PropTypes.bool.isRequired
+  };
+
+  static propTypes = {
+    peer: PropTypes.object.isRequired,
+    message: PropTypes.object.isRequired,
+    isShort: PropTypes.bool.isRequired,
+    isSelected: PropTypes.bool,
+    onSelect: PropTypes.func
+  };
+
   static getStores() {
     return [DropdownStore];
   }
@@ -42,18 +43,12 @@ class MessageItem extends Component {
     }
   }
 
-  static propTypes = {
-    peer: PropTypes.object.isRequired,
-    message: PropTypes.object.isRequired,
-    isShort: PropTypes.bool.isRequired,
-    isSelected: PropTypes.bool,
-    onSelect: PropTypes.func
-  };
+  constructor(props, context) {
+    super(props, context);
 
-  static contextTypes = {
-    delegate: PropTypes.object,
-    isExperimental: PropTypes.bool
-  };
+    this.components = this.context.delegate.components.dialog.messages;
+    this.isExperimental = context.isExperimental;
+  }
 
   shouldComponentUpdate(nextProps, nextState) {
     return (this.props.message !== nextProps.message || this.props.isShort !== nextProps.isShort);
@@ -82,30 +77,13 @@ class MessageItem extends Component {
   render() {
     const { message, peer, isShort, isSelected } = this.props;
     const { isHighlighted } = this.state;
-    const { delegate, isExperimental } = this.context;
+    const { components, isExperimental } = this;
 
-    let Service, Text, Modern, Photo, Document, Voice, Contact, Location, Sticker;
-    if (delegate.components.dialog && delegate.components.dialog.messages && delegate.components.dialog.messages.message !== null && typeof delegate.components.messages.message !== 'function') {
-      Service = delegate.components.dialog.messages.service || DefaultService;
-      Text = delegate.components.dialog.messages.text || DefaultText;
-      Modern = delegate.components.dialog.messages.modern || DefaultModern;
-      Photo = delegate.components.dialog.messages.photo || DefaultPhoto;
-      Document = delegate.components.dialog.messages.document || DefaultDocument;
-      Voice = delegate.components.dialog.messages.voice || DefaultVoice;
-      Contact = delegate.components.dialog.messages.contact || DefaultContact;
-      Location = delegate.components.dialog.messages.location || DefaultLocation;
-      Sticker = delegate.components.dialog.messages.sticker || DefaultSticker;
-    } else {
-      Service = DefaultService;
-      Text = DefaultText;
-      Modern = DefaultModern;
-      Photo = DefaultPhoto;
-      Document = DefaultDocument;
-      Voice = DefaultVoice;
-      Contact = DefaultContact;
-      Location = DefaultLocation;
-      Sticker = DefaultSticker;
-    }
+    const {
+      Service, Text, Modern, Photo, Document,
+      Voice, Contact, Location, Sticker
+    } = components;
+
 
     let header = null,
         messageContent = null,

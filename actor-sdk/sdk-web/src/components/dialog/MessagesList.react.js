@@ -9,6 +9,10 @@ import Welcome from './messages/Welcome.react';
 import MessagesScroller from './MessagesScroller.react';
 
 class MessagesList extends Component {
+  static contextTypes = {
+    delegate: PropTypes.object.isRequired
+  };
+
   static propTypes = {
     peer: PropTypes.object.isRequired,
     messages: PropTypes.array.isRequired,
@@ -17,16 +21,17 @@ class MessagesList extends Component {
     selectedMessages: PropTypes.object.isRequired,
     isMember: PropTypes.bool.isRequired,
     isAllMessagesLoaded: PropTypes.bool.isRequired,
-    components: PropTypes.shape({
-      MessageItem: PropTypes.func.isRequired
-    }).isRequired,
     onSelect: PropTypes.func.isRequired,
     onVisibilityChange: PropTypes.func.isRequired,
     onLoadMore: PropTypes.func.isRequired
   };
 
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
+
+    this.components = {
+      Message: context.delegate.components.dialog.messages.Message
+    };
 
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
   }
@@ -52,8 +57,8 @@ class MessagesList extends Component {
   }
 
   renderMessages() {
-    const {peer, messages, overlay, count, selectedMessages, components} = this.props;
-    const {MessageItem} = this.props.components;
+    const {peer, messages, overlay, count, selectedMessages} = this.props;
+    const {Message} = this.components;
 
     const result = [];
     for (let index = messages.length - count; index < messages.length; index++) {
@@ -68,7 +73,7 @@ class MessagesList extends Component {
 
       const message = messages[index];
       result.push(
-        <MessageItem
+        <Message
           key={message.sortKey}
           message={message}
           isShort={overlayItem.useShort}

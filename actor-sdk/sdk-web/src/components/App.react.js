@@ -10,13 +10,10 @@ import LocationContainer from '../utils/LocationContainer';
  */
 class App extends Component {
   static propTypes = {
-    delegate: PropTypes.object,
-    isExperimental: PropTypes.bool,
-    children: PropTypes.oneOfType([
-      PropTypes.arrayOf(PropTypes.node),
-      PropTypes.node
-    ]),
-    location: PropTypes.object
+    delegate: PropTypes.object.isRequired,
+    isExperimental: PropTypes.bool.isRequired,
+    children: PropTypes.node.isRequired,
+    location: PropTypes.object.isRequired
   };
 
   static childContextTypes = {

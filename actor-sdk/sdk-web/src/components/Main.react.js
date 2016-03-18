@@ -20,20 +20,20 @@ import InviteByLink from './modals/invite-user/InviteByLink.react';
 import EditGroup from './modals/EditGroup.react';
 
 class Main extends Component {
-  static propTypes = {
-    params: PropTypes.object,
-    children: PropTypes.oneOfType([
-      PropTypes.arrayOf(PropTypes.node),
-      PropTypes.node
-    ])
-  };
-
   static contextTypes = {
-    delegate: PropTypes.object
+    delegate: PropTypes.object.isRequired
   };
 
-  constructor(props) {
-    super(props);
+  static propTypes = {
+    children: PropTypes.node
+  };
+
+  constructor(props, context) {
+    super(props, context);
+
+    this.components = {
+      Sidebar: context.delegate.components.sidebar.Sidebar
+    };
 
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     document.addEventListener('keydown', this.onKeyDown, false);
@@ -64,15 +64,13 @@ class Main extends Component {
   };
 
   render() {
-    const { delegate } = this.context;
-
-    const Sidebar = (typeof delegate.components.sidebar == 'function') ? delegate.components.sidebar : DefaultSidebar;
+    const { Sidebar } = this.components;
 
     return (
       <div className="app">
         <Favicon/>
 
-        <Sidebar/>
+        {/*<Sidebar/>*/}
         {this.props.children}
 
         <ModalsWrapper/>

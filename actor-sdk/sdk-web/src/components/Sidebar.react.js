@@ -13,6 +13,10 @@ import DialogStore from '../stores/DialogStore';
 import ArchiveStore from '../stores/ArchiveStore';
 
 class SidebarSection extends Component {
+  static contextTypes = {
+    delegate: PropTypes.object.isRequired
+  };
+
   static getStores() {
     return [DialogStore, ArchiveStore];
   }
@@ -25,29 +29,24 @@ class SidebarSection extends Component {
     };
   };
 
-  static contextTypes = {
-    delegate: PropTypes.object
-  };
+  constructor(props, context) {
+    super(props, context);
+    
+    this.components = context.delegate.components.sidebar;
+  }
 
   render() {
-    const { delegate } = this.context;
     const { currentPeer, dialogs, archive } = this.state;
-
-    let HeaderSection, Recent, FooterSection;
-    if (delegate.components.sidebar !== null && typeof delegate.components.sidebar !== 'function') {
-      HeaderSection = delegate.components.sidebar.header || DefaultHeaderSection;
-      Recent = delegate.components.sidebar.recent || DefaultRecent;
-      FooterSection = delegate.components.sidebar.footer || QuickSearchButton;
-    } else {
-      HeaderSection = DefaultHeaderSection;
-      Recent = DefaultRecent;
-      FooterSection = QuickSearchButton;
-    }
+    const { HeaderSection, RecentSection, FooterSection } = this.components;
 
     return (
       <aside className="sidebar">
-        <HeaderSection/>
-        <Recent currentPeer={currentPeer} dialogs={dialogs} archive={archive} />
+        <HeaderSection />
+        <RecentSection
+          currentPeer={currentPeer}
+          dialogs={dialogs}
+          archive={archive}
+        />
         <FooterSection/>
       </aside>
     );

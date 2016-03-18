@@ -6,12 +6,18 @@ import React, { Component, PropTypes } from 'react';
 
 class DialogFooter extends Component {
   static propTypes = {
-    isMember: PropTypes.bool.isRequired,
-    components: PropTypes.shape({
-      TypingSection: React.PropTypes.func.isRequired,
-      ComposeSection: React.PropTypes.func.isRequired
-    }).isRequired
+    isMember: PropTypes.bool.isRequired
   };
+
+  static contextTypes = {
+    delegate: PropTypes.object.isRequired
+  };
+
+  constructor(props, context) {
+    super(props, context);
+
+    this.components = this.context.delegate.components.dialog;
+  }
 
   render() {
     if (!this.props.isMember) {
@@ -22,7 +28,7 @@ class DialogFooter extends Component {
       );
     }
 
-    const {TypingSection, ComposeSection} = this.props.components;
+    const {TypingSection, ComposeSection} = this.components;
 
     return (
       <footer className="dialog__footer">

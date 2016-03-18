@@ -28,15 +28,6 @@ import defaultLogHandler from '../utils/defaultLogHandler';
 
 import LoginStore from '../stores/LoginStore';
 
-import App from '../components/App.react';
-import Main from '../components/Main.react';
-import DefaultLogin from '../components/Login.react';
-import DefaultDeactivated from '../components/Deactivated.react';
-import DefaultJoin from '../components/Join.react';
-import DefaultInstall from '../components/Install.react';
-import DefaultArchive from '../components/Archive.react';
-import DefaultDialog from '../components/Dialog.react';
-import DefaultEmpty from '../components/Empty.react';
 import Modal from 'react-modal';
 
 import { extendL18n, getIntlData } from '../l18n';
@@ -111,15 +102,27 @@ class ActorSDK {
       });
     }
 
-    const Login = (typeof this.delegate.components.login == 'function') ? this.delegate.components.login : DefaultLogin;
-    const Deactivated = (typeof this.delegate.components.deactivated == 'function') ? this.delegate.components.deactivated : DefaultDeactivated;
-    const Install = (typeof this.delegate.components.install == 'function') ? this.delegate.components.install : DefaultInstall;
-    const Archive = (typeof this.delegate.components.archive == 'function') ? this.delegate.components.archive : DefaultArchive;
-    const Join = (typeof this.delegate.components.join == 'function') ? this.delegate.components.join : DefaultJoin;
-    const Empty = (typeof this.delegate.components.empty == 'function') ? this.delegate.components.empty : DefaultEmpty;
-    const Dialog = (typeof this.delegate.components.dialog == 'function') ? this.delegate.components.dialog : DefaultDialog;
     const intlData = getIntlData(this.forceLocale);
+    const router = this.createRouter();
+    const root = (
+      <IntlProvider {...intlData}>
+        {router}
+      </IntlProvider>
+    );
 
+    render(root, appRootElemet);
+
+    // initial setup fot react modal
+    Modal.setAppElement(appRootElemet);
+
+    if (window.location.hash !== '#/deactivated') {
+      if (LoginStore.isLoggedIn()) {
+        LoginActionCreators.setLoggedIn({redirect: false});
+      }
+    }
+  };
+
+  createRouter() {
     const requireAuth = (nextState, replaceState) => {
       if (!LoginStore.isLoggedIn()) {
         replaceState({
@@ -137,6 +140,8 @@ class ActorSDK {
       }
     }
 
+    const { delegate, isExperimental } = this;
+
     /**
      * Method for pulling props to router components
      *
@@ -145,39 +150,30 @@ class ActorSDK {
      * @returns {object} extended component
      */
     const createElement = (Component, props) => {
-      return <Component {...props} delegate={this.delegate} isExperimental={this.isExperimental}/>;
+      return <Component {...props} delegate={delegate} isExperimental={isExperimental}/>;
     };
 
-    const root = (
-      <IntlProvider {...intlData}>
-        <Router history={history} createElement={createElement}>
-          <Route path="/" component={App}>
-            <Route path="auth" component={Login}/>
-            <Route path="deactivated" component={Deactivated}/>
-            <Route path="install" component={Install}/>
-            <Route path="join/:token" component={Join} onEnter={requireAuth}/>
+    const { routes } = delegate;
 
-            <Route path="im" component={Main} onEnter={requireAuth}>
-              <Route path="archive" component={Archive}/>
-              <Route path=":id" component={Dialog} onEnter={checkPeer}/>
-              <IndexRoute component={Empty}/>
-            </Route>
+    return (
+      <Router history={history} createElement={createElement}>
+        <Route {...routes.index}>
+          <Route {...routes.auth} />
+          <Route {...routes.install} />
+          <Route {...routes.deactivated} />
+          <Route {...routes.join} onEnter={requireAuth} />
 
-            <IndexRedirect to="im"/>
+          <Route {...routes.im} onEnter={requireAuth}>
+            <Route {...routes.im.archive} />
+            <Route {...routes.im.dialog} onEnter={checkPeer} />
+            <IndexRoute {...routes.im.index} />
           </Route>
-        </Router>
-      </IntlProvider>
+
+          <IndexRedirect to={routes.im.path} />
+        </Route>
+      </Router>
     );
-
-    render(root, appRootElemet);
-
-    // initial setup fot react modal
-    Modal.setAppElement(appRootElemet);
-
-    if (window.location.hash !== '#/deactivated') {
-      if (LoginStore.isLoggedIn()) LoginActionCreators.setLoggedIn({redirect: false});
-    }
-  };
+  }
 
   /**
    * Start application
