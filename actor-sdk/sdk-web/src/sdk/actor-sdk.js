@@ -2,7 +2,6 @@
  * Copyright (C) 2015-2016 Actor LLC. <https://actor.im>
  */
 
-import 'babel-polyfill';
 import 'setimmediate';
 import initPollyfils from '../utils/polyfills';
 
@@ -25,6 +24,7 @@ import { lightbox } from '../utils/ImageUtils'
 
 import LoginActionCreators from '../actions/LoginActionCreators';
 import {loggerAppend} from '../actions/LoggerActionCreators';
+import defaultLogHandler from '../utils/defaultLogHandler';
 
 import LoginStore from '../stores/LoginStore';
 
@@ -89,7 +89,7 @@ class ActorSDK {
       return loggerAppend;
     }
 
-    return () => {};
+    return defaultLogHandler;
   }
 
   _starter = () => {

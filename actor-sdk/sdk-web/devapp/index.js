@@ -5,8 +5,6 @@
 import ActorSDK from '../src/sdk/actor-sdk';
 import ActorSDKDelegate from '../src/sdk/actor-sdk-delegate';
 
-window.ReactPerf = require('react-addons-perf');
-
 const components = {};
 const actions = {};
 const l18n = {};
