@@ -12,6 +12,7 @@ import { PeerTypes } from '../constants/ActorAppConstants';
 import PeerUtils from '../utils/PeerUtils';
 
 import CallActionCreators from '../actions/CallActionCreators';
+import DialogActionCreators from '../actions/DialogActionCreators';
 
 import CallStore from '../stores/CallStore';
 import DialogStore from '../stores/DialogStore';
@@ -71,6 +72,7 @@ class Call extends Component {
     this.onFullscreen = this.onFullscreen.bind(this);
     this.onUserAdd = this.onUserAdd.bind(this);
     this.onVideo = this.onVideo.bind(this);
+    this.onAvatarClick = this.onAvatarClick.bind(this);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -110,6 +112,10 @@ class Call extends Component {
     console.debug('onVideo');
   }
 
+  onAvatarClick() {
+    DialogActionCreators.selectDialogPeer(this.state.callPeer);
+  }
+
   renderContactInfo() {
     const { callPeer, peerInfo } = this.state;
     if (!peerInfo || callPeer.type === PeerTypes.GROUP) return null;
@@ -141,6 +147,7 @@ class Call extends Component {
           onUserAdd={this.onUserAdd}
           onVideo={this.onVideo}
           onClose={this.onClose}
+          onAvatarClick={this.onAvatarClick}
         />
       );
     }

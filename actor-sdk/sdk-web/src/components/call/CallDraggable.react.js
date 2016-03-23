@@ -21,7 +21,8 @@ class CallDraggable extends Component {
     onFullscreen: PropTypes.func.isRequired,
     onUserAdd: PropTypes.func.isRequired,
     onVideo: PropTypes.func.isRequired,
-    onClose: PropTypes.func.isRequired
+    onClose: PropTypes.func.isRequired,
+    onAvatarClick: PropTypes.func.isRequired
   };
 
   render() {
@@ -30,7 +31,12 @@ class CallDraggable extends Component {
     return (
       <Draggable>
         <section className="call__draggable" style={{position: 'absolute', top: 60, right: 60}}>
-          <CallBody peerInfo={peerInfo} callState={callState} small />
+          <CallBody
+            small
+            peerInfo={peerInfo}
+            callState={callState}
+            onAvatarClick={this.props.onAvatarClick}
+          />
           <CallControls
             callState={callState}
             isOutgoing={this.props.isOutgoing}

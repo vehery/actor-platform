@@ -23,7 +23,8 @@ class CallAvatar extends Component {
       CallStates.IN_PROGRESS,
       CallStates.CONNECTING,
       CallStates.ENDED
-    ]).isRequired
+    ]).isRequired,
+    onClick: PropTypes.func
   };
 
   renderAnimation() {
@@ -46,7 +47,7 @@ class CallAvatar extends Component {
   }
 
   render() {
-    const {peerInfo, small} = this.props;
+    const { peerInfo, small, onClick } = this.props;
 
     return (
       <div className="call__avatar">
@@ -55,6 +56,7 @@ class CallAvatar extends Component {
           title={peerInfo.name}
           image={peerInfo.avatar}
           placeholder={peerInfo.placeholder}
+          onClick={onClick}
         />
         {this.renderAnimation()}
       </div>

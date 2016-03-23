@@ -12,11 +12,12 @@ class CallBody extends Component {
   static propTypes = {
     small: PropTypes.bool,
     peerInfo: PropTypes.object,
-    callState: PropTypes.string.isRequired
+    callState: PropTypes.string.isRequired,
+    onAvatarClick: PropTypes.func
   };
 
   render() {
-    const {small, peerInfo, callState} = this.props;
+    const { small, peerInfo, callState, onAvatarClick } = this.props;
     if (!peerInfo) {
       return null;
     }
@@ -27,7 +28,12 @@ class CallBody extends Component {
 
     return (
       <div className="call__body">
-        <CallAvatar peerInfo={peerInfo} callState={callState} small={small} />
+        <CallAvatar
+          small={small}
+          peerInfo={peerInfo}
+          callState={callState}
+          onClick={onAvatarClick}
+        />
         <h3 className={titleClassName}>
           {peerInfo.name}
         </h3>
