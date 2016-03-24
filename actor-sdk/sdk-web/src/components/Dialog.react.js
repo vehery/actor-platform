@@ -79,7 +79,7 @@ class DialogSection extends Component {
           <section className="dialog">
             <ConnectionState/>
             <MessagesSection peer={peer} isMember={isMember} />
-            <DialogFooter isMember={isMember} />
+            <DialogFooter className="dialog__footer" isMember={isMember} />
           </section>
           {activity}
         </div>

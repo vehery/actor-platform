@@ -14,7 +14,8 @@ class DialogFooter extends Component {
   };
 
   static propTypes = {
-    isMember: PropTypes.bool.isRequired
+    isMember: PropTypes.bool.isRequired,
+    className: PropTypes.string
   };
 
   constructor(props, context) {
@@ -37,7 +38,7 @@ class DialogFooter extends Component {
   render() {
     if (!this.props.isMember) {
       return (
-        <footer className="dialog__footer dialog__footer--disabled row center-xs middle-xs">
+        <footer className={this.props.className + ' row center-xs middle-xs'}>
           <h3>You are not a member</h3>
         </footer>
       );
@@ -46,7 +47,7 @@ class DialogFooter extends Component {
     const { TypingSection, ComposeSection } = this.components;
 
     return (
-      <footer className="dialog__footer">
+      <footer className={this.props.className}>
         <TypingSection />
         <ComposeSection />
       </footer>
