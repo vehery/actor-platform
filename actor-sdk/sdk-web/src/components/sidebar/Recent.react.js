@@ -143,12 +143,13 @@ class Recent extends Component {
       const groupList = map(dialogGroup.shorts, (dialog, index) => {
         const peer = dialog.peer.peer;
         const peerKey = PeerUtils.peerToString(peer);
+        const isActive = PeerUtils.equals(peer, currentPeer) || false;
 
         return (
           <RecentItem
             dialog={dialog}
             archiveState={archive[peerKey]}
-            isActive={PeerUtils.equals(peer, currentPeer)}
+            isActive={isActive}
             key={peerKey}
           />
         );
