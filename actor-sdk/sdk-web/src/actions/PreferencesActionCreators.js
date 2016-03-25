@@ -20,15 +20,11 @@ export default {
   },
 
   save(preferences) {
-    dispatch(ActionTypes.PREFERENCES_SAVE, {
-      preferences
-    });
+    dispatch(ActionTypes.PREFERENCES_SAVE, { preferences });
   },
 
   changeTab(tab) {
-    dispatch(ActionTypes.PREFERENCES_CHANGE_TAB, {
-      tab
-    });
+    dispatch(ActionTypes.PREFERENCES_CHANGE_TAB, { tab });
   },
 
   loadSessions() {

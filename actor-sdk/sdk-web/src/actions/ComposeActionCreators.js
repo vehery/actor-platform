@@ -22,15 +22,11 @@ export default {
   },
 
   pasteText(text) {
-    if (text !== '') {
-      dispatch(ActionTypes.COMPOSE_PASTE, { text });
-    }
+    if (text !== '') dispatch(ActionTypes.COMPOSE_PASTE, { text });
   },
 
   onTyping(peer, text, caretPosition) {
-    if (text !== '') {
-      ActorClient.onTyping(peer);
-    }
+    if (text !== '') ActorClient.onTyping(peer);
 
     DraftActionCreators.changeDraft(text);
     dispatch(ActionTypes.COMPOSE_TYPING, { peer, text, caretPosition });

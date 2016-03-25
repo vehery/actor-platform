@@ -22,10 +22,8 @@ export default {
         dispatch(ActionTypes.CALL_MODAL_OPEN, { id });
         break;
       case CallTypes.ENDED:
-        setTimeout(() => {
-          ActorClient.unbindCall(id, this.setCall);
-          if (CallStore.isOpen()) dispatch(ActionTypes.CALL_MODAL_HIDE);
-        }, HIDE_MODAL_AFTER);
+        ActorClient.unbindCall(id, this.setCall);
+        dispatch(ActionTypes.CALL_MODAL_HIDE);
         break;
       default:
     }
@@ -65,7 +63,7 @@ export default {
     ActorClient.toggleCallMute(callId);
     dispatch(ActionTypes.CALL_MUTE_TOGGLE, { callId })
   },
-  
+
   toggleFloating() {
     dispatch(ActionTypes.CALL_FLOAT_TOGGLE)
   }
