@@ -5,16 +5,21 @@ package im.actor.core.api;
 
 import im.actor.runtime.bser.*;
 import im.actor.runtime.collections.*;
+
 import static im.actor.runtime.bser.Utils.*;
+
 import im.actor.core.network.parser.*;
+
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
+
 import com.google.j2objc.annotations.ObjectiveCName;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
-public class ApiMessageContainer extends BserObject {
+public class ApiHistoryMessage extends BserObject {
 
     private int senderUid;
     private long rid;
@@ -22,19 +27,17 @@ public class ApiMessageContainer extends BserObject {
     private ApiMessage message;
     private ApiMessageState state;
     private List<ApiMessageReaction> reactions;
-    private ApiMessageAttributes attributes;
 
-    public ApiMessageContainer(int senderUid, long rid, long date, @NotNull ApiMessage message, @Nullable ApiMessageState state, @NotNull List<ApiMessageReaction> reactions, @Nullable ApiMessageAttributes attributes) {
+    public ApiHistoryMessage(int senderUid, long rid, long date, @NotNull ApiMessage message, @Nullable ApiMessageState state, @NotNull List<ApiMessageReaction> reactions) {
         this.senderUid = senderUid;
         this.rid = rid;
         this.date = date;
         this.message = message;
         this.state = state;
         this.reactions = reactions;
-        this.attributes = attributes;
     }
 
-    public ApiMessageContainer() {
+    public ApiHistoryMessage() {
 
     }
 
@@ -65,11 +68,6 @@ public class ApiMessageContainer extends BserObject {
         return this.reactions;
     }
 
-    @Nullable
-    public ApiMessageAttributes getAttributes() {
-        return this.attributes;
-    }
-
     @Override
     public void parse(BserValues values) throws IOException {
         this.senderUid = values.getInt(1);
@@ -81,11 +79,10 @@ public class ApiMessageContainer extends BserObject {
             this.state = ApiMessageState.parse(val_state);
         }
         List<ApiMessageReaction> _reactions = new ArrayList<ApiMessageReaction>();
-        for (int i = 0; i < values.getRepeatedCount(7); i ++) {
+        for (int i = 0; i < values.getRepeatedCount(7); i++) {
             _reactions.add(new ApiMessageReaction());
         }
         this.reactions = values.getRepeatedObj(7, _reactions);
-        this.attributes = values.optObj(8, new ApiMessageAttributes());
     }
 
     @Override
@@ -102,20 +99,16 @@ public class ApiMessageContainer extends BserObject {
             writer.writeInt(6, this.state.getValue());
         }
         writer.writeRepeatedObj(7, this.reactions);
-        if (this.attributes != null) {
-            writer.writeObject(8, this.attributes);
-        }
     }
 
     @Override
     public String toString() {
-        String res = "struct MessageContainer{";
+        String res = "struct HistoryMessage{";
         res += "senderUid=" + this.senderUid;
         res += ", rid=" + this.rid;
         res += ", date=" + this.date;
         res += ", message=" + this.message;
         res += ", reactions=" + this.reactions;
-        res += ", attributes=" + this.attributes;
         res += "}";
         return res;
     }

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import im.actor.core.api.ApiAvatar;
+import im.actor.core.api.ApiBotCommand;
 import im.actor.core.api.ApiContactRecord;
 import im.actor.core.api.ApiContactType;
 import im.actor.core.api.ApiUser;
@@ -69,6 +70,9 @@ public class User extends WrapperEntity<ApiUser> implements KeyValueItem {
     @Property("readonly, nonatomic")
     @SuppressWarnings("NullableProblems")
     private List<ContactRecord> records;
+    @Property("readonly, nonatomic")
+    @SuppressWarnings("NullableProblems")
+    private List<BotCommand> commands;
 
     public User(@NotNull ApiUser wrappedUser) {
         super(RECORD_ID, wrappedUser);
@@ -139,6 +143,11 @@ public class User extends WrapperEntity<ApiUser> implements KeyValueItem {
         return records;
     }
 
+    @NotNull
+    public List<BotCommand> getBotCommands() {
+        return commands;
+    }
+
     public boolean isBot() {
         return isBot;
     }
@@ -158,7 +167,8 @@ public class User extends WrapperEntity<ApiUser> implements KeyValueItem {
                 w.getAbout(),
                 w.getExternal(),
                 w.getPreferredLanguages(),
-                w.getTimeZone());
+                w.getTimeZone(),
+                w.getBotCommands());
         res.setUnmappedObjects(w.getUnmappedObjects());
         return new User(res);
     }
@@ -178,7 +188,8 @@ public class User extends WrapperEntity<ApiUser> implements KeyValueItem {
                 w.getAbout(),
                 w.getExternal(),
                 w.getPreferredLanguages(),
-                w.getTimeZone());
+                w.getTimeZone(),
+                w.getBotCommands());
         res.setUnmappedObjects(w.getUnmappedObjects());
         return new User(res);
     }
@@ -198,7 +209,8 @@ public class User extends WrapperEntity<ApiUser> implements KeyValueItem {
                 w.getAbout(),
                 w.getExternal(),
                 w.getPreferredLanguages(),
-                w.getTimeZone());
+                w.getTimeZone(),
+                w.getBotCommands());
         res.setUnmappedObjects(w.getUnmappedObjects());
         return new User(res);
     }
@@ -218,7 +230,29 @@ public class User extends WrapperEntity<ApiUser> implements KeyValueItem {
                 about,
                 w.getExternal(),
                 w.getPreferredLanguages(),
-                w.getTimeZone());
+                w.getTimeZone(),
+                w.getBotCommands());
+        res.setUnmappedObjects(w.getUnmappedObjects());
+        return new User(res);
+    }
+
+    public User editBotCommands(@Nullable List<ApiBotCommand> botCommands) {
+        ApiUser w = getWrapped();
+        ApiUser res = new ApiUser(
+                w.getId(),
+                w.getAccessHash(),
+                w.getName(),
+                w.getLocalName(),
+                w.getSex(),
+                w.getAvatar(),
+                w.getContactInfo(),
+                w.isBot(),
+                w.getNick(),
+                w.getAbout(),
+                w.getExternal(),
+                w.getPreferredLanguages(),
+                w.getTimeZone(),
+                botCommands);
         res.setUnmappedObjects(w.getUnmappedObjects());
         return new User(res);
     }
@@ -238,7 +272,8 @@ public class User extends WrapperEntity<ApiUser> implements KeyValueItem {
                 w.getAbout(),
                 w.getExternal(),
                 w.getPreferredLanguages(),
-                w.getTimeZone());
+                w.getTimeZone(),
+                w.getBotCommands());
         res.setUnmappedObjects(w.getUnmappedObjects());
         return new User(res);
     }
@@ -290,6 +325,11 @@ public class User extends WrapperEntity<ApiUser> implements KeyValueItem {
 
         if (wrapped.getAvatar() != null) {
             this.avatar = new Avatar(wrapped.getAvatar());
+        }
+
+        this.commands = new ArrayList<BotCommand>();
+        for (ApiBotCommand command : wrapped.getBotCommands()) {
+            commands.add(new BotCommand(command.getSlashCommand(), command.getDescription(), command.getLocKey()));
         }
     }
 

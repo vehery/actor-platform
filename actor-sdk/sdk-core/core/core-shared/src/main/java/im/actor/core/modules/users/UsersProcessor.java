@@ -2,11 +2,14 @@ package im.actor.core.modules.users;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import im.actor.core.api.ApiAvatar;
+import im.actor.core.api.ApiBotCommand;
 import im.actor.core.api.ApiUser;
 import im.actor.core.api.updates.UpdateUserAboutChanged;
 import im.actor.core.api.updates.UpdateUserAvatarChanged;
+import im.actor.core.api.updates.UpdateUserBotCommandsChanged;
 import im.actor.core.api.updates.UpdateUserLocalNameChanged;
 import im.actor.core.api.updates.UpdateUserNameChanged;
 import im.actor.core.api.updates.UpdateUserNickChanged;
@@ -173,6 +176,16 @@ public class UsersProcessor extends AbsModule implements Processor {
         }
     }
 
+    private void onBotCommandsChanged(int uid, List<ApiBotCommand> commands) {
+        User u = users().getValue(uid);
+        if (u != null) {
+            u = u.editBotCommands(commands);
+
+            // Updating user in collection
+            users().addOrUpdateItem(u);
+        }
+    }
+
     @Override
     public boolean process(Object update) {
         if (update instanceof UpdateUserNameChanged) {
@@ -194,6 +207,10 @@ public class UsersProcessor extends AbsModule implements Processor {
         } else if (update instanceof UpdateUserAvatarChanged) {
             UpdateUserAvatarChanged avatarChanged = (UpdateUserAvatarChanged) update;
             onUserAvatarChanged(avatarChanged.getUid(), avatarChanged.getAvatar());
+            return true;
+        } else if (update instanceof UpdateUserBotCommandsChanged) {
+            UpdateUserBotCommandsChanged botCommandsChanged = (UpdateUserBotCommandsChanged) update;
+            onBotCommandsChanged(botCommandsChanged.getUid(), botCommandsChanged.getCommands());
             return true;
         }
         return false;

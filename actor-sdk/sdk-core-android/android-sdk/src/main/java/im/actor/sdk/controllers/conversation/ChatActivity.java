@@ -59,6 +59,7 @@ import im.actor.core.viewmodel.Command;
 import im.actor.core.viewmodel.CommandCallback;
 import im.actor.core.viewmodel.GroupVM;
 import im.actor.core.viewmodel.UserVM;
+import im.actor.core.viewmodel.generics.ArrayListBotCommands;
 import im.actor.runtime.Log;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorRef;
@@ -72,6 +73,7 @@ import im.actor.sdk.controllers.Intents;
 import im.actor.sdk.controllers.conversation.mentions.MentionsAdapter;
 import im.actor.sdk.controllers.conversation.messages.AudioHolder;
 import im.actor.sdk.controllers.conversation.messages.MessagesFragment;
+import im.actor.sdk.controllers.conversation.view.CommandAdapter;
 import im.actor.sdk.controllers.conversation.view.FastShareAdapter;
 import im.actor.sdk.controllers.fragment.settings.BaseActorChatActivity;
 import im.actor.sdk.core.audio.VoiceCaptureActor;
@@ -86,6 +88,7 @@ import im.actor.sdk.view.markdown.AndroidMarkdown;
 import im.actor.runtime.mvvm.Value;
 import im.actor.runtime.mvvm.ValueChangedListener;
 
+import static im.actor.sdk.util.ViewUtils.expand;
 import static im.actor.sdk.util.ViewUtils.expandMentions;
 import static im.actor.sdk.util.ViewUtils.goneView;
 import static im.actor.sdk.util.ViewUtils.hideView;
@@ -213,6 +216,10 @@ public class ChatActivity extends ActorEditTextActivity {
     private boolean textEditing = false;
     private long currentEditRid;
     private Animation.AnimationListener animationListener;
+
+    boolean hasBotCommands = false;
+    private UserVM userVM;
+    private RecyclerView commands;
 
     public static Intent build(Peer peer, boolean compose, Context context) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -440,6 +447,24 @@ public class ChatActivity extends ActorEditTextActivity {
                 }
             }
         });
+
+        //commands
+        if (peer.getPeerType() == PeerType.PRIVATE) {
+            userVM = users().get(peer.getPeerId());
+            if (userVM.isBot()) {
+                userVM.getBotCommands().subscribe(new ValueChangedListener<ArrayListBotCommands>() {
+                    @Override
+                    public void onChanged(ArrayListBotCommands val, Value<ArrayListBotCommands> valueModel) {
+                        hasBotCommands = val.size() > 0;
+                    }
+                });
+                CommandAdapter commandsAdapter = new CommandAdapter(userVM, this);
+                commands = (RecyclerView) findViewById(R.id.commands);
+                LinearLayoutManager commandLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+                commands.setLayoutManager(commandLinearLayoutManager);
+                commands.setAdapter(commandsAdapter);
+            }
+        }
     }
 
     private void startCamera() {
@@ -1295,6 +1320,10 @@ public class ChatActivity extends ActorEditTextActivity {
                     //mentionsDisplay.initSearch(mentionSearchString, false);
                     mentionsAdapter.setQuery(mentionSearchString.toLowerCase());
                 }
+            }
+
+            if (hasBotCommands && count == 1 && s.toString().startsWith("/")) {
+                expand(commands, Screen.dp(122));
             }
         }
 
