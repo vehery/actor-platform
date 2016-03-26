@@ -1,0 +1,53 @@
+/*
+ * Copyright (C) 2016 Actor LLC. <https://actor.im>
+ */
+
+.pace {
+  pointer-events: none;
+
+  @include no-select();
+  .pace-progress {
+    position: fixed;
+    z-index: 2000;
+    top: 0;
+    right: 100%;
+
+    width: 100%;
+    height: 3px;
+
+    background: white;
+  }
+  &.pace-inactive {
+    display: none;
+  }
+}
+
+.pace-running {
+  .splash {
+    z-index: 1;
+
+    opacity: 1;
+  }
+  .app,
+  .login {
+    z-index: 0;
+
+    opacity: 0;
+  }
+}
+
+.pace-done {
+  .splash {
+    z-index: 0;
+
+    transition: opacity $default-transition-duration $default-transition-timing;
+
+    opacity: 0;
+  }
+  .app,
+  .login {
+    z-index: 1;
+
+    opacity: 1;
+  }
+}

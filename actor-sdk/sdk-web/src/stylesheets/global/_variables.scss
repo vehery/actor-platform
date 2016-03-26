@@ -1,0 +1,35 @@
+/*
+ * Copyright (C) 2016 Actor LLC. <https://actor.im>
+ */
+
+// Defaults
+$default-spacing: 16px;
+$default-border-radius: 3px;
+$default-transition-duration: 200ms;
+$default-transition-timing: cubic-bezier(.25, .8, .25, 1);
+
+// Colors
+$dusk: #49627f;
+
+// App
+$app-min-height: 500px;
+$app-min-width: 600px;
+$app-background-color: $dusk;
+
+// Splash
+$splash-logo-size: 200px;
+$splash-background-color: $dusk;
+
+// Sidebar
+$sidebar-width: 250px;
+$sidebar-background-color: $dusk;
+
+// Toolbar
+$toolbar-height: 60px;
+
+// Chat
+$chat-min-width: 200px;
+$chat-footer-height: 100px;
+
+// Activity
+$activity-width: 350px;

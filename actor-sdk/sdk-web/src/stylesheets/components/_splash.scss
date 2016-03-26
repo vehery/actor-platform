@@ -1,0 +1,21 @@
+/*
+ * Copyright (C) 2016 Actor LLC. <https://actor.im>
+ */
+
+.splash {
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+  @include overlay();
+  &__logo {
+    width: $splash-logo-size;
+    height: $splash-logo-size;
+
+    background-image: url('/assets/images/logo_splash.png');
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+
+    flex: 0 1 auto;
+  }
+}
