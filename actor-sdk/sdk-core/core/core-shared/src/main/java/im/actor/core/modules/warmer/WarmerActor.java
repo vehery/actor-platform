@@ -27,4 +27,8 @@ public class WarmerActor extends ModuleActor {
     public static class OnSequenceStarted {
 
     }
+
+    public static class OnGroupedDialogsStarted {
+
+    }
 }

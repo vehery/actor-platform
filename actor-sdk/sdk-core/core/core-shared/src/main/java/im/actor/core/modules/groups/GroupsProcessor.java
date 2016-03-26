@@ -27,7 +27,7 @@ import im.actor.core.entity.content.ServiceGroupUserLeave;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.messaging.dialogs.DialogsActor;
-import im.actor.core.modules.messaging.dialogs.GroupedDialogsActor;
+import im.actor.core.modules.messaging.dialogs.ActiveDialogsActor;
 import im.actor.core.entity.EntityConverter;
 import im.actor.runtime.annotations.Verified;
 
@@ -306,6 +306,6 @@ public class GroupsProcessor extends AbsModule {
         context().getMessagesModule().getDialogsActor()
                 .send(new DialogsActor.GroupChanged(group));
         context().getMessagesModule().getDialogsGroupedActor().send(
-                new GroupedDialogsActor.PeerInformationChanged(Peer.group(group.getGroupId())));
+                new ActiveDialogsActor.PeerInformationChanged(Peer.group(group.getGroupId())));
     }
 }

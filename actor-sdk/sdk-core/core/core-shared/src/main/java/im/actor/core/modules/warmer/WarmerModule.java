@@ -26,4 +26,8 @@ public class WarmerModule extends AbsModule {
     public void onSequenceStarted() {
         warmerRef.send(new WarmerActor.OnSequenceStarted());
     }
+
+    public void onGroupedStarted() {
+        warmerRef.send(new WarmerActor.OnGroupedDialogsStarted());
+    }
 }

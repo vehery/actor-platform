@@ -12,7 +12,7 @@ public class GroupedItem extends BserObject {
 
     private String key;
     private String title;
-    private ArrayList<Peer> peers = new ArrayList<Peer>();
+    private ArrayList<Peer> peers = new ArrayList<>();
 
     public GroupedItem(String key, String title, ArrayList<Peer> peers) {
         this.key = key;

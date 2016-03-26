@@ -27,13 +27,12 @@ import im.actor.core.entity.content.AbsContent;
 import im.actor.core.entity.content.ServiceUserRegistered;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.actions.ArchivedDialogsActor;
+import im.actor.core.modules.messaging.dialogs.ArchivedDialogsActor;
 import im.actor.core.modules.messaging.conversations.ConversationActor;
 import im.actor.core.modules.messaging.conversations.ConversationHistoryActor;
 import im.actor.core.modules.messaging.actions.CursorReceiverActor;
 import im.actor.core.modules.messaging.dialogs.DialogsActor;
 import im.actor.core.modules.messaging.dialogs.DialogsHistoryActor;
-import im.actor.core.modules.messaging.dialogs.GroupedDialogsActor;
 import im.actor.core.modules.messaging.counters.OwnReadActor;
 import im.actor.core.modules.messaging.actions.SenderActor;
 import im.actor.core.modules.messaging.dialogs.entity.DialogHistory;
@@ -370,8 +369,8 @@ public class MessagesProcessor extends AbsModule {
         context().getAppStateModule().onCountersChanged(counters);
     }
 
-    public void onChatGroupsChanged(List<ApiDialogGroup> groups) {
-        context().getMessagesModule().getRouter().onChatGroupsChanged(groups);
+    public void onActiveDialogsChanged(List<ApiDialogGroup> groups) {
+        context().getMessagesModule().getRouter().onActiveDialogsChanged(groups);
     }
 
     public void onArchivedDialogsLoaded(ResponseLoadArchived responseLoadArchived) {

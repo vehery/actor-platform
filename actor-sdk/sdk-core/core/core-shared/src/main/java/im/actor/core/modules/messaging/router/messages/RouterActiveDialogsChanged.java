@@ -4,11 +4,11 @@ import java.util.List;
 
 import im.actor.core.api.ApiDialogGroup;
 
-public class RouterChatGroupsChanged {
+public class RouterActiveDialogsChanged {
 
     private List<ApiDialogGroup> groups;
 
-    public RouterChatGroupsChanged(List<ApiDialogGroup> groups) {
+    public RouterActiveDialogsChanged(List<ApiDialogGroup> groups) {
         this.groups = groups;
     }
 

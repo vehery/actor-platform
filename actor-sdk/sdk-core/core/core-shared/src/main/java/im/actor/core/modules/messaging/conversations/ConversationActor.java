@@ -18,7 +18,7 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.events.AppVisibleChanged;
 import im.actor.core.modules.messaging.counters.OwnReadActor;
 import im.actor.core.modules.messaging.dialogs.DialogsActor;
-import im.actor.core.modules.messaging.dialogs.GroupedDialogsActor;
+import im.actor.core.modules.messaging.dialogs.ActiveDialogsActor;
 import im.actor.core.util.ModuleActor;
 import im.actor.runtime.Storage;
 import im.actor.runtime.actors.ActorRef;
@@ -135,8 +135,8 @@ public class ConversationActor extends ModuleActor {
 
         // Prepare messages
         Message topMessage = null;
-        ArrayList<Message> updated = new ArrayList<Message>();
-        ArrayList<Message> updatedDocs = new ArrayList<Message>();
+        ArrayList<Message> updated = new ArrayList<>();
+        ArrayList<Message> updatedDocs = new ArrayList<>();
         for (Message m : inMessages) {
             if (m.getSenderId() == myUid()) {
                 // Force set message state if server out message
@@ -203,7 +203,7 @@ public class ConversationActor extends ModuleActor {
                 dialogsActor.send(new DialogsActor.InMessage(peer, topMessage, inPendingIndex.getCount()));
             }
             if (dialogsGroupedActor!=null) {
-                dialogsGroupedActor.send(new GroupedDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
+                dialogsGroupedActor.send(new ActiveDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
             }
         }
     }
@@ -265,7 +265,7 @@ public class ConversationActor extends ModuleActor {
                 dialogsActor.send(new DialogsActor.InMessage(peer, message, inPendingIndex.getCount()));
             }
             if (dialogsGroupedActor!=null) {
-                dialogsGroupedActor.send(new GroupedDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
+                dialogsGroupedActor.send(new ActiveDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
             }
         }
     }
@@ -343,7 +343,7 @@ public class ConversationActor extends ModuleActor {
                 // Updating dialog
                 dialogsActor.send(new DialogsActor.InMessage(peer, updatedMsg, inPendingIndex.getCount()));
                 if (dialogsGroupedActor!=null) {
-                    dialogsGroupedActor.send(new GroupedDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
+                    dialogsGroupedActor.send(new ActiveDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
                 }
             }
 
@@ -375,7 +375,7 @@ public class ConversationActor extends ModuleActor {
                         MessageState.ERROR));
             }
             if (dialogsGroupedActor!=null) {
-                dialogsGroupedActor.send(new GroupedDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
+                dialogsGroupedActor.send(new ActiveDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
             }
         }
     }
@@ -394,7 +394,7 @@ public class ConversationActor extends ModuleActor {
         if (res.size() > 0) {
             long minRid = -1;
             long minDate = Long.MAX_VALUE;
-            ArrayList<Message> updated = new ArrayList<Message>();
+            ArrayList<Message> updated = new ArrayList<>();
             for (Long ref : res) {
                 Message msg = messages.getValue(ref);
                 if (msg != null && msg.isReceivedOrSent()) {
@@ -432,7 +432,7 @@ public class ConversationActor extends ModuleActor {
         if (res.size() > 0) {
             long maxRid = -1;
             long maxDate = Long.MIN_VALUE;
-            ArrayList<Message> updated = new ArrayList<Message>();
+            ArrayList<Message> updated = new ArrayList<>();
 
             for (Long ref : res) {
                 Message msg = messages.getValue(ref);
@@ -474,7 +474,7 @@ public class ConversationActor extends ModuleActor {
             dialogsActor.send(new DialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
         }
         if (dialogsGroupedActor!=null) {
-            dialogsGroupedActor.send(new GroupedDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
+            dialogsGroupedActor.send(new ActiveDialogsActor.CounterChanged(peer, inPendingIndex.getCount()));
         }
     }
 
@@ -492,7 +492,7 @@ public class ConversationActor extends ModuleActor {
                     dialogsActor.send(new DialogsActor.CounterChanged(peer, 0));
                 }
                 if (dialogsGroupedActor!=null) {
-                    dialogsGroupedActor.send(new GroupedDialogsActor.CounterChanged(peer, 0));
+                    dialogsGroupedActor.send(new ActiveDialogsActor.CounterChanged(peer, 0));
                 }
             }
         }
@@ -551,8 +551,8 @@ public class ConversationActor extends ModuleActor {
     @Verified
     private void onHistoryLoaded(List<Message> history) {
 
-        ArrayList<Message> updated = new ArrayList<Message>();
-        ArrayList<Message> updatedDocs = new ArrayList<Message>();
+        ArrayList<Message> updated = new ArrayList<>();
+        ArrayList<Message> updatedDocs = new ArrayList<>();
 
         long maxReadMessage = 0;
 

@@ -17,7 +17,7 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.modules.sequence.Processor;
 import im.actor.core.modules.contacts.ContactsSyncActor;
 import im.actor.core.modules.messaging.dialogs.DialogsActor;
-import im.actor.core.modules.messaging.dialogs.GroupedDialogsActor;
+import im.actor.core.modules.messaging.dialogs.ActiveDialogsActor;
 import im.actor.runtime.Log;
 import im.actor.runtime.annotations.Verified;
 
@@ -204,7 +204,7 @@ public class UsersProcessor extends AbsModule implements Processor {
         context().getMessagesModule().getDialogsActor().send(
                 new DialogsActor.UserChanged(u));
         context().getMessagesModule().getDialogsGroupedActor().send(
-                new GroupedDialogsActor.PeerInformationChanged(Peer.user(u.getUid())));
+                new ActiveDialogsActor.PeerInformationChanged(Peer.user(u.getUid())));
         context().getContactsModule().getContactSyncActor()
                 .send(new ContactsSyncActor.UserChanged(u));
     }

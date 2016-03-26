@@ -53,14 +53,14 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.events.AppVisibleChanged;
 import im.actor.core.events.PeerChatClosed;
 import im.actor.core.events.PeerChatOpened;
-import im.actor.core.modules.messaging.actions.ArchivedDialogsActor;
+import im.actor.core.modules.messaging.dialogs.ArchivedDialogsActor;
 import im.actor.core.modules.messaging.conversations.ConversationActor;
 import im.actor.core.modules.messaging.conversations.ConversationHistoryActor;
 import im.actor.core.modules.messaging.actions.CursorReaderActor;
 import im.actor.core.modules.messaging.actions.CursorReceiverActor;
 import im.actor.core.modules.messaging.dialogs.DialogsActor;
 import im.actor.core.modules.messaging.dialogs.DialogsHistoryActor;
-import im.actor.core.modules.messaging.dialogs.GroupedDialogsActor;
+import im.actor.core.modules.messaging.dialogs.ActiveDialogsActor;
 import im.actor.core.modules.messaging.actions.MessageDeleteActor;
 import im.actor.core.modules.messaging.counters.OwnReadActor;
 import im.actor.core.modules.messaging.actions.SenderActor;
@@ -148,8 +148,8 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
         this.dialogsGroupedActor = system().actorOf(Props.create(new ActorCreator() {
             @Override
-            public GroupedDialogsActor create() {
-                return new GroupedDialogsActor(context());
+            public ActiveDialogsActor create() {
+                return new ActiveDialogsActor(context());
             }
         }), "actor/dialogs/grouped");
 
@@ -1049,11 +1049,11 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
         if (event instanceof PeerChatOpened) {
             Peer peer = ((PeerChatOpened) event).getPeer();
             assumeConvActor(peer);
-            conversationActors.get(peer).send(new ConversationActor.ConversationVisible());
+            router.onChatOpen(peer);
         } else if (event instanceof PeerChatClosed) {
             Peer peer = ((PeerChatClosed) event).getPeer();
             assumeConvActor(peer);
-            conversationActors.get(peer).send(new ConversationActor.ConversationHidden());
+            router.onChatClosed(peer);
         } else if (event instanceof PeerChatPreload) {
             Peer peer = ((PeerChatPreload) event).getPeer();
             assumeConvActor(peer);

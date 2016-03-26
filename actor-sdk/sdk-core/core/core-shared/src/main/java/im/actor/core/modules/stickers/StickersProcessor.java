@@ -9,7 +9,6 @@ import java.util.List;
 import im.actor.core.api.ApiStickerCollection;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.stickers.StickersActor;
 
 public class StickersProcessor extends AbsModule {
 
