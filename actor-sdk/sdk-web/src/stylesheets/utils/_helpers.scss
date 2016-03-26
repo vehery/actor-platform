@@ -1,3 +1,40 @@
 /*
  * Copyright (C) 2016 Actor LLC. <https://actor.im>
  */
+
+.hide {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.fill {
+  @include fill-area();
+}
+
+.pull-left {
+  float: left;
+}
+
+.pull-right {
+  float: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.no-p {
+  padding: 0 !important;
+}
+
+.no-m {
+  margin: 0 !important;
+}

@@ -32,3 +32,16 @@
   bottom: 0;
   left: 0;
 }
+
+@mixin fill-area() {
+  width: 100%;
+  height: 100%;
+}
+
+// Full size flex block
+@mixin flex-fill() {
+  display: flex;
+  flex-direction: row;
+
+  @include fill-area();
+}

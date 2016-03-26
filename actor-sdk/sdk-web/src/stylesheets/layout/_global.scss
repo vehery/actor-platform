@@ -4,8 +4,8 @@
 
 body,
 html {
-  width: 100%;
   min-width: $app-min-width;
-  height: 100%;
   min-height: $app-min-height;
+
+  @include fill-area();
 }
