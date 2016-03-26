@@ -44,8 +44,11 @@ public class GroupedDialogsActor extends ModuleActor {
     @Override
     public void preStart() {
         super.preStart();
+
         specs = context().getMessagesModule().getDialogDescKeyValue();
         storage = new GroupedStorage();
+        isLoaded = preferences().getBool(PREFERENCE_GROUPED_LOADED, false);
+
 
         byte[] data = preferences().getBytes(PREFERENCE_GROUPED);
         if (data != null) {
@@ -53,25 +56,23 @@ public class GroupedDialogsActor extends ModuleActor {
                 storage = new GroupedStorage(data);
             } catch (IOException e) {
                 e.printStackTrace();
+                isLoaded = false;
             }
         }
 
-        isLoaded = preferences().getBool(PREFERENCE_GROUPED_LOADED, false);
 
         if (!isLoaded) {
             request(new RequestLoadGroupedDialogs(), new RpcCallback<ResponseLoadGroupedDialogs>() {
                 @Override
                 public void onResult(final ResponseLoadGroupedDialogs response) {
-                    updates().executeRelatedResponse(response.getUsers(), response.getGroups(),
-                            self(),
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    applyGroups(response.getDialogs());
-                                    isLoaded = true;
-                                    preferences().putBool(PREFERENCE_GROUPED_LOADED, true);
-                                }
-                            });
+                    updates().executeRelatedResponse(response.getUsers(), response.getGroups(), self(), new Runnable() {
+                        @Override
+                        public void run() {
+                            applyGroups(response.getDialogs());
+                            isLoaded = true;
+                            preferences().putBool(PREFERENCE_GROUPED_LOADED, true);
+                        }
+                    });
                 }
 
                 @Override

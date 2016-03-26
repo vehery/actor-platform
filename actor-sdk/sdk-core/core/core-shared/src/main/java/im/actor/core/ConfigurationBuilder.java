@@ -58,20 +58,6 @@ public class ConfigurationBuilder {
 
     private CallsProvider callsProvider;
 
-    private boolean isEnabledGroupedChatList = true;
-
-    /**
-     * Setting if grouped chat list support enabled
-     *
-     * @param isEnabledGroupedChatList if grouped chat list enabled
-     * @return this
-     */
-    @ObjectiveCName("setIsEnabledGroupedChatList:")
-    public ConfigurationBuilder setIsEnabledGroupedChatList(boolean isEnabledGroupedChatList) {
-        this.isEnabledGroupedChatList = isEnabledGroupedChatList;
-        return this;
-    }
-
     /**
      * Setting If Voice Calls enabled in App. By default is True.
      *
@@ -394,7 +380,6 @@ public class ConfigurationBuilder {
                 trustedKeys.toArray(new TrustedKey[trustedKeys.size()]),
                 isPhoneBookImportEnabled,
                 callsProvider,
-                voiceCallsEnabled,
-                isEnabledGroupedChatList);
+                voiceCallsEnabled);
     }
 }

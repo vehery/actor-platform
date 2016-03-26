@@ -78,9 +78,7 @@ public class ConversationActor extends ModuleActor {
         readerActor = context().getMessagesModule().getOwnReadActor();
 
         dialogsActor = context().getMessagesModule().getDialogsActor();
-        if (context().getConfiguration().isEnabledGroupedChatList()) {
-            dialogsGroupedActor = context().getMessagesModule().getDialogsGroupedActor();
-        }
+        dialogsGroupedActor = context().getMessagesModule().getDialogsGroupedActor();
         outPendingIndex = new IndexEngine(Storage.createIndex("out_pending_" + peer.getPeerType() + "_" + peer.getPeerId()));
         inPendingIndex = new IndexEngine(Storage.createIndex("in_pending_" + peer.getPeerType() + "_" + peer.getPeerId()));
 

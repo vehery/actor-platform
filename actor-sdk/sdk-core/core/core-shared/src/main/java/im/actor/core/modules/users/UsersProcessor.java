@@ -203,10 +203,8 @@ public class UsersProcessor extends AbsModule implements Processor {
     private void onUserDescChanged(User u) {
         context().getMessagesModule().getDialogsActor().send(
                 new DialogsActor.UserChanged(u));
-        if (context().getConfiguration().isEnabledGroupedChatList()) {
-            context().getMessagesModule().getDialogsGroupedActor().send(
-                    new GroupedDialogsActor.PeerInformationChanged(Peer.user(u.getUid())));
-        }
+        context().getMessagesModule().getDialogsGroupedActor().send(
+                new GroupedDialogsActor.PeerInformationChanged(Peer.user(u.getUid())));
         context().getContactsModule().getContactSyncActor()
                 .send(new ContactsSyncActor.UserChanged(u));
     }

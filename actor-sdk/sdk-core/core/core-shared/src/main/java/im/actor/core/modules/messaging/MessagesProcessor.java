@@ -54,7 +54,7 @@ public class MessagesProcessor extends AbsModule {
         long intMessageSortDate = 0;
         Peer peer = convert(_peer);
 
-        ArrayList<Message> nMessages = new ArrayList<Message>();
+        ArrayList<Message> nMessages = new ArrayList<>();
         for (UpdateMessage u : messages) {
 
             AbsContent msgContent;
@@ -289,7 +289,7 @@ public class MessagesProcessor extends AbsModule {
 
         // Should we eliminate DialogHistory?
 
-        ArrayList<DialogHistory> dialogs = new ArrayList<DialogHistory>();
+        ArrayList<DialogHistory> dialogs = new ArrayList<>();
 
         long maxLoadedDate = Long.MAX_VALUE;
 
@@ -328,7 +328,7 @@ public class MessagesProcessor extends AbsModule {
 
     @Verified
     public void onMessagesLoaded(Peer peer, ResponseLoadHistory historyResponse) {
-        ArrayList<Message> messages = new ArrayList<Message>();
+        ArrayList<Message> messages = new ArrayList<>();
         long maxLoadedDate = Long.MAX_VALUE;
         for (ApiMessageContainer historyMessage : historyResponse.getHistory()) {
 
@@ -345,7 +345,7 @@ public class MessagesProcessor extends AbsModule {
             }
             MessageState state = EntityConverter.convert(historyMessage.getState());
 
-            ArrayList<Reaction> reactions = new ArrayList<Reaction>();
+            ArrayList<Reaction> reactions = new ArrayList<>();
 
             for (ApiMessageReaction r : historyMessage.getReactions()) {
                 reactions.add(new Reaction(r.getCode(), r.getUsers()));
@@ -370,20 +370,8 @@ public class MessagesProcessor extends AbsModule {
         context().getAppStateModule().onCountersChanged(counters);
     }
 
-    public void onChatArchived(ApiPeer peer) {
-        //context().getMessagesModule().getDialogsActor()
-        //        .send(new DialogsActor.ChatDelete(convert(peer)));
-    }
-
-    public void onChatRestored(Peer peer) {
-
-    }
-
     public void onChatGroupsChanged(List<ApiDialogGroup> groups) {
-        if (context().getConfiguration().isEnabledGroupedChatList()) {
-            context().getMessagesModule().getDialogsGroupedActor()
-                    .send(new GroupedDialogsActor.GroupedDialogsChanged(groups));
-        }
+        context().getMessagesModule().getRouter().onChatGroupsChanged(groups);
     }
 
     public void onArchivedDialogsLoaded(ResponseLoadArchived responseLoadArchived) {
