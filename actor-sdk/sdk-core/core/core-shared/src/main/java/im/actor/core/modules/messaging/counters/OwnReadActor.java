@@ -2,13 +2,15 @@
  * Copyright (C) 2015 Actor LLC. <https://actor.im>
  */
 
-package im.actor.core.modules.messaging.actors;
+package im.actor.core.modules.messaging.counters;
 
 import im.actor.core.entity.ContentDescription;
 import im.actor.core.entity.Message;
 import im.actor.core.entity.Peer;
 import im.actor.core.entity.content.TextContent;
 import im.actor.core.modules.ModuleContext;
+import im.actor.core.modules.messaging.actions.CursorReaderActor;
+import im.actor.core.modules.messaging.conversations.ConversationActor;
 import im.actor.core.util.ModuleActor;
 
 public class OwnReadActor extends ModuleActor {

@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Actor LLC. <https://actor.im>
  */
 
-package im.actor.core.modules.messaging.actors.entity;
+package im.actor.core.modules.messaging.dialogs.entity;
 
 import im.actor.core.entity.MessageState;
 import im.actor.core.entity.Peer;

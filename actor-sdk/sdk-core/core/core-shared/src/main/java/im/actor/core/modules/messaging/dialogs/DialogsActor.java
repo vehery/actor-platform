@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Actor LLC. <https://actor.im>
  */
 
-package im.actor.core.modules.messaging.actors;
+package im.actor.core.modules.messaging.dialogs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.User;
 import im.actor.core.entity.content.AbsContent;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.actors.entity.DialogHistory;
+import im.actor.core.modules.messaging.dialogs.entity.DialogHistory;
 import im.actor.core.util.ModuleActor;
 import im.actor.runtime.Log;
 import im.actor.runtime.Runtime;

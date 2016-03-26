@@ -1,4 +1,4 @@
-package im.actor.core.modules.messaging.actors;
+package im.actor.core.modules.messaging.dialogs;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,7 +6,6 @@ import java.util.List;
 
 import im.actor.core.api.ApiDialogGroup;
 import im.actor.core.api.ApiDialogShort;
-import im.actor.core.api.ApiPeer;
 import im.actor.core.api.rpc.RequestLoadGroupedDialogs;
 import im.actor.core.api.rpc.ResponseLoadGroupedDialogs;
 import im.actor.core.entity.Avatar;
@@ -16,8 +15,8 @@ import im.actor.core.entity.Peer;
 import im.actor.core.entity.PeerType;
 import im.actor.core.entity.User;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.actors.entity.GroupedItem;
-import im.actor.core.modules.messaging.actors.entity.GroupedStorage;
+import im.actor.core.modules.messaging.dialogs.entity.GroupedItem;
+import im.actor.core.modules.messaging.dialogs.entity.GroupedStorage;
 import im.actor.core.util.ModuleActor;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
@@ -27,7 +26,7 @@ import im.actor.core.viewmodel.DialogSpecVM;
 import im.actor.core.viewmodel.generics.ArrayListDialogSmall;
 import im.actor.runtime.mvvm.MVVMCollection;
 
-import static im.actor.core.modules.messaging.actors.entity.EntityConverter.convert;
+import static im.actor.core.entity.EntityConverter.convert;
 
 public class GroupedDialogsActor extends ModuleActor {
 

@@ -59,7 +59,7 @@ import im.actor.core.modules.encryption.EncryptedProcessor;
 import im.actor.core.modules.eventbus.EventBusProcessor;
 import im.actor.core.modules.contacts.ContactsSyncActor;
 import im.actor.core.modules.groups.GroupsProcessor;
-import im.actor.core.modules.messaging.actors.OwnReadActor;
+import im.actor.core.modules.messaging.counters.OwnReadActor;
 import im.actor.core.modules.presence.PresenceProcessor;
 import im.actor.core.modules.settings.SettingsProcessor;
 import im.actor.core.modules.stickers.StickersProcessor;

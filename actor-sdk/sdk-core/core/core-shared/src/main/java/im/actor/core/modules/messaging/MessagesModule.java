@@ -53,17 +53,17 @@ import im.actor.core.modules.ModuleContext;
 import im.actor.core.events.AppVisibleChanged;
 import im.actor.core.events.PeerChatClosed;
 import im.actor.core.events.PeerChatOpened;
-import im.actor.core.modules.messaging.actors.ArchivedDialogsActor;
-import im.actor.core.modules.messaging.actors.ConversationActor;
-import im.actor.core.modules.messaging.actors.ConversationHistoryActor;
-import im.actor.core.modules.messaging.actors.CursorReaderActor;
-import im.actor.core.modules.messaging.actors.CursorReceiverActor;
-import im.actor.core.modules.messaging.actors.DialogsActor;
-import im.actor.core.modules.messaging.actors.DialogsHistoryActor;
-import im.actor.core.modules.messaging.actors.GroupedDialogsActor;
-import im.actor.core.modules.messaging.actors.MessageDeleteActor;
-import im.actor.core.modules.messaging.actors.OwnReadActor;
-import im.actor.core.modules.messaging.actors.SenderActor;
+import im.actor.core.modules.messaging.actions.ArchivedDialogsActor;
+import im.actor.core.modules.messaging.conversations.ConversationActor;
+import im.actor.core.modules.messaging.conversations.ConversationHistoryActor;
+import im.actor.core.modules.messaging.actions.CursorReaderActor;
+import im.actor.core.modules.messaging.actions.CursorReceiverActor;
+import im.actor.core.modules.messaging.dialogs.DialogsActor;
+import im.actor.core.modules.messaging.dialogs.DialogsHistoryActor;
+import im.actor.core.modules.messaging.dialogs.GroupedDialogsActor;
+import im.actor.core.modules.messaging.actions.MessageDeleteActor;
+import im.actor.core.modules.messaging.counters.OwnReadActor;
+import im.actor.core.modules.messaging.actions.SenderActor;
 import im.actor.core.modules.sequence.internal.ChangeContent;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
@@ -304,7 +304,7 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
     public void deleteMessages(Peer peer, long[] rids) {
         ActorRef conversationActor = getConversationActor(peer);
-        ArrayList<Long> deleted = new ArrayList<Long>();
+        ArrayList<Long> deleted = new ArrayList<>();
         for (long rid : rids) {
             deleted.add(rid);
         }
@@ -346,7 +346,7 @@ public class MessagesModule extends AbsModule implements BusSubscriber {
 
             @Override
             public void start(final CommandCallback<ResponseSeqDate> callback) {
-                ArrayList<Integer> mentions = new ArrayList<Integer>();
+                ArrayList<Integer> mentions = new ArrayList<>();
                 TextContent content = TextContent.create(message, null, mentions);
 
                 if (peer.getPeerType() == PeerType.GROUP) {

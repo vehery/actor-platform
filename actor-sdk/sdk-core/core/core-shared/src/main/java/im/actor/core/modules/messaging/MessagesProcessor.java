@@ -27,20 +27,20 @@ import im.actor.core.entity.content.AbsContent;
 import im.actor.core.entity.content.ServiceUserRegistered;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.messaging.actors.ArchivedDialogsActor;
-import im.actor.core.modules.messaging.actors.ConversationActor;
-import im.actor.core.modules.messaging.actors.ConversationHistoryActor;
-import im.actor.core.modules.messaging.actors.CursorReceiverActor;
-import im.actor.core.modules.messaging.actors.DialogsActor;
-import im.actor.core.modules.messaging.actors.DialogsHistoryActor;
-import im.actor.core.modules.messaging.actors.GroupedDialogsActor;
-import im.actor.core.modules.messaging.actors.OwnReadActor;
-import im.actor.core.modules.messaging.actors.SenderActor;
-import im.actor.core.modules.messaging.actors.entity.DialogHistory;
-import im.actor.core.modules.messaging.actors.entity.EntityConverter;
+import im.actor.core.modules.messaging.actions.ArchivedDialogsActor;
+import im.actor.core.modules.messaging.conversations.ConversationActor;
+import im.actor.core.modules.messaging.conversations.ConversationHistoryActor;
+import im.actor.core.modules.messaging.actions.CursorReceiverActor;
+import im.actor.core.modules.messaging.dialogs.DialogsActor;
+import im.actor.core.modules.messaging.dialogs.DialogsHistoryActor;
+import im.actor.core.modules.messaging.dialogs.GroupedDialogsActor;
+import im.actor.core.modules.messaging.counters.OwnReadActor;
+import im.actor.core.modules.messaging.actions.SenderActor;
+import im.actor.core.modules.messaging.dialogs.entity.DialogHistory;
+import im.actor.core.entity.EntityConverter;
 import im.actor.runtime.annotations.Verified;
 
-import static im.actor.core.modules.messaging.actors.entity.EntityConverter.convert;
+import static im.actor.core.entity.EntityConverter.convert;
 
 public class MessagesProcessor extends AbsModule {
 
