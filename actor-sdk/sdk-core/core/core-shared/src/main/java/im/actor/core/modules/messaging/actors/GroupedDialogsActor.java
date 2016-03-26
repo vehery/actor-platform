@@ -99,12 +99,6 @@ public class GroupedDialogsActor extends ModuleActor {
         applyGroups(groupedItems);
     }
 
-
-    private void onChatArchived(ApiPeer peer) {
-
-    }
-
-
     // Tools
 
     private void notifyVM(Peer peer) {
@@ -125,7 +119,7 @@ public class GroupedDialogsActor extends ModuleActor {
 
     private void notifyVM() {
 
-        ArrayList<DialogGroup> groups = new ArrayList<DialogGroup>();
+        ArrayList<DialogGroup> groups = new ArrayList<>();
         for (GroupedItem i : storage.getGroups()) {
             ArrayListDialogSmall dialogSmalls = new ArrayListDialogSmall();
             for (Peer p : i.getPeers()) {
@@ -156,7 +150,7 @@ public class GroupedDialogsActor extends ModuleActor {
 
         // Writing missing specs
 
-        ArrayList<DialogSpec> updatedSpecs = new ArrayList<DialogSpec>();
+        ArrayList<DialogSpec> updatedSpecs = new ArrayList<>();
         for (ApiDialogGroup g : dialogGroups) {
             for (ApiDialogShort s : g.getDialogs()) {
                 Peer peer = convert(s.getPeer());
@@ -196,8 +190,6 @@ public class GroupedDialogsActor extends ModuleActor {
         } else if (message instanceof GroupedDialogsChanged) {
             GroupedDialogsChanged g = (GroupedDialogsChanged) message;
             onGroupedChanged(g.getItems());
-        } else if (message instanceof ChatArchived) {
-            onChatArchived(((ChatArchived) message).getPeer());
         } else {
             super.onReceive(message);
         }
@@ -245,17 +237,6 @@ public class GroupedDialogsActor extends ModuleActor {
 
         public int getCounter() {
             return counter;
-        }
-    }
-
-    public static class ChatArchived {
-        ApiPeer peer;
-        public ChatArchived(ApiPeer peer) {
-            this.peer = peer;
-        }
-
-        public ApiPeer getPeer() {
-            return peer;
         }
     }
 }

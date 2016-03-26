@@ -24,7 +24,7 @@ public class LocaleLoader {
     }
 
     static String[] linesWorkaround(String s) {
-        ArrayList<String> res = new ArrayList<String>();
+        ArrayList<String> res = new ArrayList<>();
         int index;
         while ((index = s.indexOf("\n")) >= 0) {
             res.add(s.substring(0, index));

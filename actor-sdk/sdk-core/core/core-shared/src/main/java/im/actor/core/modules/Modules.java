@@ -31,6 +31,7 @@ import im.actor.core.modules.settings.SettingsModule;
 import im.actor.core.modules.stickers.StickersModule;
 import im.actor.core.modules.typing.TypingModule;
 import im.actor.core.modules.users.UsersModule;
+import im.actor.core.modules.warmer.WarmerModule;
 import im.actor.core.network.ActorApi;
 import im.actor.core.util.Timing;
 import im.actor.runtime.Storage;
@@ -78,6 +79,7 @@ public class Modules implements ModuleContext {
     private volatile EncryptionModule encryptionModule;
     private volatile DeviceInfoModule deviceInfoModule;
     private volatile EventBusModule eventBusModule;
+    private volatile WarmerModule warmerModule;
 
     public Modules(Messenger messenger, Configuration configuration) {
         this.messenger = messenger;
@@ -154,6 +156,8 @@ public class Modules implements ModuleContext {
         deviceInfoModule = new DeviceInfoModule(this);
         timing.section("EventBus");
         eventBusModule = new EventBusModule(this);
+        timing.section("Warmer");
+        warmerModule = new WarmerModule(this);
         timing.end();
 
 
@@ -349,6 +353,11 @@ public class Modules implements ModuleContext {
     @Override
     public EventBusModule getEventBus() {
         return eventBusModule;
+    }
+
+    @Override
+    public WarmerModule getWarmer() {
+        return warmerModule;
     }
 
     @Override

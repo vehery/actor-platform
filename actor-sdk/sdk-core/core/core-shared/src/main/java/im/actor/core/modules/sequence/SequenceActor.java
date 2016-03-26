@@ -25,6 +25,7 @@ import im.actor.core.util.ModuleActor;
 import im.actor.runtime.*;
 import im.actor.runtime.Runtime;
 import im.actor.runtime.actors.Cancellable;
+import im.actor.runtime.collections.ManagedList;
 import im.actor.runtime.function.Constructor;
 import im.actor.runtime.function.Consumer;
 import im.actor.runtime.power.WakeLock;
@@ -43,12 +44,14 @@ public class SequenceActor extends ModuleActor {
     private static final String TAG = "Updates";
     private static final int INVALIDATE_GAP = 2000;// 2 Secs
     private static final int INVALIDATE_MAX_SEC_HOLE = 10;
+    private static final List<ApiUpdateOptimization> OPTIMIZATIONS = ManagedList.of(ApiUpdateOptimization.STRIP_ENTITIES);
 
     private static final String KEY_SEQ = "updates_seq";
     private static final String KEY_STATE = "updates_state";
 
     private ArrayList<ExecuteAfter> pendingRunnables = new ArrayList<>();
 
+    private boolean isStarted = false;
     private boolean isValidated = true;
     private boolean isTimerStarted = false;
 
@@ -67,18 +70,53 @@ public class SequenceActor extends ModuleActor {
         super(modules);
     }
 
+    //
+    // Initialization
+    //
+
     @Override
     public void preStart() {
+        handler = context().getUpdatesModule().getUpdateHandler();
+
+        // Loading State
         seq = preferences().getInt(KEY_SEQ, -1);
         state = preferences().getBytes(KEY_STATE);
         finishedSeq = seq;
         finishedState = state;
 
-        handler = context().getUpdatesModule().getUpdateHandler();
+        // Loading State if not available
+        if (seq < 0) {
 
-        currentWakeLock = im.actor.runtime.Runtime.makeWakeLock();
+            Log.d(TAG, "Loading fresh state...");
 
-        self().send(new Invalidate());
+            startWakeLock();
+            api(new RequestGetState(OPTIMIZATIONS)).then(new Consumer<ResponseSeq>() {
+                @Override
+                public void apply(ResponseSeq responseSeq) {
+
+                    Log.d(TAG, "State loaded {seq=" + seq + "}");
+
+                    stopWakeLock();
+
+                    seq = responseSeq.getSeq();
+                    state = responseSeq.getState();
+                    persistState(seq, state);
+
+                    context().getWarmer().onSequenceStarted();
+                }
+            }).done(self());
+        } else {
+            context().getWarmer().onSequenceStarted();
+        }
+    }
+
+    private void doLaunch() {
+        if (!isStarted) {
+            isStarted = true;
+            Log.d(TAG, "Starting Sequence");
+            unstashAll();
+            invalidate();
+        }
     }
 
     private void onPushSeqReceived(int seq) {
@@ -330,7 +368,7 @@ public class SequenceActor extends ModuleActor {
 
 
     //
-    // Weak Locks
+    // Wake Locks
     //
 
     private void startWakeLock() {
@@ -358,12 +396,12 @@ public class SequenceActor extends ModuleActor {
         if (message instanceof Invalidate
                 || message instanceof SeqUpdateTooLong
                 || message instanceof ForceInvalidate) {
-            if (!isValidated) {
+            if (!isValidated || !isStarted) {
                 return;
             }
             invalidate();
         } else if (message instanceof SeqUpdate || message instanceof FatSeqUpdate) {
-            if (!isValidated) {
+            if (!isValidated || !isStarted) {
                 stash();
                 return;
             }
@@ -390,17 +428,19 @@ public class SequenceActor extends ModuleActor {
 
             onUpdateReceived(seq, state, type, body, users, groups);
         } else if (message instanceof ExecuteAfter) {
-            if (!isValidated) {
+            if (!isValidated || !isStarted) {
                 stash();
                 return;
             }
             onExecuteAfter((ExecuteAfter) message);
         } else if (message instanceof PushSeq) {
-            if (!isValidated) {
+            if (!isValidated || !isStarted) {
                 stash();
                 return;
             }
             onPushSeqReceived(((PushSeq) message).seq);
+        } else if (message instanceof LaunchSequence) {
+            doLaunch();
         } else {
             drop(message);
         }
@@ -420,5 +460,9 @@ public class SequenceActor extends ModuleActor {
         public PushSeq(int seq) {
             this.seq = seq;
         }
+    }
+
+    public static class LaunchSequence {
+
     }
 }

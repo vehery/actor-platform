@@ -9,7 +9,6 @@ import im.actor.core.modules.Modules;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.ActorRef;
 import im.actor.runtime.actors.Props;
-import im.actor.core.modules.profile.avatar.OwnAvatarChangeActor;
 import im.actor.core.viewmodel.OwnAvatarVM;
 
 import static im.actor.runtime.actors.ActorSystem.system;

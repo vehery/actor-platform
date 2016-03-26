@@ -29,7 +29,7 @@ import im.actor.core.js.providers.JsCallsProvider;
 import im.actor.core.js.providers.electron.JsElectronApp;
 import im.actor.core.js.utils.HtmlMarkdownUtils;
 import im.actor.core.js.utils.IdentityUtils;
-import im.actor.core.modules.internal.messages.entity.EntityConverter;
+import im.actor.core.modules.messaging.actors.entity.EntityConverter;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;
 import im.actor.core.viewmodel.CommandCallback;
@@ -878,6 +878,7 @@ public class JsFacade implements Exportable {
                     public void onResult(ResponseLoadArchived response) {
                         JsArray<JsDialogShort> res = JsArray.createArray().cast();
                         for (ApiDialog d : response.getDialogs()) {
+                            // WTF??
                             res.push(JsDialogShort.create(messenger.buildPeerInfo(EntityConverter.convert(d.getPeer())), d.getUnreadCount()));
                         }
                         Log.d(TAG, "loadArchivedDialogs:result");

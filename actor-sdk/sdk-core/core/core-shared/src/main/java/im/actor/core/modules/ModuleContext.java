@@ -27,6 +27,7 @@ import im.actor.core.modules.settings.SettingsModule;
 import im.actor.core.modules.stickers.StickersModule;
 import im.actor.core.modules.typing.TypingModule;
 import im.actor.core.modules.users.UsersModule;
+import im.actor.core.modules.warmer.WarmerModule;
 import im.actor.core.network.ActorApi;
 import im.actor.runtime.eventbus.EventBus;
 import im.actor.runtime.storage.PreferencesStorage;
@@ -99,4 +100,6 @@ public interface ModuleContext {
     EncryptionModule getEncryption();
 
     EventBusModule getEventBus();
+
+    WarmerModule getWarmer();
 }

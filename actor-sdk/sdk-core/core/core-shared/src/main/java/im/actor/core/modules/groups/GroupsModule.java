@@ -57,7 +57,6 @@ import im.actor.core.entity.PublicGroup;
 import im.actor.core.entity.User;
 import im.actor.core.modules.AbsModule;
 import im.actor.core.modules.ModuleContext;
-import im.actor.core.modules.profile.avatar.GroupAvatarChangeActor;
 import im.actor.core.util.RandomUtils;
 import im.actor.core.network.RpcCallback;
 import im.actor.core.network.RpcException;

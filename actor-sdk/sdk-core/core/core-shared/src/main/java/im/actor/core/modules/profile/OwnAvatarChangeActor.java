@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Actor LLC. <https://actor.im>
  */
 
-package im.actor.core.modules.profile.avatar;
+package im.actor.core.modules.profile;
 
 import im.actor.core.api.ApiFileLocation;
 import im.actor.core.api.base.SeqUpdate;
