@@ -10,12 +10,39 @@
 
   @include flex-fill();
   &__welcome {
+    display: flex;
+    flex-direction: column;
+
+    padding: $default-spacing * 2;
+
     flex: 1 1 auto;
+    &__header {
+      padding-bottom: $default-spacing * 2;
+
+      flex: 0 0 auto;
+    }
+    &__body {
+      display: flex;
+      flex-direction: column;
+
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+    &__footer {
+      padding-top: $default-spacing * 2;
+
+      flex: 0 0 auto;
+    }
   }
 
-  &__form {
-    width: $login-form-width;
+  &__forms {
+    display: flex;
+    flex-direction: column;
 
-    flex: 0 1 auto;
+    width: $login-form-width;
+    padding: $default-spacing * 2;
+
+    flex: 0 0 auto;
+    justify-content: center;
   }
 }

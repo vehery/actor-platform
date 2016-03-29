@@ -1,0 +1,48 @@
+/*
+ * Copyright (C) 2016 Actor LLC. <https://actor.im>
+ */
+
+.button {
+  font-size: $button-font-size;
+  font-weight: 500;
+  line-height: $button-height - $default-spacing;
+
+  position: relative;
+
+  display: inline-block;
+
+  box-sizing: border-box;
+  height: $button-height;
+  padding: $default-spacing/2 $default-spacing;
+
+  cursor: pointer;
+  transition: box-shadow $default-transition-duration $default-transition-timing, background $default-transition-duration $default-transition-timing;
+  text-align: center;
+  vertical-align: middle;
+  text-decoration: none;
+  text-transform: uppercase;
+
+  border: none;
+  border-radius: $default-border-radius;
+  outline: none;
+
+  appearance: none;
+  @include no-select();
+
+  &--rised {
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, .1), 0 2px 8px 0 rgba(0, 0, 0, .15);
+    &:active {
+      box-shadow: 0 3px 6px 0 rgba(0, 0, 0, .2), 0 4px 10px 0 rgba(0, 0, 0, .1);
+    }
+  }
+
+  &--wide {
+    width: 100%;
+  }
+
+  &[disabled] {
+    cursor: not-allowed;
+
+    opacity: .7;
+  }
+}

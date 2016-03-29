@@ -1,0 +1,114 @@
+/*
+ * Copyright (C) 2016 Actor LLC. <https://actor.im>
+ */
+
+@mixin focused-label($color) {
+  cursor: default;
+  transform: translateY(0) scale(.8) !important;
+
+  color: $color !important;
+}
+
+.text-field {
+  font-size: 15px;
+  line-height: 18px;
+
+  position: relative;
+
+  height: 44px;
+  label {
+    display: block;
+
+    cursor: text;
+    //transition: all $default-transition-duration $default-transition-timing 0ms;
+    transform: translateY(22px) translateZ(0);
+    transform-origin: 0 50%;
+    text-align: left;
+
+    color: rgba(black, .3);
+  }
+  input {
+    margin: 0;
+    padding: 4px 0;
+    //transition: box-shadow $default-transition-duration $default-transition-timing 0ms;
+
+    border: none;
+    outline: none;
+    background-color: transparent;
+    box-shadow: 0 1px 0 0 rgba(black, .3);
+  }
+  .error {
+    font-size: 14px;
+    font-style: italic;
+    line-height: 20px;
+
+    position: absolute;
+    top: 48px;
+    left: 0;
+
+    display: none;
+
+    width: 100%;
+
+    text-align: left;
+
+    color: $error-color;
+  }
+  &--focus {
+    label {
+      @include focused-label($text-field-color);
+    }
+    input {
+      box-shadow: 0 2px 0 0 $text-field-color !important;
+    }
+  }
+  &--filled {
+    label {
+      @include focused-label($text-field-color);
+    }
+    input {
+      box-shadow: 0 1px 0 0 $text-field-color;
+    }
+  }
+  &--wide {
+    input {
+      width: 100%;
+    }
+  }
+  &--disabled {
+    &:after {
+      bottom: 0;
+      left: 0;
+
+      display: block;
+
+      width: 100%;
+      height: 0;
+
+      content: '';
+
+      border-bottom: 1px dotted rgba(black, .5);
+    }
+    label {
+      color: rgba(black, .5);
+
+      @include focused-label($text-field-color);
+    }
+    input {
+      box-shadow: none;
+
+      @include no-select();
+    }
+  }
+  &--with-error {
+    label {
+      @include focused-label($error-color);
+    }
+    input {
+      box-shadow: 0 2px 0 0 $error-color !important;
+    }
+    .error {
+      display: block;
+    }
+  }
+}

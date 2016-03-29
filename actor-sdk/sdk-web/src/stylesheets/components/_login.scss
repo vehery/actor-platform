@@ -1,3 +1,103 @@
 /*
- * Copyright (C) 2016 Actor LLC. <https://actor.im>
- */
+* Copyright (C) 2016 Actor LLC. <https://actor.im>
+*/
+
+.login {
+  h1 {
+    font-size: 26px;
+    font-weight: 300;
+
+    display: block;
+
+    margin: 0 0 ($default-spacing * 1.5) 0;
+    strong {
+      font-weight: 400;
+    }
+  }
+  p {
+    font-size: 16px;
+    line-height: 24px;
+
+    margin: 0 0 18px;
+  }
+
+  &__welcome {
+    &__header {
+      // logo
+    }
+    &__body {
+      // body
+    }
+    &__footer {
+      font-size: 14px;
+      a {
+        text-decoration: none;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  &__form {
+    display: none;
+
+    text-align: center;
+
+    footer {
+      margin-top: 36px;
+    }
+    .spinner {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+    }
+
+    &--request {
+      position: relative;
+      .wrong {
+        font-size: 14px;
+
+        position: absolute;
+        z-index: 1;
+        top: 22px;
+        right: 0;
+
+        display: none;
+
+        cursor: pointer;
+
+        color: white;
+      }
+    }
+    &--active {
+      display: block;
+    }
+    &--done {
+      display: block;
+
+      margin-bottom: 36px;
+      .wrong {
+        display: block;
+      }
+      footer {
+        display: none;
+      }
+    }
+
+    &__input {
+      label {
+        color: rgba(white, .3);
+      }
+      input {
+        box-shadow: 0 1px 0 0 rgba(white, .15);
+      }
+
+      &--focus {
+        label {
+          color: rgba(white, .8) !important;
+        }
+      }
+    }
+  }
+}

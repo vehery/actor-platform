@@ -1,0 +1,65 @@
+/*
+ * Copyright (C) 2015 Actor LLC. <https://actor.im>
+ *
+ * Switch
+ *
+ * <label for="switch">Switch label</label>
+ * <div class="switch">
+ *   <input id="switch" type="checkbox">
+ *   <label for="switch"></label>
+ * </div>
+ *
+ */
+.switch {
+  display: inline-block;
+
+  box-sizing: border-box;
+  height: $switch-height;
+  padding: 4px;
+
+  vertical-align: middle;
+  input[type='checkbox'] {
+    display: none;
+    &:checked + label {
+      background-color: rgba($switch-color, .5);
+      &:before {
+        left: 17px;
+
+        background-color: $switch-color;
+      }
+    }
+  }
+  label {
+    position: relative;
+
+    display: block;
+
+    box-sizing: border-box;
+    width: 34px;
+    height: 14px;
+
+    cursor: pointer;
+    user-select: none;
+    transition: background $default-transition-duration $default-transition-timing;
+
+    border-radius: 100%;
+    background-color: rgba(black, .2);
+    &:before {
+      position: absolute;
+      top: -3px;
+      left: -3px;
+
+      display: block;
+
+      width: 20px;
+      height: 20px;
+
+      content: '';
+      transition: background $default-transition-duration $default-transition-timing, left $default-transition-duration $default-transition-timing;
+
+      border-radius: 100%;
+      background-color: white;
+      box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .15), 0 2px 2px 0 rgba(0, 0, 0, .1), 0 1px 5px 0 rgba(0, 0, 0, .085);
+    }
+  }
+}

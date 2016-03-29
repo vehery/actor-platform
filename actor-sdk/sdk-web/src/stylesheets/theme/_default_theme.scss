@@ -3,6 +3,7 @@
  */
 
 html, body {
+  font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background-color: $app-background-color;
 }
 
@@ -12,4 +13,25 @@ html, body {
 
 .sidebar {
   background-color: $sidebar-background-color;
+}
+
+// Buttons
+.button {
+  &--primary {
+    background-color: $primary-color;
+    color: white;
+  }
+}
+
+// Login
+.login {
+  color: $login-text-color;
+  &__welcome {
+    &__footer {
+      color: $login-footer-text-color;
+      a {
+        color: $login-footer-text-color;
+      }
+    }
+  }
 }

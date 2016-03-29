@@ -9,11 +9,46 @@ $default-transition-duration: 200ms;
 $default-transition-timing: cubic-bezier(.25, .8, .25, 1);
 
 // Colors
-$dusk: #49627f;
+$dusk: #3b5271;
+$dark-sky-blue: #468ee5;
+$dark-mint: #48bb77;
+$dark-peach: #e77979;
+$dark-grey-blue: #29384b;
+$pale-grey: #f5f6f7;
+$coral: #fd5c52;
+
+// Main color scheme
+$primary-color: $dark-sky-blue;
+
+// Forms
+$error-color: $coral;
+// Buttons
+$button-font-size: 14px;
+$button-height: 36px;
+// Text fileds
+$text-field-color: $primary-color;
+// Checkboxes
+$checkbox-size: 24px;
+$checkbox-color: $primary-color;
+// Switch
+$switch-height: 24px;
+$switch-color: $primary-color;
+// Radio
+$radio-size: 24px;
+$radio-color: $primary-color;
+
+// Preloaders and spinners
+$preloader-max-height: 20px;
+$preloader-color: $pale-grey;
+$spiner-height: 20px;
+$spiner-color: $pale-grey;
 
 // Login
 $login-max-width: 1024px;
-$login-form-width: 450px;
+$login-form-width: 320px;
+$login-text-color: $pale-grey;
+$login-footer-text-color: #8ba8cb;
+$login-input-color: #659ee1;
 
 // App
 $app-min-height: 500px;

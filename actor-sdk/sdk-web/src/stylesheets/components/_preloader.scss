@@ -1,0 +1,46 @@
+/*
+ * Copyright (C) 2016 Actor LLC. <https://actor.im>
+ */
+
+.preloader {
+  display: inline-block;
+
+  box-sizing: border-box;
+  width: $preloader-max-height + 20px;
+  height: $preloader-max-height + 20px;
+  padding: 10px;
+
+  border-radius: 50%;
+  background-color: rgba(0,0,0,.2);
+  div {
+    position: relative;
+
+    display: inline-block;
+    float: left;
+
+    box-sizing: content-box;
+    width: 2px;
+    height: $preloader-max-height;
+    margin: 0 1px;
+
+    animation: line-scale 1.2s infinite ease;
+
+    color: $preloader-color;
+    border: 0 solid $preloader-color;
+    border-radius: 0;
+    background: $preloader-color;
+    @for $i from 1 through 5 {
+      &:nth-child(#{$i}) {
+        animation-delay: -(1.3s - ($i * .1));
+      }
+    }
+  }
+  &:after {
+    line-height: 0;
+
+    display: table;
+    clear: both;
+
+    content: '';
+  }
+}

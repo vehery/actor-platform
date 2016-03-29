@@ -8,6 +8,8 @@
 @import 'global/variables';
 @import 'utils/mixins';
 @import 'utils/helpers';
+@import 'utils/animations';
+@import 'global/fonts';
 
 // Layout
 @import 'layout/global';
@@ -19,7 +21,11 @@
 @import 'vendors/pace';
 
 // Components
+@import 'components/forms';
 @import 'components/splash';
+@import 'components/login';
+@import 'components/spinner';
+@import 'components/preloader';
 
 // Theme
 @import 'theme/default_theme';

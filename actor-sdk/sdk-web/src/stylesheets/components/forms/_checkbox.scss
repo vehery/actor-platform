@@ -1,0 +1,90 @@
+/*
+ * Copyright (C) 2016 Actor LLC. <https://actor.im>
+ *
+ * Checkbox
+ *
+ * <div class="checkbox">
+ *   <input type="checkbox" id="checkbox">
+ *   <label for="checkbox">Checkbox label</label>
+ * </div>
+ *
+ * Note: Checkbox uses Material Icons web font for tick icon.
+ *       Make sure it is included in your project.
+ *
+ */
+.checkbox {
+  height: $checkbox-size;
+
+  vertical-align: middle;
+  input[type='checkbox'] {
+    display: none;
+    & + label {
+      &:after {
+        transform: scale(0);
+      }
+    }
+    &:checked + label {
+      &:before {
+        background-color: $checkbox-color;
+        box-shadow: 0 0 0 2px $checkbox-color;
+      }
+      &:after {
+        transform: scale(1);
+      }
+    }
+  }
+  label {
+    line-height: $checkbox-size;
+
+    position: relative;
+
+    display: inline-block;
+
+    padding-left: 32px;
+
+    cursor: pointer;
+    user-select: none;
+
+    &:before {
+      position: absolute;
+      top: 4px;
+      left: 2px;
+
+      display: block;
+
+      width: 16px;
+      height: 16px;
+
+      content: '';
+      transition: box-shadow $default-transition-duration $default-transition-timing, background $default-transition-duration $default-transition-timing;
+
+      border-radius: 1px;
+      box-shadow: 0 0 0 2px $checkbox-color;
+    }
+    &:after {
+      font-family: 'Material Icons';
+      font-size: 18px;
+      font-style: normal;
+
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      display: inline-block;
+      overflow: hidden;
+
+      width: 20px;
+      height: 20px;
+
+      content: 'check';
+      transition: transform $default-transition-duration $default-transition-timing;
+      text-align: center;
+
+      color: white;
+
+      text-rendering: optimizeLegibility;
+      font-feature-settings: 'liga' 1;
+      -webkit-font-smoothing: antialiased;
+    }
+  }
+}

@@ -45,3 +45,25 @@
 
   @include fill-area();
 }
+
+// Font
+@mixin font-face($family, $file, $style: normal, $weight: normal) {
+  $fonts-folder: '../../assets/fonts';
+  $path: $fonts-folder + '/' + $family + '/' + $file;
+
+  @font-face {
+    font-family: '#{$family}';
+    font-style:  $style;
+    font-weight: $weight;
+
+    src: url($path + '.eot');
+    src: url($path + '.eot?#iefix') format('embedded-opentype'),
+         url($path + '.woff') format('woff'),
+         url($path + '.woff2') format('woff2'),
+         url($path + '.ttf')  format('truetype');
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

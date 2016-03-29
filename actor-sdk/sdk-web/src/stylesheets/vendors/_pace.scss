@@ -30,7 +30,9 @@
   }
   .app,
   .login {
-    z-index: 0;
+    z-index: -1;
+
+    transition: all $default-transition-duration * 2 $default-transition-timing;
 
     opacity: 0;
   }
@@ -40,7 +42,7 @@
   .splash {
     z-index: 0;
 
-    transition: opacity $default-transition-duration $default-transition-timing;
+    visibility: hidden;
 
     opacity: 0;
   }
