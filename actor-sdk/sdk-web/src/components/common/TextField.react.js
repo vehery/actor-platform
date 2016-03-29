@@ -19,6 +19,7 @@ class TextField extends Component {
     ref: PropTypes.string,
     disabled: PropTypes.bool,
     errorText: PropTypes.string,
+    wide: PropTypes.bool,
 
     onChange: PropTypes.func,
     onFocus: PropTypes.func,
@@ -32,45 +33,6 @@ class TextField extends Component {
       isFocused: false,
       inputId: 'input-' + Math.random().toString(36).substr(2, 5)
     };
-  }
-
-  render() {
-    const { className, floatingLabel, type, value, ref, disabled, errorText } = this.props;
-    const { isFocused, inputId } = this.state;
-
-    const inputClassName = classnames('input input__material', className, {
-      'input__material--focus': isFocused,
-      'input__material--filled': value && value.length > 0,
-      'input__material--disabled': disabled,
-      'input__material--with-error': errorText
-    });
-
-    const inputProps = {
-      type: type || 'text',
-      id: inputId,
-      onChange: this.handleChange,
-      onFocus: this.handleFocus,
-      onBlur: this.handleBlur,
-      value,
-      disabled,
-      ref: ref ? ref : 'input'
-    };
-
-    return (
-      <div className={inputClassName}>
-        {
-          floatingLabel
-            ? <label htmlFor={inputId} onMouseDown={this.focus}>{floatingLabel}</label>
-            : null
-        }
-        <input {...inputProps}/>
-        {
-          errorText
-            ? <span className="error">{errorText}</span>
-            : null
-        }
-      </div>
-    );
   }
 
   focus = () => {
@@ -101,6 +63,46 @@ class TextField extends Component {
     this.setState({isFocused: false});
     onBlur && onBlur(event);
   };
+
+  render() {
+    const { className, floatingLabel, type, value, ref, disabled, errorText, wide } = this.props;
+    const { isFocused, inputId } = this.state;
+
+    const inputClassName = classnames('text-field', className, {
+      'text-field--focus': isFocused,
+      'text-field--filled': value && value.length > 0,
+      'text-field--disabled': disabled,
+      'text-field--with-error': errorText,
+      'text-field--wide': wide || false,
+    });
+
+    const inputProps = {
+      type: type || 'text',
+      id: inputId,
+      onChange: this.handleChange,
+      onFocus: this.handleFocus,
+      onBlur: this.handleBlur,
+      value,
+      disabled,
+      ref: ref ? ref : 'input'
+    };
+
+    return (
+      <div className={inputClassName}>
+        {
+          floatingLabel
+            ? <label htmlFor={inputId} onMouseDown={this.focus}>{floatingLabel}</label>
+            : null
+        }
+        <input {...inputProps}/>
+        {
+          errorText
+            ? <span className="error">{errorText}</span>
+            : null
+        }
+      </div>
+    );
+  }
 }
 
 export default TextField;
