@@ -9,7 +9,6 @@ import { findDOMNode } from 'react-dom';
 import { Link } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 import  classnames from 'classnames';
-
 import PeerUtils from '../../utils/PeerUtils';
 
 import CreateGroupActionCreators from '../../actions/CreateGroupActionCreators';
@@ -17,6 +16,7 @@ import ContactActionCreators from '../../actions/ContactActionCreators';
 import GroupListActionCreators from '../../actions/GroupListActionCreators';
 import AddContactActionCreators from '../../actions/AddContactActionCreators';
 
+import Tooltip from 'rc-tooltip';
 import Scrollbar from '../common/Scrollbar.react';
 import RecentItem from './RecentItem.react';
 
@@ -121,18 +121,46 @@ class Recent extends Component {
         case 'groups':
           groupTitle = (
             <li className="sidebar__list__title">
-              <a onClick={this.handleGroupListClick}>{intl.messages[`sidebar.recents.${dialogGroup.key}`]}</a>
-              <i className="material-icons sidebar__list__title__icon pull-right"
-                 onClick={this.handleCreateGroup}>add_circle_outline</i>
+              <Tooltip
+                placement="right"
+                mouseEnterDelay={0.5}
+                overlay={<FormattedMessage id="tooltip.recent.groupList"/>}
+              >
+                <a onClick={this.handleGroupListClick}>
+                  <FormattedMessage id={`sidebar.recents.${dialogGroup.key}`}/>
+                </a>
+              </Tooltip>
+              <Tooltip
+                placement="top"
+                mouseEnterDelay={0.5}
+                overlay={<FormattedMessage id="tooltip.recent.createGroup"/>}
+              >
+                <i className="material-icons sidebar__list__title__icon pull-right"
+                   onClick={this.handleCreateGroup}>add_circle_outline</i>
+              </Tooltip>
             </li>
           );
           break;
         case 'privates':
           groupTitle = (
             <li className="sidebar__list__title">
-              <a onClick={this.handlePrivateListClick}>{intl.messages[`sidebar.recents.${dialogGroup.key}`]}</a>
-              <i className="material-icons sidebar__list__title__icon pull-right"
-                 onClick={this.handleCreatePrivate}>add_circle_outline</i>
+              <Tooltip
+                placement="right"
+                mouseEnterDelay={0.5}
+                overlay={<FormattedMessage id="tooltip.recent.privateList"/>}
+              >
+                <a onClick={this.handlePrivateListClick}>
+                  <FormattedMessage id={`sidebar.recents.${dialogGroup.key}`}/>
+                </a>
+              </Tooltip>
+              <Tooltip
+                placement="top"
+                mouseEnterDelay={0.5}
+                overlay={<FormattedMessage id="tooltip.recent.addContact"/>}
+              >
+                <i className="material-icons sidebar__list__title__icon pull-right"
+                   onClick={this.handleCreatePrivate}>add_circle_outline</i>
+               </Tooltip>
             </li>
           );
           break;
@@ -140,7 +168,7 @@ class Recent extends Component {
           groupTitle = <li className="sidebar__list__title">{intl.messages[`sidebar.recents.${dialogGroup.key}`]}</li>;
       }
 
-      const groupList = map(dialogGroup.shorts, (dialog, index) => {
+      const groupList = map(dialogGroup.shorts, (dialog) => {
         const peer = dialog.peer.peer;
         const peerKey = PeerUtils.peerToString(peer);
 

@@ -77,6 +77,7 @@ class MessageStore extends Store {
       case ActionTypes.MESSAGES_CHANGED:
         this._messages = action.messages;
         this._overlay = action.overlay;
+        this._renderMessagesCount = Math.min(action.messages.length, this._renderMessagesCount);
         this._isLoaded = action.isLoaded;
         this.__emitChange();
         break;

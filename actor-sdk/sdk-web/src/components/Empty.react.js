@@ -2,17 +2,13 @@
  * Copyright (C) 2015-2016 Actor LLC. <https://actor.im>
  */
 
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import SvgIcon from './common/SvgIcon.react';
 import ConnectionState from './common/ConnectionState.react';
 
 class EmptyScreen extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     return (
       <section className="main">

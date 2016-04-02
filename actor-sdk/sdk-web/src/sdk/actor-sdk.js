@@ -9,7 +9,6 @@ import 'intl';
 import Actor from 'actor-js';
 import DelegateContainer from '../utils/DelegateContainer';
 import SharedContainer from '../utils/SharedContainer';
-import PeerUtils from '../utils/PeerUtils';
 import SDKDelegate from './actor-sdk-delegate';
 import { endpoints, rootElement, homePage, twitter, helpPhone, appName } from '../constants/ActorAppConstants'
 import Pace from 'pace';
@@ -144,12 +143,7 @@ class ActorSDK {
 
             <Route path="im" component={Main} onEnter={RouterHooks.requireAuth}>
               <Route path="archive" component={Archive}/>
-              <Route
-                path=":id"
-                component={Dialog}
-                onEnter={RouterHooks.onDialogEnter}
-                onLeave={RouterHooks.onDialogLeave}
-              />
+              <Route path=":id" component={Dialog}/>
               <IndexRoute component={Empty}/>
             </Route>
 
