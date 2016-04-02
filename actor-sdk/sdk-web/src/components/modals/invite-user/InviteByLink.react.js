@@ -2,46 +2,37 @@
  * Copyright (C) 2015-2016 Actor LLC. <https://actor.im>
  */
 
-import { assign } from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import Modal from 'react-modal';
-import ReactMixin from 'react-mixin';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import { FormattedMessage } from 'react-intl';
+import { Container } from 'flux/utils';
+
 import { escapeWithEmoji } from '../../../utils/EmojiUtils'
 
 import { KeyCodes } from '../../../constants/ActorAppConstants';
 
-import SvgIcon from '../../common/SvgIcon.react';;
+import SvgIcon from '../../common/SvgIcon.react';
 
 import InviteUserByLinkActions from '../../../actions/InviteUserByLinkActions';
 import InviteUserActions from '../../../actions/InviteUserActions';
 
 import InviteUserStore from '../../../stores/InviteUserStore';
 
-const getStateFromStores = () => {
-  return {
-    isOpen: InviteUserStore.isInviteWithLinkModalOpen(),
-    group: InviteUserStore.getGroup(),
-    inviteUrl: InviteUserStore.getInviteUrl()
-  };
-};
-
 class InviteByLink extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = getStateFromStores();
-
-    InviteUserStore.addChangeListener(this.onChange);
-  }
-
   static contextTypes = {
     intl: PropTypes.object
   };
 
-  componentWillUnmount() {
-    InviteUserStore.removeChangeListener(this.onChange);
+  static getStores() {
+    return [InviteUserStore];
+  }
+
+  static calculateState() {
+    return {
+      isOpen: InviteUserStore.isInviteWithLinkModalOpen(),
+      group: InviteUserStore.getGroup(),
+      inviteUrl: InviteUserStore.getInviteUrl()
+    };
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -52,7 +43,6 @@ class InviteByLink extends Component {
     }
   }
 
-  onChange = () => this.setState(getStateFromStores());
   onClose = () => InviteUserByLinkActions.hide();
   onInviteLinkClick = event => event.target.select();
 
@@ -138,6 +128,4 @@ class InviteByLink extends Component {
   }
 }
 
-ReactMixin.onClass(InviteByLink, PureRenderMixin);
-
-export default InviteByLink;
+export default Container.create(InviteByLink);
