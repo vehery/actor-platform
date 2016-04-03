@@ -116,8 +116,10 @@ class DialogSection extends Component {
         <div className="flexrow">
           <section className="dialog">
             <ConnectionState/>
-            <MessagesSection peer={peer} isMember={isMember} />
-            <DialogFooter isMember={isMember} />
+            <div className="chat">
+              <MessagesSection peer={peer} isMember={isMember} />
+              <DialogFooter isMember={isMember} />
+            </div>
           </section>
           {activity}
         </div>
