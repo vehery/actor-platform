@@ -32,7 +32,8 @@ export default {
       'twitter': 'Наш твиттер',
       'preferences': 'Настройки',
       'signOut': 'Выход',
-      'homePage': 'Домашняя страница'
+      'homePage': 'Домашняя страница',
+      'facebook': 'Ищите нас в Facebook'
     },
 
     // Buttons
@@ -311,7 +312,24 @@ export default {
         privateList: 'Список приватных диалогов',
         addContact: 'Добавить новый контакт',
         createGroup: 'Создать группу'
-      }
+      },
+      quicksearch: 'Быстрый поиск по приложению.'
+    },
+
+    context: {
+      favorite: {
+        add: 'Добавить в избранное',
+        remove: 'Убрать из избранного'
+      },
+      archive: 'Отправить в архив',
+      delete: 'Удалить'
+    },
+
+    'search': {
+      'placeholder': 'Поиск',
+      'emptyQuery': 'Начните печатать чтобы начать поиск',
+      'searching': 'Поиск "{query}"',
+      'notFound': 'По запросу "{query}" ничего не найдено<br/>Попробуйте поискать что-нибуь другое'
     }
   }
 };

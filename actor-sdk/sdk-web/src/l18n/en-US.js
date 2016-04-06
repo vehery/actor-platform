@@ -35,7 +35,8 @@ export default {
       'twitter': 'Our twitter',
       'preferences': 'Preferences',
       'signOut': 'Sign Out',
-      'homePage': 'Home page'
+      'homePage': 'Home page',
+      'facebook': 'Find us on Facebook'
     },
 
     // Buttons
@@ -316,7 +317,24 @@ export default {
         privateList: 'List of private conversation',
         addContact: 'Add new contact',
         createGroup: 'Create group'
-      }
+      },
+      quicksearch: 'A fastest way to find something'
+    },
+
+    context: {
+      favorite: {
+        add: 'Favorite',
+        remove: 'Unfavorite'
+      },
+      archive: 'Send to archive',
+      delete: 'Delete'
+    },
+
+    search: {
+      'placeholder': 'Search',
+      'emptyQuery': 'You must start typing to find anything',
+      'searching': 'Search for "{query}"',
+      'notFound': 'Nothing found for "{query}"<br/>Try your luck with another request'
     }
   }
 };
