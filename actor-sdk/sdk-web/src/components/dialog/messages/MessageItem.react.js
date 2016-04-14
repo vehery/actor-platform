@@ -46,6 +46,7 @@ class MessageItem extends Component {
   static propTypes = {
     peer: PropTypes.object.isRequired,
     message: PropTypes.object.isRequired,
+    state: PropTypes.string.isRequired,
     isShort: PropTypes.bool.isRequired,
     isSelected: PropTypes.bool,
     onSelect: PropTypes.func
@@ -81,7 +82,7 @@ class MessageItem extends Component {
   };
 
   render() {
-    const { message, peer, isShort, isSelected } = this.props;
+    const { peer, message, state, isShort, isSelected } = this.props;
     const { isHighlighted } = this.state;
     const { delegate, isExperimental } = this.context;
 
@@ -114,7 +115,7 @@ class MessageItem extends Component {
 
     const messageSender = escapeWithEmoji(message.sender.title);
 
-    const messageClassName = classnames('message row', {
+    const messageClassName = classnames('message', {
       'message--same-sender': isShort,
       'message--active': isHighlighted,
       'message--selected': isSelected
@@ -127,7 +128,7 @@ class MessageItem extends Component {
       leftBlock = (
         <div className="message__info text-right">
           <time className="message__timestamp">{message.date}</time>
-          <State message={message}/>
+          <State state={state} />
         </div>
       );
     } else {
@@ -157,7 +158,7 @@ class MessageItem extends Component {
             </a>
           </h3>
           <time className="message__timestamp">{message.date}</time>
-          <State message={message}/>
+          <State state={state} />
         </header>
       );
     }
@@ -196,26 +197,27 @@ class MessageItem extends Component {
 
     return (
       <div className={messageClassName}>
-        {leftBlock}
-        <div className="message__body col-xs">
-          {header}
-          {messageContent}
-        </div>
-        <div className="message__actions">
-          <Reactions peer={peer} message={message}/>
-
-          <div className={messageActionsMenuClassName} onClick={this.showActions}>
-            <SvgIcon className="icon icon--dropdown" glyph="cog" />
+        <div className="row">
+          {leftBlock}
+          <div className="message__body col-xs">
+            {header}
+            {messageContent}
           </div>
+          <div className="message__actions">
+            <Reactions peer={peer} message={message}/>
 
-          {
-            isExperimental
-              ? <div className="message__actions__selector" onClick={this.toggleMessageSelection}>
-                  <i className="icon material-icons icon-check"></i>
-                </div>
-              : null
-          }
+            <div className={messageActionsMenuClassName} onClick={this.showActions}>
+              <SvgIcon className="icon icon--dropdown" glyph="cog" />
+            </div>
 
+            {
+              isExperimental
+                ? <div className="message__actions__selector" onClick={this.toggleMessageSelection}>
+                    <i className="icon material-icons icon-check"></i>
+                  </div>
+                : null
+            }
+          </div>
         </div>
       </div>
     );
