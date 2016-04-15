@@ -53,6 +53,7 @@ import im.actor.core.util.Timing;
 import im.actor.core.viewmodel.AppStateVM;
 import im.actor.core.viewmodel.CallVM;
 import im.actor.core.viewmodel.Command;
+import im.actor.core.viewmodel.CommandPromise;
 import im.actor.core.viewmodel.ConversationVM;
 import im.actor.core.viewmodel.DialogGroupsVM;
 import im.actor.core.viewmodel.FileCallback;
@@ -2114,7 +2115,7 @@ public class Messenger {
     @NotNull
     @ObjectiveCName("loadSessionsCommand")
     public Command<List<ApiAuthSession>> loadSessions() {
-        return modules.getSecurityModule().loadSessions();
+        return new CommandPromise<>(modules.getSecurityModule().loadSessions());
     }
 
     /**
@@ -2125,7 +2126,7 @@ public class Messenger {
     @NotNull
     @ObjectiveCName("terminateAllSessionsCommand")
     public Command<Boolean> terminateAllSessions() {
-        return modules.getSecurityModule().terminateAllSessions();
+        return new CommandPromise<>(modules.getSecurityModule().terminateAllSessions());
     }
 
     /**
@@ -2137,7 +2138,7 @@ public class Messenger {
     @NotNull
     @ObjectiveCName("terminateSessionCommandWithId:")
     public Command<Boolean> terminateSession(int id) {
-        return modules.getSecurityModule().terminateSession(id);
+        return new CommandPromise<>(modules.getSecurityModule().terminateSession(id));
     }
 
     //////////////////////////////////////

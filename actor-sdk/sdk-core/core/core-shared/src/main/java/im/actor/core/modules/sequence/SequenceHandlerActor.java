@@ -124,7 +124,7 @@ public class SequenceHandlerActor extends ModuleActor {
 
     private Promise<UpdateProcessed> onDifferenceUpdate(final ResponseGetDifference difference) {
         long parseStart = im.actor.runtime.Runtime.getCurrentTime();
-        final ArrayList<Update> updates = new ArrayList<Update>();
+        final ArrayList<Update> updates = new ArrayList<>();
         for (ApiUpdateContainer u : difference.getUpdates()) {
             try {
                 updates.add(updatesParser.read(u.getUpdateHeader(), u.getUpdate()));

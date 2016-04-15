@@ -4,6 +4,8 @@
 
 package im.actor.core.modules;
 
+import org.jetbrains.annotations.NotNull;
+
 import im.actor.core.api.ApiOutPeer;
 import im.actor.core.api.ApiPeer;
 import im.actor.core.api.ApiPeerType;
@@ -17,6 +19,9 @@ import im.actor.core.network.RpcException;
 import im.actor.core.network.parser.Request;
 import im.actor.core.network.parser.Response;
 import im.actor.runtime.actors.ActorRef;
+import im.actor.runtime.promise.Promise;
+import im.actor.runtime.promise.PromiseFunc;
+import im.actor.runtime.promise.PromiseResolver;
 import im.actor.runtime.storage.KeyValueEngine;
 import im.actor.runtime.storage.KeyValueStorage;
 import im.actor.runtime.storage.PreferencesStorage;
@@ -91,6 +96,25 @@ public abstract class AbsModule {
             @Override
             public void onError(RpcException e) {
 
+            }
+        });
+    }
+
+    public <T extends Response> Promise<T> api(final Request<T> request) {
+        return new Promise<>(new PromiseFunc<T>() {
+            @Override
+            public void exec(@NotNull final PromiseResolver<T> resolver) {
+                request(request, new RpcCallback<T>() {
+                    @Override
+                    public void onResult(T response) {
+                        resolver.result(response);
+                    }
+
+                    @Override
+                    public void onError(RpcException e) {
+                        resolver.error(e);
+                    }
+                });
             }
         });
     }
