@@ -37,25 +37,8 @@ public class ActorApplicationDelegate: ActorSDKDelegateDefault, UIApplicationDel
         ActorSDK.sharedActor().applicationWillResignActive(application)
     }
     
-    public func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-        ActorSDK.sharedActor().application(application, didReceiveRemoteNotification: userInfo)
-    }
-    
     public func application(application: UIApplication, didRegisterUserNotificationSettings notificationSettings: UIUserNotificationSettings) {
         ActorSDK.sharedActor().application(application, didRegisterUserNotificationSettings: notificationSettings)
-    }
-    
-    public func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
-        let tokenString = "\(deviceToken)".replace(" ", dest: "").replace("<", dest: "").replace(">", dest: "")
-        ActorSDK.sharedActor().pushRegisterToken(tokenString)
-    }
-    
-    public func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject], fetchCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
-        ActorSDK.sharedActor().application(application, didReceiveRemoteNotification: userInfo, fetchCompletionHandler: completionHandler)
-    }
-    
-    public func application(application: UIApplication, performFetchWithCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
-        ActorSDK.sharedActor().application(application, performFetchWithCompletionHandler: completionHandler)
     }
     
     public func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {

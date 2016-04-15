@@ -37,7 +37,11 @@ public class PushesModule extends AbsModule {
     }
 
     public void registerApplePushKit(int apnsKey, String token) {
-        pushRegisterActor.send(new PushRegisterActor.RegisterAppleVoipPush(apnsKey, token));
+        pushRegisterActor.send(new PushRegisterActor.RegisterAppleVoIPPush(apnsKey, token));
+    }
+
+    public void registerApplePushService(String bundleId, String token) {
+        pushRegisterActor.send(new PushRegisterActor.RegisterApplePushService(bundleId, token));
     }
 
     public void registerActorPush(String endpoint) {

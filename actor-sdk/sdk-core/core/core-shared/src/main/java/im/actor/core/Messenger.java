@@ -2258,6 +2258,17 @@ public class Messenger {
     }
 
     /**
+     * Register Apple Push Service tokens
+     *
+     * @param bundleId Application Bundle Id
+     * @param token    Push Token
+     */
+    @ObjectiveCName("registerApplePushService:withToken:")
+    public void registerApplePushService(String bundleId, String token) {
+        modules.getPushesModule().registerApplePushService(bundleId, token);
+    }
+
+    /**
      * Register actor push
      *
      * @param endpoint push endpoint

@@ -316,28 +316,14 @@ import DZNWebViewController
     //
     // Push support
     //
-    
+  
     /// Token need to be with stripped everything except numbers and letters
-    func pushRegisterToken(token: String) {
-        
+    func pushServiceRegisterToken(token: String) {
         if !isStarted {
             fatalError("Messenger not started")
         }
         
-        if apiPushId != nil {
-            messenger.registerApplePushWithApnsId(jint(apiPushId!), withToken: token)
-        }
-    }
-    
-    func pushRegisterKitToken(token: String) {
-        if !isStarted {
-            fatalError("Messenger not started")
-        }
-        
-        if apiPushId != nil {
-            messenger.registerApplePushKitWithApnsId(jint(apiPushId!), withToken: token)
-        }
-
+        messenger.registerApplePushService(NSBundle.mainBundle().bundleIdentifier, withToken: token)
     }
     
     private func requestPush() {
@@ -356,14 +342,12 @@ import DZNWebViewController
     @objc public func pushRegistry(registry: PKPushRegistry!, didUpdatePushCredentials credentials: PKPushCredentials!, forType type: String!) {
         if (type == PKPushTypeVoIP) {
             let tokenString = "\(credentials.token)".replace(" ", dest: "").replace("<", dest: "").replace(">", dest: "")
-            pushRegisterKitToken(tokenString)
+            pushServiceRegisterToken(tokenString)
         }
     }
     
     @objc public func pushRegistry(registry: PKPushRegistry!, didInvalidatePushTokenForType type: String!) {
-        if (type == PKPushTypeVoIP) {
-            
-        }
+        // TODO: Implement
     }
     
     @objc public func pushRegistry(registry: PKPushRegistry!, didReceiveIncomingPushWithPayload payload: PKPushPayload!, forType type: String!) {
@@ -745,38 +729,11 @@ import DZNWebViewController
     }
     
     //
-    // Handling remote notifications
+    // Handling notifications permission
     //
-    
-    public func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject], fetchCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
-        
-        if !messenger.isLoggedIn() {
-            completionHandler(UIBackgroundFetchResult.NoData)
-            return
-        }
-        
-        self.completionHandler = completionHandler
-    }
-    
-    public func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-        // Nothing?
-    }
-    
+
     public func application(application: UIApplication, didRegisterUserNotificationSettings notificationSettings: UIUserNotificationSettings) {
         requestPushKit()
-    }
-    
-    //
-    // Handling background fetch events
-    //
-    
-    public func application(application: UIApplication, performFetchWithCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
-        
-        if !messenger.isLoggedIn() {
-            completionHandler(UIBackgroundFetchResult.NoData)
-            return
-        }
-        self.completionHandler = completionHandler
     }
 
     //
