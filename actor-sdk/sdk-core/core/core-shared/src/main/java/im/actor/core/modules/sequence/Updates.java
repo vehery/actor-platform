@@ -32,7 +32,6 @@ import static im.actor.runtime.actors.ActorSystem.system;
 public class Updates extends AbsModule implements BusSubscriber {
 
     private ActorRef updateActor;
-    private ActorRef updateHandler;
     private SequenceHandlerInt updateHandlerInt;
 
     public Updates(ModuleContext messenger) {
@@ -40,17 +39,12 @@ public class Updates extends AbsModule implements BusSubscriber {
     }
 
     public void run() {
-        this.updateHandler = system().actorOf("actor/updates/handler", "updates",
+        ActorRef updateHandler = system().actorOf("actor/updates/handler", "updates",
                 SequenceHandlerActor.CONSTRUCTOR(context()));
-        this.updateHandlerInt = new SequenceHandlerInt(this.updateHandler);
+        this.updateHandlerInt = new SequenceHandlerInt(updateHandler);
         this.updateActor = system().actorOf("actor/updates", SequenceActor.CONSTRUCTOR(context()));
 
-
         context().getEvents().subscribe(this, NewSessionCreated.EVENT);
-    }
-
-    public ActorRef getUpdateActor() {
-        return updateActor;
     }
 
     public SequenceHandlerInt getUpdateHandler() {
@@ -83,25 +77,12 @@ public class Updates extends AbsModule implements BusSubscriber {
         }
     }
 
-//    public void onUpdateReceived(Object update, Long delay) {
-//        updateActor.send(update, delay);
-//    }
-
     public void executeAfter(int seq, Runnable runnable) {
         updateActor.send(new ExecuteAfter(seq, runnable));
     }
 
     public void executeRelatedResponse(List<ApiUser> users, List<ApiGroup> groups, Runnable runnable) {
         updateHandlerInt.executeRelatedResponse(users, groups, runnable);
-    }
-
-    public void executeRelatedResponse(List<ApiUser> users, List<ApiGroup> groups, final ActorRef ref, final Runnable runnable) {
-        executeRelatedResponse(users, groups, new Runnable() {
-            @Override
-            public void run() {
-                ref.send(runnable);
-            }
-        });
     }
 
     public Promise<Void> applyRelatedData(final List<ApiUser> users, final List<ApiGroup> groups) {

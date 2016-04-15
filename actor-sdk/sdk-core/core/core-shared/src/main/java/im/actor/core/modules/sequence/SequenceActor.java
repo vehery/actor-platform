@@ -27,7 +27,6 @@ import im.actor.runtime.Runtime;
 import im.actor.runtime.actors.Actor;
 import im.actor.runtime.actors.ActorCreator;
 import im.actor.runtime.actors.Cancellable;
-import im.actor.runtime.function.Constructor;
 import im.actor.runtime.function.Consumer;
 import im.actor.runtime.power.WakeLock;
 

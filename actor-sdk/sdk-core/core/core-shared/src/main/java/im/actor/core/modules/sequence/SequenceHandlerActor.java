@@ -1,5 +1,6 @@
 package im.actor.core.modules.sequence;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -81,7 +82,7 @@ public class SequenceHandlerActor extends ModuleActor {
     }
 
     private void onRelatedResponse(List<ApiUser> relatedUsers, List<ApiGroup> relatedGroups, Runnable afterApply) {
-        processor.applyRelated(relatedUsers, relatedGroups, false);
+        processor.applyRelated(relatedUsers, relatedGroups);
         afterApply.run();
     }
 
@@ -109,14 +110,10 @@ public class SequenceHandlerActor extends ModuleActor {
         Log.d(TAG, "Processing update: " + update);
 
         if (groups != null && users != null) {
-            processor.applyRelated(users, groups, false);
+            processor.applyRelated(users, groups);
         }
 
         processor.processUpdate(update);
-
-        if (groups != null && users != null) {
-            processor.applyRelated(users, groups, true);
-        }
 
         // Log.d(TAG, "Processing update success");
         return Promises.success(new UpdateProcessed());
@@ -163,14 +160,13 @@ public class SequenceHandlerActor extends ModuleActor {
             isUpdating = true;
             return new Promise<>(new PromiseFunc<UpdateProcessed>() {
                 @Override
-                public void exec(final PromiseResolver<UpdateProcessed> resolver) {
+                public void exec(@NotNull final PromiseResolver<UpdateProcessed> resolver) {
                     api(new RequestGetReferencedEntitites(pendingUserPeers, pendingGroupPeers))
                             .then(new Consumer<ResponseGetReferencedEntitites>() {
                                 @Override
                                 public void apply(ResponseGetReferencedEntitites responseGetReferencedEntitites) {
                                     Log.d(TAG, "Pending peers downloaded");
-                                    processor.applyRelated(responseGetReferencedEntitites.getUsers(),
-                                            responseGetReferencedEntitites.getGroups(), false);
+                                    processor.applyRelated(responseGetReferencedEntitites.getUsers(), responseGetReferencedEntitites.getGroups());
                                     long applyStart = im.actor.runtime.Runtime.getCurrentTime();
                                     processor.applyDifferenceUpdate(difference.getUsers(), difference.getGroups(), updates);
                                     Log.d(TAG, "Difference applied in " + (im.actor.runtime.Runtime.getCurrentTime() - applyStart) + " ms");
