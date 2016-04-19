@@ -137,7 +137,6 @@ class DialogActionCreators extends ActionCreators {
   }
 
   loadMoreMessages(peer) {
-    dispatch(ActionTypes.MESSAGES_LOADING_MORE);
     if (MessageStore.isAllRendered()) {
       this.onChatEnd(peer);
     } else {
