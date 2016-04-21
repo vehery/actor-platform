@@ -641,7 +641,6 @@ $sticker-max-size: 180px;
     samp {
       margin: 0 0 7px;
       overflow: auto;
-      white-space: pre-wrap;
     }
 
     .emoji-outer {
@@ -1109,7 +1108,7 @@ $sticker-max-size: 180px;
   }
 
   &__mention {
-    background-color: rgb(255, 243, 184);
+    background-color: #FFFBE9;
     border-radius: 2px;
     padding: 2px 1px;
   }

@@ -4,10 +4,10 @@
 
 import { map } from 'lodash';
 import React, { PropTypes, Component } from 'react';
+import EventListener from 'fbjs/lib/EventListener';
 import { findDOMNode } from 'react-dom';
 import classnames from 'classnames';
-import ReactMixin from 'react-mixin';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import { shouldComponentUpdate } from 'react-addons-pure-render-mixin';
 
 import { KeyCodes } from '../../constants/ActorAppConstants';
 
@@ -32,6 +32,8 @@ class MentionDropdown extends Component {
       isOpen: mentions && mentions.length > 0,
       selectedIndex: 0
     };
+
+    this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
   }
 
   componentWillUnmount() {
@@ -55,16 +57,24 @@ class MentionDropdown extends Component {
   }
 
   setListeners() {
-    document.addEventListener('keydown', this.onKeyDown, false);
-    document.addEventListener('click', this.closeMentions, false);
+    this.cleanListeners();
+    this.listeners = [
+      EventListener.listen(document, 'keydown', this.onKeyDown),
+      EventListener.listen(document, 'click', this.closeMentions)
+    ];
   }
 
   cleanListeners() {
-    document.removeEventListener('keydown', this.onKeyDown, false);
-    document.removeEventListener('click', this.closeMentions, false);
+    if (this.listeners) {
+      this.listeners.forEach((listener) => {
+        listener.remove();
+      });
+
+      this.listeners = null;
+    }
   }
 
-  closeMentions = () => this.setState({isOpen: false});
+  closeMentions = () => this.setState({ isOpen: false });
 
   onSelect = (value) => this.props.onSelect(value);
 
@@ -104,7 +114,7 @@ class MentionDropdown extends Component {
           }
 
           this.handleScroll(scrollIndex * DROPDOWN_ITEM_HEIGHT);
-          this.setState({selectedIndex: index});
+          this.setState({ selectedIndex: index });
           break;
         case KeyCodes.ARROW_DOWN:
         case KeyCodes.TAB:
@@ -124,7 +134,7 @@ class MentionDropdown extends Component {
           }
 
           this.handleScroll(scrollIndex * DROPDOWN_ITEM_HEIGHT);
-          this.setState({selectedIndex: index});
+          this.setState({ selectedIndex: index });
           break;
         default:
       }
@@ -153,7 +163,7 @@ class MentionDropdown extends Component {
         <li className={itemClassName}
             key={index}
             onClick={() => this.onSelect(mention)}
-            onMouseOver={() => this.setState({selectedIndex: index})}>
+            onMouseOver={() => this.setState({ selectedIndex: index })}>
           <AvatarItem image={mention.peer.avatar}
                       placeholder={mention.peer.placeholder}
                       size="tiny"
@@ -184,7 +194,5 @@ class MentionDropdown extends Component {
     );
   }
 }
-
-ReactMixin.onClass(MentionDropdown, PureRenderMixin);
 
 export default MentionDropdown;
