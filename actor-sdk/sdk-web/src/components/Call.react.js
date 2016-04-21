@@ -19,6 +19,7 @@ import GroupStore from '../stores/GroupStore';
 import CallBody from './call/CallBody.react';
 import CallControls from './call/CallControls.react';
 import ContactDetails from './common/ContactDetails.react';
+import GroupMeta from './activity/GroupMeta.react';
 
 class Call extends Component {
   static getStores() {
@@ -101,13 +102,23 @@ class Call extends Component {
 
   renderContactInfo() {
     const { call, peerInfo } = this.state;
-    if (!peerInfo || call.peer.type === PeerTypes.GROUP) return null;
+    if (!peerInfo) {
+      return null;
+    }
+
+    if (call.peer.type === PeerTypes.USER) {
+      return (
+        <section className="call__info">
+          <ContactDetails peerInfo={peerInfo}/>
+        </section>
+      );
+    }
 
     return (
       <section className="call__info">
-        <ContactDetails peerInfo={peerInfo}/>
+        <GroupMeta group={peerInfo} />
       </section>
-    )
+    );
   }
 
   render() {
