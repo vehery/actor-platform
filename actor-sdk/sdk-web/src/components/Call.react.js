@@ -19,7 +19,7 @@ import GroupStore from '../stores/GroupStore';
 import CallBody from './call/CallBody.react';
 import CallControls from './call/CallControls.react';
 import ContactDetails from './common/ContactDetails.react';
-import GroupMeta from './activity/GroupMeta.react';
+import CallGroupInfo from './call/CallGroupInfo.react';
 
 class Call extends Component {
   static getStores() {
@@ -116,7 +116,7 @@ class Call extends Component {
 
     return (
       <section className="call__info">
-        <GroupMeta group={peerInfo} />
+        <CallGroupInfo group={peerInfo} />
       </section>
     );
   }
