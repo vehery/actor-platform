@@ -301,15 +301,17 @@ public class JsBindingModule extends AbsModule implements JsFileLoadedListener {
                 @Override
                 public void onChanged(Integer val, Value<Integer> valueModel) {
                     if (groupVM.isMember().get()) {
-                        if (val == null) {
-                            value.changeValue(null);
-                            return;
-                        }
                         String presence = messenger.getFormatter().formatGroupMembers(groupVM.getMembersCount());
-                        if (val > 0) {
-                            presence += ", " + messenger.getFormatter().formatGroupOnline(val);
+                        if (val == null) {
+                            value.changeValue(JsOnlineGroup.create(groupVM.getMembersCount(), 0, presence, false));
+
+                        } else {
+                            if (val > 0) {
+                                presence += ", " + messenger.getFormatter().formatGroupOnline(val);
+                            }
+                            value.changeValue(JsOnlineGroup.create(groupVM.getMembersCount(), val, presence, false));
                         }
-                        value.changeValue(JsOnlineGroup.create(groupVM.getMembersCount(), val, presence, false));
+
                     } else {
                         value.changeValue(JsOnlineGroup.create(0, 0, "Not member", false));
                     }
