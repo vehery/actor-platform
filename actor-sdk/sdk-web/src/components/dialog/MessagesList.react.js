@@ -64,11 +64,11 @@ class MessagesList extends Component {
         MessageItem: DefaultMessageItem,
         Welcome: DefaultWelcome
       };
-
-      this.state = {
-        isScrollToBottomNeeded: false
-      }
     }
+
+    this.state = {
+      isScrollToBottomNeeded: false
+    };
 
     this.dimensions = null;
     this.isLoading = false;
@@ -96,7 +96,11 @@ class MessagesList extends Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.isScrollToBottomNeeded !== this.state.isScrollToBottomNeeded) {
+      return;
+    }
+
     const { dimensions, refs: { scroller }, props: { uid, messages } } = this;
 
     if (messages.changeReason === MessageChangeReason.PUSH) {
@@ -145,7 +149,6 @@ class MessagesList extends Component {
 
   handleScrollToBottom() {
     const { refs: { scroller } } = this;
-    this.dimensions = null;
     scroller.scrollToBottom();
   }
 
