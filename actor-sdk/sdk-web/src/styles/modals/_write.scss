@@ -1,0 +1,64 @@
+.write {
+  width: 500px;
+  .Select {
+    &-control {
+      border: none;
+      border-radius: 0;
+      box-shadow: 0 2px 0 0 $dark-sky-blue2;
+    }
+    &-value {
+      line-height: 32px;
+
+      display: inline-block;
+
+      margin: 0 6px 6px 0;
+      padding: 0;
+
+      vertical-align: top;
+
+      color: $dorado;
+      border: none;
+      border-radius: 16px;
+      background-color: rgba(black, .03);
+
+      &-icon {
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 32px;
+
+        display: inline-block;
+        // float: right;
+
+        margin: 0 10px 0 4px;
+
+        cursor: pointer;
+        vertical-align: middle;
+      }
+      &-label {
+        display: block;
+        float: left;
+      }
+
+      .contact {
+        padding: 0;
+        &__avatar {
+          margin-right: 6px;
+        }
+      }
+    }
+    &-input {
+      display: inline-block;
+      vertical-align: top;
+      margin: 0 0 6px;
+    }
+    &-arrow-zone {
+      padding: 0 5px 6px;
+      line-height: 32px;
+    }
+    &-menu-outer {
+      .contact {
+        padding: 0;
+      }
+    }
+  }
+}

@@ -9,6 +9,8 @@
   cursor: pointer;
 
   color: rgba(white, .8);
+  border: none;
+  outline: none;
 
   @include no-select();
 

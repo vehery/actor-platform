@@ -80,6 +80,7 @@
     "react-router": "2.3.0",
     "react-scroll": "github:actorapp/react-scroll#develop",
     "react-visibility-sensor": "3.1.2",
+    "react-select": "^1.0.0-beta12",
     "setimmediate": "1.0.4",
     "simple-scrollbar": "github:actorapp/simple-scrollbar"
   },

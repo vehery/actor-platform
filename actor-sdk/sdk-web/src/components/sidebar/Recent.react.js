@@ -11,10 +11,12 @@ import GroupListActionCreators from '../../actions/GroupListActionCreators';
 import ContactActionCreators from '../../actions/ContactActionCreators';
 import CreateGroupActionCreators from '../../actions/CreateGroupActionCreators';
 import AddContactActionCreators from '../../actions/AddContactActionCreators';
+import WriteActionCreators from  '../../actions/WriteActionCreators';
 
 import CustomScroller from '../common/CustomScroller.react';
 import RecentGroup from './RecentGroup.react';
 import SidebarLink from './SidebarLink.react';
+import SidebarButton from './SidebarButton.react';
 
 class Recent extends Component {
   static propTypes = {
@@ -38,6 +40,7 @@ class Recent extends Component {
     this.scrollToLastHiddenBelow = this.scrollToLastHiddenBelow.bind(this);
     this.handleGroupListTitleClick = this.handleGroupListTitleClick.bind(this);
     this.handlePrivateListTitleClick = this.handlePrivateListTitleClick.bind(this);
+    this.handleWriteButtonClick = this.handleWriteButtonClick.bind(this);
   }
 
   handleGroupListTitleClick () {
@@ -54,6 +57,10 @@ class Recent extends Component {
 
   handleCreateGroup() {
     CreateGroupActionCreators.open();
+  }
+
+  handleWriteButtonClick() {
+    WriteActionCreators.show();
   }
 
   checkInvisibleCounters() {
@@ -183,8 +190,21 @@ class Recent extends Component {
     );
   }
 
+  renderWriteButton() {
+    return (
+      <SidebarButton
+        className="sidebar__write"
+        title={'Write'}
+        glyph="edit"
+        onClick={this.handleWriteButtonClick}
+        key="write"
+      />
+    );
+  }
+
   renderScrollableContent() {
     return [
+      this.renderWriteButton(),
       this.renderRecentGroups(),
       this.renderHistoryButton()
     ];

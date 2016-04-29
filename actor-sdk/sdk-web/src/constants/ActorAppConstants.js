@@ -265,7 +265,10 @@ export const ActionTypes = keymirror({
   BLOCKED_USERS_LOAD: null,
   BLOCKED_USERS_SET: null,
   BLOCKED_USERS_LOAD_FAILED: null,
-  BLOCKED_USERS_SET_QUERY: null
+  BLOCKED_USERS_SET_QUERY: null,
+
+  WRITE_MODAL_SHOW: null,
+  WRITE_MODAL_HIDE: null
 });
 
 export const EventTypes = {
@@ -384,7 +387,8 @@ export const ModalTypes = keymirror({
   INVITE_BY_LINK: null,
   QUICK_SEARCH: null,
   ATTACHMENTS: null,
-  BLOCKED_USERS: null
+  BLOCKED_USERS: null,
+  WRITE: null
 });
 
 export const PreferencesTabTypes = keymirror({
