@@ -16,6 +16,7 @@ class ContactItem extends Component {
     name: PropTypes.string.isRequired,
     placeholder: PropTypes.string.isRequired,
     avatar: PropTypes.string,
+    avatarSize: PropTypes.string,
 
     className: PropTypes.string,
 
@@ -29,7 +30,7 @@ class ContactItem extends Component {
   }
 
   render() {
-    const { name, placeholder, avatar, children, className } = this.props;
+    const { name, placeholder, avatar, children, className, avatarSize } = this.props;
     const contactClassName = classnames('contact row middle-xs', className);
 
     return (
@@ -38,7 +39,7 @@ class ContactItem extends Component {
           <AvatarItem
             image={avatar}
             placeholder={placeholder}
-            size="small"
+            size={avatarSize || 'small'}
             title={name}
           />
         </div>
