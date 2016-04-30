@@ -43,7 +43,6 @@ $sticker-max-size: 180px;
   &--empty {
     .advice {
       max-width: 480px;
-      padding: 0 32px 64px;
 
       user-select: none;
       text-align: center;
@@ -273,7 +272,7 @@ $sticker-max-size: 180px;
     }
   }
 
-  &--same-sender {
+  &--short {
     padding: 3px 39px 3px 10px;
     .message__info {
       box-sizing: border-box;

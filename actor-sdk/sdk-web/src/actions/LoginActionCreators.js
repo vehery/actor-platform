@@ -11,7 +11,8 @@ import DelegateContainer from '../utils/DelegateContainer';
 import LocationContainer from '../utils/LocationContainer';
 
 import ActionCreators from './ActionCreators';
-import MyProfileActionCreators from './MyProfileActionCreators';
+import JoinGroupActions from './JoinGroupActions';
+import ProfileActionCreators from './ProfileActionCreators';
 import DialogActionCreators from './DialogActionCreators';
 import ContactActionCreators from './ContactActionCreators';
 import QuickSearchActionCreators from './QuickSearchActionCreators';
@@ -20,6 +21,10 @@ import EventBusActionCreators from './EventBusActionCreators';
 import StickersActionCreators from './StickersActionCreators';
 
 class LoginActionCreators extends ActionCreators {
+  start() {
+    dispatch(ActionTypes.AUTH_START);
+  }
+
   changeLogin(login) {
     dispatch(ActionTypes.AUTH_CHANGE_LOGIN, { login });
   }
@@ -112,7 +117,7 @@ class LoginActionCreators extends ActionCreators {
     }
 
     this.setBindings('main', [
-      ActorClient.bindUser(ActorClient.getUid(), MyProfileActionCreators.onProfileChanged),
+      ActorClient.bindUser(ActorClient.getUid(), ProfileActionCreators.setProfile),
       ActorClient.bindGroupDialogs(DialogActionCreators.setDialogs),
       ActorClient.bindContacts(ContactActionCreators.setContacts),
       ActorClient.bindSearch(QuickSearchActionCreators.setQuickSearchList),
@@ -122,6 +127,8 @@ class LoginActionCreators extends ActionCreators {
     ]);
 
     dispatch(ActionTypes.AUTH_SET_LOGGED_IN);
+
+    JoinGroupActions.joinAfterLogin();
   }
 
   setLoggedOut() {

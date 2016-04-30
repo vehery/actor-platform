@@ -65,6 +65,8 @@ export default {
   },
   plugins: [
     new webpack.DefinePlugin({
+      __ACTOR_SDK_VERSION__: JSON.stringify(require('./package.json').version),
+      __ACTOR_CORE_VERSION__: JSON.stringify(require('actor-js/package.json').version),
       'process.env': {
         'NODE_ENV': JSON.stringify('development')
       }
@@ -76,6 +78,6 @@ export default {
     new webpack.NoErrorsPlugin()
   ],
   postcss: [
-    autoprefixer({browsers: ['last 3 versions']})
+    autoprefixer({ browsers: ['last 3 versions'] })
   ]
 };

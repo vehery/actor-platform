@@ -116,7 +116,13 @@ export default {
         'email': 'Email',
         'about': 'О себе',
         'avatarChange': 'Изменить аватар',
-        'avatarRemove': 'Удалить'
+        'avatarRemove': 'Удалить',
+        errors: {
+          nick: {
+            length: 'Никнейм должен содержать от 5 до 32 символов',
+            chars: 'Пожалуйста используйте латинские буквы, цифры или подчеркивание'
+          }
+        }
       },
       'group': {
         'title': 'Редактировать группу',
@@ -187,7 +193,9 @@ export default {
         'nonContactHide': {
           'title': 'Вы действительно хотите скрыть этот диалог?',
           'body': '{name} не в списке ваших контактов.'
-        }
+        },
+        delete: 'Удалить эту группу?',
+        kick: 'Исключить этого пользователя?'
       }
     },
 
@@ -227,45 +235,6 @@ export default {
     'integrationTokenHint': 'Вы можете использовать этот токен для настройки интеграции с вашими собственными системами.',
     'integrationTokenHelp': 'Узнайте, как пользоваться токенами',
 
-    // Modals
-    'inviteModalTitle': 'Пригласить людей в группу',
-    'inviteModalSearch': 'Поиск по именам и никнеймам',
-    'inviteModalNotFound': 'Извините, ничего не найдено',
-    'inviteByLink': 'Ссылка для приглашения в группу',
-    'inviteByLinkModalTitle': 'Пригласить по ссылке',
-    'inviteByLinkModalDescription': 'Любой в интернете теперь может присоедениться к ”{groupName}”, открыв эту ссылку:',
-    'inviteByLinkModalCopyButton': 'Скопировать',
-    'inviteByLinkModalRevokeButton': 'Отменить',
-    'inviteLinkCopied': 'Ссылка скопирована.',
-
-    'blockedUsersTitle': 'Заблокированные пользователи',
-    'blockedUsersNotExists': 'Вы никого не заблокировали.',
-    'blockedUsersNotFound': 'Извините, ничего не найдено',
-    'blockedUsersSearch': 'Поиск по именам и никнеймам',
-    'blockedUsersUnblock': 'Помиловать',
-
-    'preferencesModalTitle': 'Настройки',
-    'preferencesGeneralTab': 'Основные',
-    'preferencesNotificationsTab': 'Уведомления и Звуки',
-    'preferencesSecurityTab': 'Безопасность',
-    'preferencesSendMessageTitle': 'Отправка сообщений',
-    'preferencesSendMessage': 'отправить сообщение',
-    'preferencesNewLine': 'новая строка',
-    'preferencesEffectsTitle': 'Эффекты',
-    'preferencesEnableEffects': 'Включить звуковые эффекты',
-    'preferencesNotificationsTitle': 'Уведомления',
-    'preferencesNotificationsGroup': 'Включить уведомления для групп',
-    'preferencesNotificationsOnlyMention': 'Включить уведомления только для упоминаний',
-    'preferencesNotificationsOnlyMentionHint': 'Вы можете включить уведомления только для сообщений, в которых вы упомянуты.',
-    'preferencesPrivacyTitle': 'Конфиденциальность',
-    'preferencesMessagePreview': 'Предварительный просмотр сообщений',
-    'preferencesMessagePreviewHint': 'Удаляет текст сообщений из уведомлений.',
-    'preferencesSessionsTitle': 'Активные сессии',
-    'preferencesSessionsCurrentSession': 'Текущий сеанс',
-    'preferencesSessionsAuthTime': 'Авторизовано',
-    'preferencesSessionsTerminate': 'Завершить',
-    'preferencesSessionsTerminateAll': 'Завершить все сеансы',
-
     // Sidebar
     'sidebar': {
       'recents': {
@@ -281,7 +250,8 @@ export default {
         },
         'newDialog': 'создать диалог',
         'favourites': 'Избранное',
-        'addPeople': 'добавить контакт'
+        'addPeople': 'добавить контакт',
+        history: 'История'
       },
       'group': {
         'empty': 'Создайте ваш первый групповой диалог'
@@ -290,6 +260,7 @@ export default {
         'empty': 'В вашей сети пока никого нет'
       }
     },
+
     'main': {
       'empty': 'Старайся быть лучше, чем был вчера!',
       'deactivated': {
@@ -297,6 +268,67 @@ export default {
         'text': 'Упс, похоже что вы открыли еще одну вкладку с {appName}. Мы вынуждены деактивировать эту вкладку, чтобы избежать ошибок.'
       }
     },
+
+    preferences: {
+      title: 'Настройки',
+      general: {
+        title: 'Основные',
+        send: {
+          title: 'Отправка сообщений',
+          sendMessage: 'отправить сообщение',
+          newLine: 'новая строка'
+        }
+      },
+      notifications: {
+        title: 'Уведомления и Звуки',
+        effects: {
+          title: 'Эффекты',
+          enable: 'Включить звуковые эффекты'
+        },
+        notification: {
+          title: 'Уведомления',
+          enable: 'Включить уведомления для групп',
+          onlyMentionEnable: 'Включить уведомления только для упоминаний',
+          onlyMentionHint: 'Вы можете включить уведомления только для сообщений, в которых вы упомянуты.'
+        },
+        privacy: {
+          title: 'Конфиденциальность',
+          messagePreview: 'Предварительный просмотр сообщений',
+          messagePreviewHint: 'Удаляет текст сообщений из уведомлений.'
+        }
+      },
+      security: {
+        title: 'Безопасность',
+        sessions: {
+          title: 'Активные сессии',
+          current: 'Текущий сеанс',
+          authTime: 'Авторизовано',
+          terminate: 'Завершить',
+          terminateAll: 'Завершить все сеансы'
+        }
+      },
+      blocked: {
+        title: 'Заблокированные пользователи',
+        notExists: 'Вы никого не заблокировали.',
+        notFound: 'Извините, ничего не найдено',
+        search: 'Поиск по именам и никнеймам',
+        unblock: 'Помиловать'
+      }
+    },
+
+    invite: {
+      title: 'Пригласить людей в группу',
+      search: 'Поиск по именам и никнеймам',
+      notFound: 'Извините, ничего не найдено.',
+      inviteByLink: 'Ссылка для приглашения в группу',
+      byLink: {
+        title: 'Пригласить по ссылке',
+        description: 'Любой в интернете теперь может присоедениться к ”<b>{groupName}</b>”, открыв эту ссылку:',
+        copy: 'Скопировать',
+        revoke: 'Отменить'
+      }
+    },
+
     call: {
       outgoing: 'Исходящий вызов',
       incoming: 'Входящий вызов',
@@ -307,11 +339,8 @@ export default {
       end: 'Завершить вызов',
       addUser: 'Добавить пользователя',
       fullScreen: 'Полный экран',
-      video: 'Видео'
-    },
-
-    toolbar: {
-      callState: {
+      video: 'Видео',
+      state: {
         calling: 'звоню',
         connecting: 'соединение',
         in_progress: 'Звонок: {time}',
@@ -325,10 +354,10 @@ export default {
         favorite: 'Добавить/удалить в избранное'
       },
       recent: {
-        groupList: 'Список групповых диалогов',
-        privateList: 'Список приватных диалогов',
-        addContact: 'Добавить новый контакт',
-        createGroup: 'Создать группу'
+        groupsList: 'Список групповых диалогов',
+        privatesList: 'Список приватных диалогов',
+        groupsCreate: 'Создать группу',
+        privatesCreate: 'Добавить новый контакт'
       },
       quicksearch: 'Быстрый поиск по приложению.'
     },
@@ -342,11 +371,11 @@ export default {
       delete: 'Удалить'
     },
 
-    'search': {
-      'placeholder': 'Поиск',
-      'emptyQuery': 'Начните печатать чтобы начать поиск',
-      'searching': 'Поиск "{query}"',
-      'notFound': 'По запросу "{query}" ничего не найдено<br/>Попробуйте поискать что-нибуь другое'
+    search: {
+      placeholder: 'Поиск',
+      emptyQuery: 'Начните печатать чтобы начать поиск',
+      searching: 'Поиск "{query}"',
+      notFound: 'По запросу "{query}" ничего не найдено<br/>Попробуйте поискать что-нибуь другое'
     }
   }
 };
