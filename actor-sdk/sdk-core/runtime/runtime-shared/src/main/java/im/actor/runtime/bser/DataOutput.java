@@ -53,6 +53,23 @@ public class DataOutput {
         data[offset++] = (byte) (v & 0xFF);
     }
 
+    public void writeLongReverse(long v) {
+        if (data.length <= offset + 8) {
+            expand(offset + 8);
+        }
+
+        v = v & 0xFFFFFFFFFFFFFFFFL;
+
+        data[offset++] = (byte) (v & 0xFF);
+        data[offset++] = (byte) ((v >> 8) & 0xFF);
+        data[offset++] = (byte) ((v >> 16) & 0xFF);
+        data[offset++] = (byte) ((v >> 24) & 0xFF);
+        data[offset++] = (byte) ((v >> 32) & 0xFF);
+        data[offset++] = (byte) ((v >> 40) & 0xFF);
+        data[offset++] = (byte) ((v >> 48) & 0xFF);
+        data[offset++] = (byte) ((v >> 56) & 0xFF);
+    }
+
     public void writeInt(int v) {
         if (data.length <= offset + 4) {
             expand(offset + 4);

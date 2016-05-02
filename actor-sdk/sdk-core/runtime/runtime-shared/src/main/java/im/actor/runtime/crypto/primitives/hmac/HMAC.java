@@ -16,16 +16,20 @@ public class HMAC implements Digest {
     private final byte[] outerKeyPad;
     private final byte[] innerKeyPad;
 
-    public HMAC(byte[] secret, Digest digest) {
 
+    public HMAC(byte[] secret, Digest digest) {
+        this(secret, digest, digest.getDigestSize());
+    }
+
+    public HMAC(byte[] secret, Digest digest, int blockSize) {
         this.digest = digest;
 
-        byte[] fixedSecret = new byte[digest.getDigestSize()];
-        if (secret.length > digest.getDigestSize()) {
+        byte[] fixedSecret = new byte[blockSize];
+        if (secret.length > blockSize) {
             digest.reset();
             digest.update(secret, 0, secret.length);
             digest.doFinal(fixedSecret, 0);
-        } else if (secret.length < digest.getDigestSize()) {
+        } else if (secret.length < blockSize) {
             ByteStrings.write(fixedSecret, 0, secret, 0, secret.length);
             for (int i = secret.length; i < fixedSecret.length; i++) {
                 fixedSecret[i] = 0;
@@ -35,8 +39,8 @@ public class HMAC implements Digest {
         }
         this.secret = fixedSecret;
 
-        outerKeyPad = new byte[digest.getDigestSize()];
-        innerKeyPad = new byte[digest.getDigestSize()];
+        outerKeyPad = new byte[blockSize];
+        innerKeyPad = new byte[blockSize];
         for (int i = 0; i < outerKeyPad.length; i++) {
             outerKeyPad[i] = (byte) (0x5c ^ this.secret[i]);
             innerKeyPad[i] = (byte) (0x36 ^ this.secret[i]);
