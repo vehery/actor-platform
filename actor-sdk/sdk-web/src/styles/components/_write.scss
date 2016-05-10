@@ -1,0 +1,69 @@
+.write {
+  width: 100%;
+  min-width: 600px;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 100px;
+  overflow: scroll;
+  &__container {
+    width: 600px;
+    padding: 0 24px;
+    flex: 1 0 auto;
+  }
+
+  &__header {
+    margin-bottom: 32px;
+    h1 {
+      font-size: 40px;
+      font-weight: 500;
+      line-height: 50px;
+      margin: 0;
+      padding: 0;
+      color: rgb(101, 101, 101);
+    }
+  }
+  &__footer {
+    padding-top: 24px;
+    .controls {
+      text-align: right;
+      .button {
+        margin-left: 8px;
+      }
+    }
+  }
+
+  .radio {
+    label {
+      font-size: 15px;
+      color: rgba($modal-text-color, .77);
+      strong {
+        color: rgba($modal-text-color, .85);
+        font-weight: 500;
+      }
+    }
+  }
+
+  &__title,
+  &__contacts,
+  &__type,
+  &__compose {
+    margin-top: 32px;
+    &__title {
+      font-size: 14px;
+      line-height: 24px;
+      display: block;
+      margin-bottom: 4px;
+      color: rgba(black, .3);
+    }
+  }
+
+  .compose__message {
+    padding: 8px;
+    font-size: 17px;
+    line-height: 24px;
+    margin: 0;
+  }
+}

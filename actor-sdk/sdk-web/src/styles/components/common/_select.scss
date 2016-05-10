@@ -1,0 +1,190 @@
+
+.Select {
+  position: relative;
+  &-control {
+    // border: none;
+    // border-radius: 0;
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.15);
+  }
+
+  &-placeholder {
+    font-size: 15px;
+    line-height: 30px;
+
+    position: absolute;
+    top: 0;
+
+    height: 30px;
+    margin: 4px 0 2px;
+    padding: 0;
+
+    vertical-align: middle;
+
+    color: rgba(black, .3);
+  }
+
+  &-input {
+    line-height: 32px;
+    height: 32px;
+    margin: 2px 0;
+    padding: 0 10px 0 0;
+
+    vertical-align: middle;
+    input {
+      line-height: 32px;
+      outline: none;
+      font-size: 15px;
+      border: 0;
+      padding: 0 5px 0 0;
+      color: rgb(77, 77, 77);
+    }
+  }
+
+  &-arrow-zone {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    line-height: 32px;
+
+    padding: 2px 6px;
+
+    cursor: pointer;
+    &:hover {
+      .Select-arrow {
+        border-top-color: rgb(102, 102, 102);
+      }
+    }
+  }
+  &-arrow {
+    border-color: rgb(153, 153, 153) transparent transparent;
+    border-style: solid;
+    border-width: 5px 5px 2.5px;
+    display: inline-block;
+    vertical-align: middle;
+    height: 0;
+    width: 0;
+  }
+
+  &-value {
+    line-height: 32px;
+
+    display: inline-flex;
+
+    height: 32px;
+    margin: 2px 4px 2px 0;
+    padding: 0;
+
+    vertical-align: top;
+
+    color: $dorado;
+    border: none;
+    border-radius: 16px;
+    background-color: rgba(black, .03);
+    &:hover {
+      background-color: rgba(black, .07);
+    }
+
+    &-icon {
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 32px;
+
+      display: inline-block;
+      // float: right;
+
+      margin: 0 10px 0 6px;
+
+      cursor: pointer;
+      vertical-align: middle;
+
+      flex: 0 0 auto;
+      order: 5;
+    }
+    &-label {
+      display: block;
+      cursor: default;
+
+      flex: 0 1 auto;
+      order: -1;
+      .contact {
+        align-items: flex-start;
+      }
+      .contact__avatar,
+      .contact__body {
+        height: 32px;
+      }
+    }
+
+    .contact {
+      padding: 0;
+      &__avatar {
+        margin-right: 6px;
+
+        vertical-align: middle;
+      }
+    }
+  }
+  &-menu-outer {
+    position: absolute;
+    background-color: white;
+    box-sizing: border-box;
+    // margin-top: 1px;
+    max-height: 240px;
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    z-index: 2;
+  }
+  &-menu {
+    max-height: 240px;
+    overflow-y: auto;
+    // box-shadow: 0 5px 12px -7px rgba(0, 0, 0, .3), 0 1px 4px -1px rgba(0, 0, 0, .1);
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
+    border-radius: 3px;
+  }
+  &-option {
+    box-sizing: border-box;
+    box-shadow: 0 1px 0 0 rgba(black, 0.02);
+    color: $dorado;
+    cursor: pointer;
+    display: block;
+    .contact {
+      padding: 4px 14px;
+    }
+
+    &.is-focused {
+      background-color: $dark-sky-blue;
+      .contact {
+        color: white;
+      }
+  	}
+  }
+  &-noresults {
+    box-sizing: border-box;
+    color: rgba(0,0,0,.3);
+    text-align: center;
+    cursor: default;
+    display: block;
+    padding: $modal-padding;
+    box-shadow: 0 1px 3px -2px rgba(0, 0, 0, 0.1);
+  }
+
+  &.is-focused {
+    .Select-control {
+      box-shadow: 0 2px 0 0 $dark-sky-blue;
+    }
+    .Select-placeholder {
+      color: rgba(black, .1);
+    }
+  }
+  &.has-value {
+    .Select-control {
+      box-shadow: 0 2px 0 0 $dark-sky-blue;
+    }
+  }
+  &.is-open {
+    .Select-arrow {
+      border-top-color: rgb(102, 102, 102);
+    }
+  }
+}

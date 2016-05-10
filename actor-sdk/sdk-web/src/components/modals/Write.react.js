@@ -15,34 +15,7 @@ import PeopleStore from '../../stores/PeopleStore';
 
 import ContactItem from '../common/ContactItem.react';
 import AvatarItem from '../common/AvatarItem.react';
-
-
-class ContactIt2m extends Component {
-  static propTypes = {
-    avatar: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    placeholder: PropTypes.string.isRequired,
-    uid: PropTypes.number.isRequired,
-    avatarSize: PropTypes.string
-  }
-
-  render() {
-    const { avatar, name, placeholder, avatarSize } = this.props;
-
-    return (
-      <div className="select-contact row">
-        <AvatarItem
-          image={avatar}
-          className="select-contact"
-          placeholder={placeholder}
-          size={avatarSize ||'tiny'}
-          title={name}
-        />
-        <div className="select-contact__title col-xs">{name}</div>
-      </div>
-    );
-  }
-}
+import TextField from '../common/TextField.react';
 
 class Write extends Component {
   static getStores() {
@@ -82,7 +55,9 @@ class Write extends Component {
   }
 
   render() {
+    const { title, selectedContacts, contacts } = this.state;
     console.debug('this.state.selectedContacts', this.state.selectedContacts)
+
     return (
       <Modal
         overlayClassName="modal-overlay"
@@ -92,17 +67,20 @@ class Write extends Component {
 
         <div className="write">
           <div className="modal__content">
+
             <div className="modal__header">
-              <FormattedMessage id="modal.addContact.title" tagName="h1"/>
+              {/*<FormattedMessage id="modal.addContact.title" tagName="h1"/>*/}
+              <h1>Write a message</h1>
               <a className="modal__header__close material-icons"
                  onClick={this.handleClose}>clear</a>
             </div>
+
             <div className="modal__body">
               <div className="write__contacts">
                 <Select
                   multi
-                  value={this.state.selectedContacts}
-                  options={this.state.contacts}
+                  value={selectedContacts}
+                  options={contacts}
                   onChange={this.handleSelectChange}
                   placeholder="Select someone"
                   labelKey="name"
@@ -112,7 +90,64 @@ class Write extends Component {
                   valueRenderer={this.renderContact}
                 />
               </div>
+              <div className="write__title">
+                <TextField
+                  className="input__material--wide"
+                  disabled={false}
+                  errorText={null}
+                  floatingLabel={'title'}
+                  onChange={this.handleTitleChange}
+                  ref="name"
+                  type="text"
+                  value={title}
+                />
+              </div>
+              <div className="write__type row">
+                <div className="col-xs">
+                  <div className="radio">
+                    <input
+                      type="radio"
+                      name="sendByEnter"
+                      id="sendByEnterEnabled"
+                      value="true"
+                      defaultChecked={true}
+                      onChange={this.toggleSendByEnter}/>
+                    <label htmlFor="sendByEnterEnabled">
+                      Direct
+                    </label>
+                  </div>
+                </div>
+                <div className="col-xs">
+                  <div className="radio">
+                    <input
+                      type="radio"
+                      name="sendByEnter"
+                      id="sendByEnterEnabled"
+                      value="true"
+                      defaultChecked={true}
+                      onChange={this.toggleSendByEnter}/>
+                    <label htmlFor="sendByEnterEnabled">
+                      Group
+                    </label>
+                  </div>
+                </div>
+                <div className="col-xs">
+                  <div className="radio">
+                    <input
+                      type="radio"
+                      name="sendByEnter"
+                      id="sendByEnterEnabled"
+                      value="true"
+                      defaultChecked={true}
+                      onChange={this.toggleSendByEnter}/>
+                    <label htmlFor="sendByEnterEnabled">
+                      Channel
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
 

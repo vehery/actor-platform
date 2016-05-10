@@ -192,11 +192,11 @@ class Recent extends Component {
 
   renderWriteButton() {
     return (
-      <SidebarButton
+      <SidebarLink
         className="sidebar__write"
+        to="/im/write"
         title={'Write'}
         glyph="edit"
-        onClick={this.handleWriteButtonClick}
         key="write"
       />
     );
