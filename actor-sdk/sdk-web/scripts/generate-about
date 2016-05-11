@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+
+const pkg = require('../package.json');
+
+function normalizeLicense(license) {
+  if (typeof license === 'string') {
+    return license;
+  }
+
+  if (!license) {
+    return 'Unlicensed';
+  }
+
+  return license.type;
+}
+
+const dependencies = Object.keys(pkg.dependencies).map((name) => {
+  const dependency = require('../node_modules/' + name + '/package.json');
+
+  return {
+    name: dependency.name,
+    url: dependency.homepage,
+    version: dependency.version,
+    license: normalizeLicense(dependency.license)
+  };
+});
+
+console.log(JSON.stringify(dependencies, null, '  '));
