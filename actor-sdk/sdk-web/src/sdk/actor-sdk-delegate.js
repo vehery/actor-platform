@@ -22,11 +22,15 @@ class ActorSDKDelegate {
       join: null,
       archive: null,
       empty: null,
-      sidebar: null
+      sidebar: null,
+      modals: null,
+      about: null
     },
     features: {
       calls: true,
-      search: false
+      search: false,
+      editing: false,
+      blocking: false
     },
     actions: {
       setLoggedIn: null,

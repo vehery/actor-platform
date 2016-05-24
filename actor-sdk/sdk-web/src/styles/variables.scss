@@ -29,6 +29,7 @@ $color-purple: #ad62a7;
 $color-red: #f16364;
 $color-orange: #f9a43e;
 $color-yellow: #e4c62e;
+$color-pink: #ed608b;
 $color-green: #67bf74;
 // New design colors
 //$dark-sky-blue: #4a90e2;
@@ -102,6 +103,7 @@ $message-state-color: rgba($mine-shaft, .3);
 $message-timestamp-color: $message-state-color;
 $message-service-text-color: rgba($mine-shaft, .5);
 $message-document-icon-size: 64px;
+$message-edit-background: lighten($color-yellow, 40%);
 
 // Call
 $call-background: #2a384a;

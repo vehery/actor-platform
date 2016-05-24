@@ -26,6 +26,7 @@ import im.actor.util.misc.IdUtils._
 import ImageUtils._
 import akka.http.scaladsl.util.FastFuture
 import im.actor.concurrent.FutureExt
+import im.actor.server.CommonErrors
 import org.joda.time.DateTime
 import slick.driver.PostgresDriver.api._
 
@@ -49,7 +50,7 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
 
       // FIXME: invite other members
 
-      val update = UpdateGroupInvite(groupId, creatorUserId, date.toEpochMilli, rng.nextLong())
+      val update = UpdateGroupInviteObsolete(groupId, creatorUserId, date.toEpochMilli, rng.nextLong())
 
       db.run(for {
         _ ← createInDb(state, rng.nextLong())
@@ -89,7 +90,7 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
     persist(created) { _ ⇒
       context become working(state)
 
-      val update = UpdateGroupInvite(groupId = groupId, inviteUserId = creatorUserId, date = date.toEpochMilli, randomId = randomId)
+      val update = UpdateGroupInviteObsolete(groupId = groupId, inviteUserId = creatorUserId, date = date.toEpochMilli, randomId = randomId)
 
       db.run(
         for {
@@ -156,9 +157,9 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
     val dateMillis = date.toEpochMilli
     val memberIds = group.members.keySet
 
-    val inviteeUpdate = UpdateGroupInvite(groupId = groupId, randomId = randomId, inviteUserId = inviterUserId, date = dateMillis)
+    val inviteeUpdate = UpdateGroupInviteObsolete(groupId = groupId, randomId = randomId, inviteUserId = inviterUserId, date = dateMillis)
 
-    val userAddedUpdate = UpdateGroupUserInvited(groupId = groupId, userId = userId, inviterUserId = inviterUserId, date = dateMillis, randomId = randomId)
+    val userAddedUpdate = UpdateGroupUserInvitedObsolete(groupId = groupId, userId = userId, inviterUserId = inviterUserId, date = dateMillis, randomId = randomId)
     val serviceMessage = GroupServiceMessages.userInvited(userId)
 
     for {
@@ -225,7 +226,7 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
     persist(GroupEvents.UserKicked(date, kickedUserId, kickerUserId)) { evt ⇒
       workWith(evt, group)
 
-      val update = UpdateGroupUserKick(groupId, kickedUserId, kickerUserId, date.toEpochMilli, randomId)
+      val update = UpdateGroupUserKickObsolete(groupId, kickedUserId, kickerUserId, date.toEpochMilli, randomId)
       val serviceMessage = GroupServiceMessages.userKicked(kickedUserId)
 
       db.run(removeUser(
@@ -247,7 +248,7 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
     persist(GroupEvents.UserLeft(now(), userId)) { evt ⇒
       workWith(evt, group)
 
-      val update = UpdateGroupUserLeave(groupId, userId, evt.ts.toEpochMilli, randomId)
+      val update = UpdateGroupUserLeaveObsolete(groupId, userId, evt.ts.toEpochMilli, randomId)
       val serviceMessage = GroupServiceMessages.userLeft(userId)
       db.run(removeUser(
         initiatorId = userId,
@@ -267,7 +268,7 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
       val date = evt.ts
       val avatarData = avatarOpt map (getAvatarData(AvatarData.OfGroup, groupId, _)) getOrElse AvatarData.empty(AvatarData.OfGroup, groupId.toLong)
 
-      val update = UpdateGroupAvatarChanged(groupId, clientUserId, avatarOpt, date.toEpochMilli, randomId)
+      val update = UpdateGroupAvatarChangedObsolete(groupId, clientUserId, avatarOpt, date.toEpochMilli, randomId)
       val serviceMessage = GroupServiceMessages.changedAvatar(avatarOpt)
 
       val memberIds = group.members.keySet
@@ -304,7 +305,7 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
     persistStashingReply(TitleUpdated(now(), title), group) { evt ⇒
       val date = evt.ts
 
-      val update = UpdateGroupTitleChanged(groupId = groupId, userId = clientUserId, title = title, date = date.toEpochMilli, randomId = randomId)
+      val update = UpdateGroupTitleChangedObsolete(groupId = groupId, userId = clientUserId, title = title, date = date.toEpochMilli, randomId = randomId)
       val serviceMessage = GroupServiceMessages.changedTitle(title)
 
       for {
@@ -329,12 +330,12 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
   protected def updateTopic(group: GroupState, clientUserId: Int, topic: Option[String], randomId: Long): Unit = {
     withGroupMember(group, clientUserId) { member ⇒
       val trimmed = topic.map(_.trim)
-      if (trimmed.map(s ⇒ s.nonEmpty & s.length < 255).getOrElse(true)) {
+      if (trimmed.forall(s ⇒ s.nonEmpty & s.length < 255)) {
         persistStashingReply(TopicUpdated(now(), trimmed), group) { evt ⇒
           val date = evt.ts
           val dateMillis = date.toEpochMilli
           val serviceMessage = GroupServiceMessages.changedTopic(trimmed)
-          val update = UpdateGroupTopicChanged(groupId = groupId, randomId = randomId, userId = clientUserId, topic = trimmed, date = dateMillis)
+          val update = UpdateGroupTopicChangedObsolete(groupId = groupId, randomId = randomId, userId = clientUserId, topic = trimmed, date = dateMillis)
           for {
             _ ← db.run(GroupRepo.updateTopic(groupId, trimmed))
             _ ← dialogExt.writeMessage(
@@ -361,7 +362,7 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
   protected def updateAbout(group: GroupState, clientUserId: Int, about: Option[String], randomId: Long): Unit = {
     withGroupAdmin(group, clientUserId) {
       val trimmed = about.map(_.trim)
-      if (trimmed.map(s ⇒ s.nonEmpty & s.length < 255).getOrElse(true)) {
+      if (trimmed.forall(s ⇒ s.nonEmpty & s.length < 255)) {
         persistStashingReply(AboutUpdated(now(), trimmed), group) { evt ⇒
           val date = evt.ts
           val dateMillis = date.toEpochMilli
@@ -405,9 +406,9 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
               (seqState, _) ← seqUpdExt.broadcastOwnSingleUpdate(
                 clientUserId,
                 group.members.keySet - clientUserId,
-                UpdateGroupMembersUpdate(groupId, members)
+                UpdateGroupMembersUpdateObsolete(groupId, members)
               )
-            } yield (members, seqState)
+            } yield (members, SeqStateDate(seqState.seq, seqState.state, date.toEpochMilli))
           } else {
             Future.failed(UserAlreadyAdmin)
           }
@@ -428,6 +429,21 @@ private[group] trait GroupCommandHandlers extends GroupsImplicits with GroupComm
         } yield RevokeIntegrationTokenAck(newToken)
       }
     }
+  }
+
+  protected def transferOwnership(group: GroupState, clientUserId: Int, clientAuthSid: Int, userId: Int): Unit = {
+    if (group.ownerUserId == clientUserId) {
+      persistReply(OwnerChanged(Instant.now, userId), group) { _ ⇒
+        for {
+          (reply, _) ← seqUpdExt.broadcastOwnSingleUpdate(
+            userId = clientUserId,
+            bcastUserIds = group.members.keySet.filterNot(_ == clientUserId),
+            update = UpdateGroupOwnerChanged(group.id, userId),
+            pushRules = PushRules().withExcludeAuthSids(Seq(clientAuthSid))
+          )
+        } yield reply
+      }
+    } else sender() ! Status.Failure(CommonErrors.Forbidden)
   }
 
   private def removeUser(initiatorId: Int, userId: Int, memberIds: Set[Int], clientAuthSid: Int, serviceMessage: ApiServiceMessage, update: Update, date: Instant, randomId: Long): DBIO[SeqStateDate] = {

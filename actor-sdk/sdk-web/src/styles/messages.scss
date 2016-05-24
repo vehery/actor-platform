@@ -287,6 +287,10 @@ $sticker-max-size: 180px;
     }
   }
 
+  &--editing {
+    background-color: $message-edit-background;
+  }
+
   &--welcome {
     cursor: default;
 
@@ -1101,4 +1105,8 @@ $sticker-max-size: 180px;
     border-radius: 2px;
     padding: 2px 1px;
   }
+}
+
+.message__photo {
+  cursor: pointer;
 }

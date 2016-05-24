@@ -32,7 +32,8 @@ class MessagesList extends Component {
       isLoaded: PropTypes.bool.isRequired,
       receiveDate: PropTypes.number.isRequired,
       readDate: PropTypes.number.isRequired,
-      firstUnreadId: PropTypes.string,
+      editId: PropTypes.string,
+      unreadId: PropTypes.string,
       selected: PropTypes.object.isRequired,
       changeReason: PropTypes.oneOf([
         MessageChangeReason.UNKNOWN,
@@ -42,7 +43,6 @@ class MessagesList extends Component {
       ]).isRequired
     }).isRequired,
     isMember: PropTypes.bool.isRequired,
-    editMessage: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
     onLoadMore: PropTypes.func.isRequired,
     onEdit: PropTypes.func.isRequired
@@ -80,7 +80,6 @@ class MessagesList extends Component {
     return nextProps.peer !== this.props.peer ||
            nextProps.messages !== this.props.messages ||
            nextProps.isMember !== this.props.isMember ||
-           nextProps.editMessage !== this.props.editMessage ||
            nextState.showScrollToBottom !== this.state.showScrollToBottom;
   }
 
@@ -90,11 +89,9 @@ class MessagesList extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (!PeerUtils.equals(nextProps.peer, this.props.peer)) {
-      console.debug('Peer changed, set dimensions to null');
       this.dimensions = null;
       this.isLoading = false;
     } else {
-      console.debug('Update dimensions due messages will rerender');
       this.updateDimensions(this.refs.scroller.getDimensions());
     }
   }
@@ -106,31 +103,25 @@ class MessagesList extends Component {
 
     const { dimensions, refs: { scroller }, props: { uid, messages } } = this;
 
-    if (messages.firstUnreadId && messages.firstUnreadId !== prevProps.messages.firstUnreadId) {
+    if (messages.unreadId && messages.unreadId !== prevProps.messages.unreadId) {
       if (this.refs.unread) {
-        console.debug('Scroll to unread divider');
         this.refs.scroller.scrollToNode(this.refs.unread);
-      } else {
-        console.debug('Scroll to unread divider impossible');
       }
     } else if (messages.changeReason === MessageChangeReason.PUSH) {
       const _isLastMessageMine = isLastMessageMine(uid, messages);
       if (!dimensions || _isLastMessageMine) {
-        console.debug('Scroll to bottom due new messages PUSH', { dimensions, _isLastMessageMine });
         this.scrollToBottom();
       }
     } else if (messages.changeReason === MessageChangeReason.UNSHIFT) {
       this.isLoading = false;
       if (dimensions) {
         const nextDimensions = scroller.getDimensions();
-        console.debug('Restore scroll due messages unshift', { dimensions, nextDimensions });
+        // Restore scroll
         scroller.scrollTo(nextDimensions.scrollHeight - dimensions.scrollHeight);
       } else {
-        console.debug('Scroll to bottom due messages have been UNSHIFT', { dimensions });
         this.scrollToBottom();
       }
     } else {
-      console.debug('Restore scroll due messages UPDATE');
       this.restoreScroll();
     }
   }
@@ -139,7 +130,6 @@ class MessagesList extends Component {
     const dimensions = this.refs.scroller.getDimensions();
     this.updateDimensions(dimensions);
     if (!this.isLoading && dimensions.scrollTop < 100) {
-      console.debug('Start loading more messages');
       this.isLoading = true;
       this.props.onLoadMore();
     }
@@ -154,14 +144,13 @@ class MessagesList extends Component {
   onResize() {
     const { dimensions, refs: { scroller } } = this;
     if (dimensions) {
+      // Fix scroll
       const ratio = dimensions.scrollTop / dimensions.scrollHeight;
       const nextDimensions = scroller.getDimensions();
       scroller.scrollTo(ratio * nextDimensions.scrollHeight);
       this.dimensions = nextDimensions;
-      console.debug('Handle resize: fix scroll', { dimensions, ratio, nextDimensions });
     } else {
       scroller.scrollToBottom();
-      console.debug('Handle resize: scroll to bottom', { dimensions });
     }
   }
 
@@ -189,13 +178,13 @@ class MessagesList extends Component {
   }
 
   renderMessages() {
-    const { uid, peer, editMessage, messages: { messages, overlay, count, selected, receiveDate, readDate, firstUnreadId } } = this.props;
+    const { uid, peer, messages: { messages, overlay, count, selected, receiveDate, readDate, editId, unreadId } } = this.props;
     const { MessageItem } = this.components;
 
     const result = [];
     for (let index = messages.length - count; index < messages.length; index++) {
       const message = messages[index];
-      if (message.rid === firstUnreadId) {
+      if (message.rid === unreadId) {
         result.push(
           <div className="unread-divider" ref="unread" key="unread">
             <div className="text">
@@ -223,7 +212,7 @@ class MessagesList extends Component {
           state={getMessageState(message, uid, receiveDate, readDate)}
           isShort={overlayItem.useShort}
           isSelected={selected.has(message.rid)}
-          isEditing={message === editMessage.message}
+          isEditing={editId === message.rid}
           onEdit={this.props.onEdit}
           onSelect={this.props.onSelect}
           key={message.sortKey}
@@ -271,10 +260,9 @@ class MessagesList extends Component {
 
   updateDimensions(dimensions) {
     if (dimensions.scrollHeight === dimensions.scrollTop + dimensions.offsetHeight) {
-      console.debug('Update dimensions: lock scroll to bottom', { dimensions });
+      // Lock scroll to bottom
       this.dimensions = null;
     } else {
-      console.debug('Update dimensions: set new dimensions', { dimensions });
       this.dimensions = dimensions;
     }
   }

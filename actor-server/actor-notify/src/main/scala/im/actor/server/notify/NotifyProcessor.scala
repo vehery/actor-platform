@@ -84,7 +84,7 @@ private[notify] object NotifyProcessor {
     )
   }
 
-  private def props = Props(classOf[NotifyProcessor])
+  private def props = Props(classOf[NotifyProcessor]).withDispatcher("notify-prio-dispatcher")
 
 }
 
@@ -102,6 +102,9 @@ private[notify] class NotifyProcessor extends Processor[NotifyProcessorState] {
   private val notifyConfig = NotifyConfig.load.get
   private val notifyAfter = notifyConfig.notifyAfter.toMillis
   private val notificationTemplate = NotificationTemplate(notifyConfig.emailTemplatePath)
+  private val resolvedDomains = notifyConfig.resolvedDomains
+
+  system.log.debug("Notify config: {}", notifyConfig)
 
   self ! SubscribeToPresence()
   system.scheduler.schedule(Duration.Zero, 10.minutes, self, FindNewUsers())
@@ -153,8 +156,8 @@ private[notify] class NotifyProcessor extends Processor[NotifyProcessorState] {
 
   private def notify(userId: Int): Unit = for {
     user ← userExt.getUser(userId)
-    result ← user.emails match {
-      case userEmail +: _ ⇒
+    _ ← user.emails match {
+      case userEmail +: _ if resolvedDomains contains userEmail ⇒
         for {
           grouped ← dialogExt.fetchGroupedDialogs(userId)
           _ ← emailIfNeeded(userEmail, user.name, grouped) match {
@@ -170,9 +173,9 @@ private[notify] class NotifyProcessor extends Processor[NotifyProcessorState] {
         } yield ()
       case Seq() ⇒
         log.debug("User: {} doesn't have email, skipping", userId)
-        FastFuture.successful(CancelNotify(userId))
+        FastFuture.successful(())
     }
-  } yield result
+  } yield ()
 
   private def emailIfNeeded(email: String, name: String, grouped: Seq[DialogGroup]): Option[Message] = {
     val dialogs = grouped flatMap (_.dialogs)

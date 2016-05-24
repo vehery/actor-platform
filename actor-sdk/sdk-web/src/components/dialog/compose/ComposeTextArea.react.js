@@ -14,12 +14,15 @@ class ComposeTextArea extends Component {
     sendEnabled: PropTypes.bool.isRequired,
     onSubmit: PropTypes.func.isRequired,
     onTyping: PropTypes.func.isRequired,
-    onPaste: PropTypes.func,
-    onKeyDown: PropTypes.func
+    onPaste: PropTypes.func.isRequired,
+    onKeyDown: PropTypes.func.isRequired,
+
+    placholder: PropTypes.string
   };
 
   static defaultProps = {
-    sendEnabled: true
+    sendEnabled: true,
+    onPaste: () => {}
   };
 
   constructor(props) {
@@ -99,13 +102,14 @@ class ComposeTextArea extends Component {
   }
 
   render() {
-    const { value } = this.props;
+    const { value, placeholder } = this.props;
 
     return (
       <textarea
         ref="area"
         className="compose__message"
         value={value}
+        placeholder={placeholder}
         onChange={this.onChange}
         onKeyDown={this.onKeyDown}
         onPaste={this.props.onPaste}
@@ -113,16 +117,16 @@ class ComposeTextArea extends Component {
     );
   }
 
-  focus() {
+  focus(force = false) {
     const { area } = this.refs;
-    if (area !== document.activeElement) {
+    if (force || area !== document.activeElement) {
       area.focus();
-      if (area.createTextRange) {
+      if (typeof area.selectionStart == 'number') {
+        area.selectionStart = area.selectionEnd = area.value.length;
+      } else if (typeof area.createTextRange != 'undefined') {
         const range = area.createTextRange();
-        range.move('character', area.value.length);
+        range.collapse(false);
         range.select();
-      } else if (area.selectionStart) {
-        area.setSelectionRange(area.value.length, area.value.length);
       }
     }
   }

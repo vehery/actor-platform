@@ -9,7 +9,7 @@ import im.actor.api.rpc.counters.UpdateCountersChanged
 import im.actor.api.rpc.files.ApiFileLocation
 import im.actor.api.rpc.messaging._
 import im.actor.api.rpc.misc.ResponseSeqDate
-import im.actor.api.rpc.peers.{ ApiPeer, ApiPeerType, ApiUserOutPeer }
+import im.actor.api.rpc.peers.{ ApiOutPeer, ApiPeer, ApiPeerType, ApiUserOutPeer }
 import im.actor.api.rpc.sequence.{ ApiUpdateContainer, ResponseGetDifference }
 import im.actor.server._
 import im.actor.server.acl.ACLUtils
@@ -42,6 +42,8 @@ class MessagingServiceSpec
   it should "publish messages in PubSub" in s.pubsub.publish
 
   it should "not repeat message sending with same authId and RandomId" in s.group.cached
+
+  it should "allow to edit last own message in public group" in s.group.editPublic
 
   "Any Messaging" should "keep original order of sent messages" in s.generic.rightOrder
 
@@ -223,27 +225,27 @@ class MessagingServiceSpec
           resp should matchForbidden
         }
 
-        whenReady(groupsService.handleEditGroupTitle(groupOutPeer, 4L, "Loosers")(alienClientData)) { resp ⇒
+        whenReady(groupsService.handleEditGroupTitle(groupOutPeer, 4L, "Loosers", Vector.empty)(alienClientData)) { resp ⇒
           resp should matchForbidden
         }
 
         val (user3, authId3, _, _) = createUser()
         val user3OutPeer = ApiUserOutPeer(user3.id, 11)
 
-        whenReady(groupsService.handleInviteUser(groupOutPeer, 4L, user3OutPeer)(alienClientData)) { resp ⇒
+        whenReady(groupsService.handleInviteUser(groupOutPeer, 4L, user3OutPeer, Vector.empty)(alienClientData)) { resp ⇒
           resp should matchForbidden
         }
 
         val fileLocation = ApiFileLocation(1L, 1L)
-        whenReady(groupsService.handleEditGroupAvatar(groupOutPeer, 5L, fileLocation)(alienClientData)) { resp ⇒
+        whenReady(groupsService.handleEditGroupAvatar(groupOutPeer, 5L, fileLocation, Vector.empty)(alienClientData)) { resp ⇒
           resp should matchForbidden
         }
 
-        whenReady(groupsService.handleRemoveGroupAvatar(groupOutPeer, 5L)(alienClientData)) { resp ⇒
+        whenReady(groupsService.handleRemoveGroupAvatar(groupOutPeer, 5L, Vector.empty)(alienClientData)) { resp ⇒
           resp should matchForbidden
         }
 
-        whenReady(groupsService.handleLeaveGroup(groupOutPeer, 5L)(alienClientData)) { resp ⇒
+        whenReady(groupsService.handleLeaveGroup(groupOutPeer, 5L, Vector.empty)(alienClientData)) { resp ⇒
           resp should matchForbidden
         }
 
@@ -286,6 +288,74 @@ class MessagingServiceSpec
           expectUpdate(classOf[UpdateMessage])(identity)
           expectUpdate(classOf[UpdateCountersChanged])(identity)
         }
+      }
+
+      def editPublic(): Unit = {
+        val sessionId = createSessionId()
+        val (alice, aliceAuthId, aliceAuthSid, _) = createUser()
+        val (bob, bobAuthId, bobAuthSid, _) = createUser()
+        val aliceClient = ClientData(aliceAuthId, sessionId, Some(AuthData(alice.id, aliceAuthSid, 42)))
+        val bobClient = ClientData(bobAuthId, sessionId, Some(AuthData(bob.id, bobAuthSid, 42)))
+
+        val WrongText = "hello everrryoine"
+        val CorrectText = "Hello everyone!"
+
+        val groupPeer = {
+          implicit val cd = aliceClient
+          val peer = createPubGroup("Test public group", "Group to test message edit", Set(bob.id)).groupPeer
+          ApiOutPeer(ApiPeerType.Group, peer.groupId, peer.accessHash)
+        }
+
+        val messRandomId = {
+          implicit val cd = aliceClient
+          sendMessageToGroup(groupPeer.id, ApiTextMessage(WrongText, Vector.empty, None))
+        }
+
+        // Alice can edit her own message
+        {
+          implicit val cd = aliceClient
+          whenReady(service.handleUpdateMessage(groupPeer, messRandomId, ApiTextMessage(CorrectText, Vector.empty, None))) { resp ⇒
+            resp should matchPattern {
+              case Xor.Right(ResponseSeqDate(_, _, _)) ⇒
+            }
+          }
+          expectUpdate(classOf[UpdateMessageContentChanged]) { upd ⇒
+            upd.randomId shouldEqual messRandomId
+            upd.peer shouldEqual groupPeer.asPeer
+            inside(parseMessage(upd.message.toByteArray)) {
+              case Right(ApiTextMessage(CorrectText, _, _)) ⇒
+            }
+          }
+        }
+
+        {
+          implicit val cd = bobClient
+          expectUpdate(classOf[UpdateMessageContentChanged]) { upd ⇒
+            upd.randomId shouldEqual messRandomId
+            upd.peer shouldEqual groupPeer.asPeer
+            inside(parseMessage(upd.message.toByteArray)) {
+              case Right(ApiTextMessage(CorrectText, _, _)) ⇒
+            }
+          }
+        }
+
+        val aliceSeq = getCurrentSeq(aliceClient)
+        val bobSeq = getCurrentSeq(bobClient)
+
+        // Bob can't edit alice's message
+        {
+          implicit val cd = bobClient
+          whenReady(service.handleUpdateMessage(groupPeer, messRandomId, ApiTextMessage("Som other text for message", Vector.empty, None))) { resp ⇒
+            resp should matchForbidden
+          }
+          expectNoUpdate(bobSeq, classOf[UpdateMessageContentChanged])
+        }
+
+        {
+          implicit val cd = aliceClient
+          expectNoUpdate(aliceSeq, classOf[UpdateMessageContentChanged])
+        }
+
       }
     }
 
@@ -510,10 +580,14 @@ class MessagingServiceSpec
 
         val (bob, bobAuthId, bobAuthSid, _) = createUser()
 
+        val bobClientData = ClientData(bobAuthId, 1, Some(AuthData(bob.id, bobAuthSid, 42)))
+        val aliceClientData1 = ClientData(aliceAuthId1, 1, Some(AuthData(alice.id, aliceAuthSid1, 42)))
+        val aliceClientData2 = ClientData(aliceAuthId2, 1, Some(AuthData(alice.id, aliceAuthSid2, 42)))
+
         val RandomId = 22L
 
         {
-          implicit val cd = ClientData(aliceAuthId1, 1, Some(AuthData(alice.id, aliceAuthSid1, 42)))
+          implicit val cd = aliceClientData1
           whenReady(service.handleSendMessage(
             getOutPeer(bob.id, aliceAuthId1),
             RandomId,
@@ -524,12 +598,13 @@ class MessagingServiceSpec
             resp should matchPattern {
               case Ok(_) ⇒
             }
-
           }
         }
 
+        val bobSeq = getCurrentSeq(bobClientData)
+
         {
-          implicit val cd = ClientData(aliceAuthId2, 1, Some(AuthData(alice.id, aliceAuthSid2, 42)))
+          implicit val cd = aliceClientData2
           whenReady(service.handleSendMessage(
             getOutPeer(bob.id, aliceAuthId2),
             RandomId,
@@ -544,7 +619,16 @@ class MessagingServiceSpec
         }
 
         {
-          implicit val cd = ClientData(bobAuthId, 1, Some(AuthData(bob.id, bobAuthSid, 42)))
+          implicit val cd = bobClientData
+          expectNoUpdate(bobSeq, classOf[UpdateMessage])
+          expectNoUpdate(bobSeq, classOf[UpdateCountersChanged])
+        }
+
+        val aliceSeq1 = getCurrentSeq(aliceClientData1)
+        val aliceSeq2 = getCurrentSeq(aliceClientData2)
+
+        {
+          implicit val cd = bobClientData
           whenReady(service.handleSendMessage(
             getOutPeer(alice.id, bobAuthId),
             RandomId,
@@ -557,6 +641,19 @@ class MessagingServiceSpec
             }
           }
         }
+
+        {
+          implicit val cd = aliceClientData1
+          expectNoUpdate(aliceSeq1, classOf[UpdateMessage])
+          expectNoUpdate(aliceSeq1, classOf[UpdateCountersChanged])
+        }
+
+        {
+          implicit val cd = aliceClientData2
+          expectNoUpdate(aliceSeq2, classOf[UpdateMessage])
+          expectNoUpdate(aliceSeq2, classOf[UpdateCountersChanged])
+        }
+
       }
 
     }

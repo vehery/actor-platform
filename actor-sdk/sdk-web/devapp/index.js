@@ -9,7 +9,9 @@ const delegate = new ActorSDKDelegate({
   components: {},
   features: {
     calls: true,
-    search: true
+    search: true,
+    editing: true,
+    blocking: false
   },
   actions: {},
   l18n: {}
