@@ -53,7 +53,7 @@ export default {
       test: /\.json$/,
       loaders: ['json']
     }, {
-      test: /\.(png|svg)$/,
+      test: /\.(png|svg|gif)$/,
       loaders: ['file?name=assets/images/[name].[ext]']
     }, {
       test: /\.(mp3)$/,

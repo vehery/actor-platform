@@ -14,6 +14,7 @@ import CallActionCreators from '../../actions/CallActionCreators';
 import ActivityActionCreators from '../../actions/ActivityActionCreators';
 import FavoriteActionCreators from '../../actions/FavoriteActionCreators';
 import SearchMessagesActionCreators from '../../actions/SearchMessagesActionCreators';
+import DialogMediaActionCreators from '../../actions/DialogMediaActionCreators';
 
 import AvatarItem from '../common/AvatarItem.react';
 import ToggleFavorite from '../common/ToggleFavorite.react';
@@ -34,7 +35,8 @@ class DialogHeader extends Component {
     message: PropTypes.string,
     isFavorite: PropTypes.bool.isRequired,
     isActivityOpen: PropTypes.bool.isRequired,
-    isDialogSearchOpen: PropTypes.bool.isRequired
+    isDialogSearchOpen: PropTypes.bool.isRequired,
+    isDialogMediaOpen: PropTypes.bool.isRequired
   }
 
   constructor(props, context) {
@@ -50,6 +52,7 @@ class DialogHeader extends Component {
     this.handleEndCallButtonClick = this.handleEndCallButtonClick.bind(this);
     this.handleSearchButtonClick = this.handleSearchButtonClick.bind(this);
     this.toggelMoreDropdownOpen = this.toggelMoreDropdownOpen.bind(this);
+    this.handlePhotoButtonClick = this.handlePhotoButtonClick.bind(this);
   }
 
   onFavoriteToggle() {
@@ -89,6 +92,15 @@ class DialogHeader extends Component {
       SearchMessagesActionCreators.open();
     } else {
       SearchMessagesActionCreators.close();
+    }
+  }
+
+  handlePhotoButtonClick() {
+    const { isDialogMediaOpen } = this.props;
+    if (!isDialogMediaOpen) {
+      DialogMediaActionCreators.show();
+    } else {
+      DialogMediaActionCreators.hide();
     }
   }
 
@@ -234,6 +246,20 @@ class DialogHeader extends Component {
     );
   }
 
+  renderPhotoButton() {
+    const { isDialogMediaOpen } = this.props;
+
+    const callButtonClassNames = classnames('button button--icon', {
+      'active': isDialogMediaOpen
+    });
+
+    return (
+      <button className={callButtonClassNames} onClick={this.handlePhotoButtonClick}>
+        <i className="material-icons">photo</i>
+      </button>
+    );
+  }
+
   render() {
     const { info } = this.props;
 
@@ -267,6 +293,7 @@ class DialogHeader extends Component {
 
           <div className="dialog__header__controls">
             {this.renderSearchButton()}
+            {this.renderPhotoButton()}
             {this.renderCallButton()}
             {this.renderInfoButton()}
             {this.renderMoreButton()}

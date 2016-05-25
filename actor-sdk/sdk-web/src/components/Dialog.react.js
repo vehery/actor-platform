@@ -17,6 +17,7 @@ import DefaultActivity from './Activity.react';
 import DefaultCall from './Call.react';
 import DialogSearch from './search/DialogSearch.react';
 import SearchResults from './search/SearchResults.react';
+import DialogMedia from './dialog/DialogMedia.react';
 
 import UserStore from '../stores/UserStore';
 import DialogStore from '../stores/DialogStore';
@@ -24,7 +25,8 @@ import DialogInfoStore from '../stores/DialogInfoStore';
 import ActivityStore from '../stores/ActivityStore';
 import OnlineStore from '../stores/OnlineStore';
 import CallStore from '../stores/CallStore';
-import SearchMessagesStore from '../stores/SearchMessagesStore'
+import SearchMessagesStore from '../stores/SearchMessagesStore';
+import DialogMediaStore from '../stores/DialogMediaStore';
 
 import DialogActionCreators from '../actions/DialogActionCreators';
 import MessageActionCreators from '../actions/MessageActionCreators';
@@ -39,13 +41,13 @@ class Dialog extends Component {
   };
 
   static getStores() {
-    return [ActivityStore, DialogStore, DialogInfoStore, OnlineStore, CallStore, SearchMessagesStore];
+    return [ActivityStore, DialogStore, DialogInfoStore, OnlineStore, CallStore, SearchMessagesStore, DialogMediaStore];
   }
 
   static calculateState() {
     const peer = DialogStore.getCurrentPeer();
     const dialogInfo = DialogInfoStore.getState();
-
+    console.debug('DialogMediaStore.getState()', DialogMediaStore.getState())
     return {
       peer,
       dialogInfo,
@@ -55,7 +57,8 @@ class Dialog extends Component {
       message: OnlineStore.getMessage(),
       isFavorite: DialogStore.isFavorite(peer.id),
       call: Dialog.calculateCallState(peer),
-      search: SearchMessagesStore.getState()
+      search: SearchMessagesStore.getState(),
+      media: DialogMediaStore.getState()
     };
   }
 
@@ -179,7 +182,7 @@ class Dialog extends Component {
   }
 
   renderContent() {
-    const { uid, peer, isMember, dialogInfo, search } = this.state;
+    const { uid, peer, isMember, dialogInfo, search, media } = this.state;
     const { MessagesSection, DialogFooter } = this.components;
 
     if (search.isOpen) {
@@ -188,6 +191,15 @@ class Dialog extends Component {
           query={search.query}
           results={search.results}
           isSearching={search.isSearching}
+        />
+      );
+    }
+
+    if (media.isOpen) {
+      return (
+        <DialogMedia
+          images={media.results}
+          isLoading={media.isLoading}
         />
       );
     }
@@ -210,7 +222,7 @@ class Dialog extends Component {
   }
 
   render() {
-    const { peer, dialogInfo, message, isFavorite, call, isActivityOpen, search } = this.state;
+    const { peer, dialogInfo, message, isFavorite, call, isActivityOpen, search, media } = this.state;
     const { DialogHeader } = this.components;
 
     if (!peer) {
@@ -227,6 +239,7 @@ class Dialog extends Component {
           isFavorite={isFavorite}
           isDialogSearchOpen={search.isOpen}
           isActivityOpen={isActivityOpen}
+          isDialogMediaOpen={media.isOpen}
         />
         {this.renderDialogSearch()}
         <div className="flexrow">

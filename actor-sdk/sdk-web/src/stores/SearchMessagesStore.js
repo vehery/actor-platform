@@ -27,6 +27,7 @@ class SearchMessagesStore extends ReduceStore {
 
       case ActionTypes.BIND_DIALOG_PEER:
       case ActionTypes.SEARCH_MESSAGES_HIDE:
+      case ActionTypes.DIALOG_MEDIA_SHOW:
         return this.getInitialState();
 
       case ActionTypes.SEARCH_MESSAGES_SET_QUERY:

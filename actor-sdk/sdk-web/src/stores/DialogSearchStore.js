@@ -43,6 +43,7 @@ class DialogSearchStore extends ReduceStore {
 
       case ActionTypes.BIND_DIALOG_PEER:
       case ActionTypes.DIALOG_SEARCH_HIDE:
+      case ActionTypes.DIALOG_MEDIA_SHOW:
         return this.getInitialState();
 
       case ActionTypes.DIALOG_SEARCH_CHANGE_QUERY:
