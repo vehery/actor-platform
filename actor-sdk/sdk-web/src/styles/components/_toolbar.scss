@@ -26,7 +26,6 @@ $stem-size: 10px;
 
   &__search {
     position: relative;
-    z-index: 100;
 
     display: inline-block;
 
@@ -136,6 +135,7 @@ $stem-size: 10px;
     }
     &__dropdown {
       position: absolute;
+      z-index: 100;
       top: 100%;
       right: -4px;
       left: -4px;

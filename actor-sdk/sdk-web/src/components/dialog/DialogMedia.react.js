@@ -5,7 +5,7 @@
 import React, { Component, PropTypes } from 'react';
 // import { FormattedMessage } from 'react-intl';
 // import classnames from 'classnames';
-import { PhotoSwipeGallery } from 'react-photoswipe';
+import { PhotoSwipe } from 'react-photoswipe';
 import DialogMediaActionCreators from '../../actions/DialogMediaActionCreators';
 
 class DialogMedia extends Component {
@@ -17,17 +17,30 @@ class DialogMedia extends Component {
   constructor(props) {
     super(props);
     console.debug(props);
+
+    this.state = {
+      galleryImageIndex: 0,
+      isPhotoSwipeOpen: false
+    };
+
+    this.handlePhotoSwipeClose = this.handlePhotoSwipeClose.bind(this);
+    this.handlePhotoSwipeOpen = this.handlePhotoSwipeOpen.bind(this);
   }
 
   componentDidMount() {
     DialogMediaActionCreators.findAllPhotos();
   }
 
-  getThumbnailContent(item) {
-    console.debug(item)
-    return (
-      <img src={item.thumbnail}/>
-    );
+  handlePhotoSwipeOpen(index) {
+    console.debug('handlePhotoSwipeOpen', index)
+    this.setState({
+      isPhotoSwipeOpen: true,
+      galleryImageIndex: index
+    })
+  }
+
+  handlePhotoSwipeClose() {
+    this.setState({ isPhotoSwipeOpen: false })
   }
 
   getImages() {
@@ -45,16 +58,33 @@ class DialogMedia extends Component {
     });
   }
 
+  renderDialogPhotos() {
+    const gallery = this.getImages();
+    if (!gallery.length) return null;
+
+    return gallery.map((image, index) => {
+      return (
+        <div className="image col-xs-12 col-sm-6 col-md-4 col-lg-3" key={index} >
+          <img src={image.thumbnail} alt={image.title} onClick={() => this.handlePhotoSwipeOpen(index)}/>
+        </div>
+      );
+    })
+  }
+
   render() {
     const { isLoading } = this.props;
+    const { isPhotoSwipeOpen, galleryImageIndex } = this.state;
 
     if (isLoading) {
       return (
-        <div>Loading</div>
+        <div className="dialog__media dialog__media--loading">
+          <div className="preloader"><div/><div/><div/><div/><div/></div>
+        </div>
       );
     }
 
     const galleryOptions = {
+      index: galleryImageIndex,
       mainClass: 'pswp--minimal--dark',
       barsSize: {
         top: 0,
@@ -65,16 +95,25 @@ class DialogMedia extends Component {
       shareEl: false,
       bgOpacity: 0.85,
       tapToClose: true,
-      tapToToggleControls: false
+      tapToToggleControls: false,
+      showAnimationDuration: 0,
+      hideAnimationDuration: 0
     };
 
     return (
       <div className="dialog__media">
-        <PhotoSwipeGallery
+
+        <div className="row">
+          {this.renderDialogPhotos()}
+        </div>
+
+        <PhotoSwipe
+          isOpen={isPhotoSwipeOpen}
           items={this.getImages()}
           options={galleryOptions}
-          thumbnailContent={this.getThumbnailContent}
+          onClose={this.handlePhotoSwipeClose}
         />
+
       </div>
     );
   }
