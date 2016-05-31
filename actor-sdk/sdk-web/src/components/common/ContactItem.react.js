@@ -20,6 +20,8 @@ class ContactItem extends Component {
 
     className: PropTypes.string,
 
+    onClick: PropTypes.func,
+
     children: PropTypes.node
   };
 
@@ -27,6 +29,12 @@ class ContactItem extends Component {
     super(props);
 
     this.shouldComponentUpdate = shouldComponentUpdate.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick() {
+    const { onClick } = this.props;
+    onClick && onClick();
   }
 
   render() {
@@ -34,7 +42,7 @@ class ContactItem extends Component {
     const contactClassName = classnames('contact row middle-xs', className);
 
     return (
-      <div className={contactClassName}>
+      <div className={contactClassName} onClick={this.handleClick}>
         <div className="contact__avatar">
           <AvatarItem
             image={avatar}
