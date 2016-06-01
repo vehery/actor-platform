@@ -5,6 +5,7 @@
 import React, { Component, PropTypes } from 'react';
 import Inputs from '../../../utils/Inputs';
 import { KeyCodes } from '../../../constants/ActorAppConstants';
+import classnames from 'classnames';
 
 class ComposeTextArea extends Component {
   static propTypes = {
@@ -17,7 +18,8 @@ class ComposeTextArea extends Component {
     onPaste: PropTypes.func.isRequired,
     onKeyDown: PropTypes.func.isRequired,
 
-    placholder: PropTypes.string
+    className: PropTypes.string,
+    placeholder: PropTypes.string
   };
 
   static defaultProps = {
@@ -102,12 +104,12 @@ class ComposeTextArea extends Component {
   }
 
   render() {
-    const { value, placeholder } = this.props;
-
+    const { value, placeholder, className } = this.props;
+    const textareaClassName = classnames('compose__message', className);
     return (
       <textarea
         ref="area"
-        className="compose__message"
+        className={textareaClassName}
         value={value}
         placeholder={placeholder}
         onChange={this.onChange}
