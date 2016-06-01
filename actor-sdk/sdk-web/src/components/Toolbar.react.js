@@ -4,7 +4,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import SharedContainer from '../utils/SharedContainer';
-import alert from '../utils/alert';
+import history from '../utils/history'
 
 import UserMenu from './common/UserMenu.react';
 import ToolbarSearch from './search/ToolbarSearch.react';
@@ -22,8 +22,7 @@ class AppHeader extends Component {
   }
 
   handleWriteButtonClick() {
-    alert('writeButtonClick')
-      .then(() => console.debug('Alert closed'));
+    history.push('/im/write');
   }
 
   renderWriteButton() {
@@ -34,7 +33,11 @@ class AppHeader extends Component {
     }
 
     return (
-      <button className="toolbar__button" onClick={this.handleWriteButtonClick}>
+      <button
+        className="toolbar__button"
+        onClick={this.handleWriteButtonClick}
+        style={{ marginRight: 6 }}
+      >
         <i className="material-icons">edit</i>
       </button>
     );

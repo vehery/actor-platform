@@ -43,7 +43,7 @@ export default {
       loader: 'style!css?modules&localIdentName=[name]__[local]!postcss?pack=cssnext',
       include: path.join(__dirname, 'src/components')
     }, {
-      test: /\.(scss|css)$/,
+      test: /\.scss$/,
       loader: ExtractTextPlugin.extract('style', sassLoaders.join('!'))
     }, {
       test: /\.js$/,

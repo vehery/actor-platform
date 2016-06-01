@@ -16,7 +16,6 @@ import WriteActionCreators from  '../../actions/WriteActionCreators';
 import CustomScroller from '../common/CustomScroller.react';
 import RecentGroup from './RecentGroup.react';
 import SidebarLink from './SidebarLink.react';
-import SidebarButton from './SidebarButton.react';
 
 class Recent extends Component {
   static propTypes = {
@@ -205,21 +204,8 @@ class Recent extends Component {
     );
   }
 
-  renderWriteButton() {
-    return (
-      <SidebarLink
-        className="sidebar__write"
-        to="/im/write"
-        title={'Write'}
-        glyph="edit"
-        key="write"
-      />
-    );
-  }
-
   renderScrollableContent() {
     return [
-      this.renderWriteButton(),
       this.renderRecentGroups(),
       this.renderHistoryButton()
     ];
