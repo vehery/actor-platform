@@ -291,10 +291,7 @@ export const ActionTypes = keymirror({
   BLOCKED_USERS_LOAD: null,
   BLOCKED_USERS_SET: null,
   BLOCKED_USERS_LOAD_FAILED: null,
-  BLOCKED_USERS_SET_QUERY: null,
-
-  WRITE_MODAL_SHOW: null,
-  WRITE_MODAL_HIDE: null
+  BLOCKED_USERS_SET_QUERY: null
 });
 
 export const EventTypes = {

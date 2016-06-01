@@ -1,0 +1,73 @@
+:root {
+  --headerColor: rgb(101, 101, 101);
+  --textColor: rgb(77, 77, 77);
+}
+
+.root {
+  width: 100%;
+  min-width: 600px;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 100px 0;
+  overflow: scroll;
+}
+
+.container {
+  width: 600px;
+  padding: 0 24px;
+  flex: 1 0 auto;
+}
+
+.header {
+  margin-bottom: 32px;
+  & h1 {
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 50px;
+    margin: 0;
+    padding: 0;
+    color: var(--headerColor);
+  }
+}
+
+.footer {
+  padding-top: 24px;
+  & .controls {
+    text-align: right;
+    & .button {
+      margin-left: 8px;
+    }
+  }
+}
+
+.radio {
+  & label {
+    font-size: 15px;
+    color: rgba(var(--textColor), .77);
+    & strong {
+      color: rgba(var(--textColor), .85);
+      font-weight: 500;
+    }
+  }
+}
+
+.section {
+  margin-top: 32px;
+  & .title {
+    font-size: 14px;
+    line-height: 24px;
+    display: block;
+    margin-bottom: 4px;
+    color: rgba(black, .3);
+  }
+}
+
+.message {
+  padding: 8px;
+  font-size: 17px;
+  line-height: 24px;
+  margin: 0;
+}

@@ -39,7 +39,7 @@ import DefaultInstall from '../components/Install.react';
 import DefaultArchive from '../components/Archive.react';
 import DefaultDialog from '../components/Dialog.react';
 import DefaultEmpty from '../components/Empty.react';
-import DefaultWrite from '../components/Write.react';
+import DefaultWrite from '../components/Write';
 
 import { extendL18n, getIntlData } from '../l18n';
 

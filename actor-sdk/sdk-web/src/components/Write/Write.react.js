@@ -2,21 +2,22 @@
  * Copyright (C) 2016 Actor LLC. <https://actor.im>
  */
 
- import React, { Component, PropTypes } from 'react';
- import { Container } from 'flux/utils';
- import { FormattedMessage } from 'react-intl';
- import Select from 'react-select';
+import React, { Component } from 'react';
+import { Container } from 'flux/utils';
+// import { FormattedMessage } from 'react-intl';
+import Select from 'react-select';
 
-import WriteActionCreators from  '../actions/WriteActionCreators';
+// import WriteActionCreators from  '../actions/WriteActionCreators';
 
-import WriteStore from  '../stores/WriteStore';
-import PeopleStore from '../stores/PeopleStore';
+import WriteStore from  '../../stores/WriteStore';
+import PeopleStore from '../../stores/PeopleStore';
 
-import ContactItem from './common/ContactItem.react';
-import AvatarItem from './common/AvatarItem.react';
-import TextField from './common/TextField.react';
-import ConnectionState from './common/ConnectionState.react';
-import ComposeTextArea from './dialog/compose/ComposeTextArea.react';
+import ContactItem from '../common/ContactItem.react';
+// import AvatarItem from './common/AvatarItem.react';
+import TextField from '../common/TextField.react';
+import ComposeTextArea from '../dialog/compose/ComposeTextArea.react';
+
+import styles from './Write.css';
 
 class Write extends Component {
   static getStores() {
@@ -56,29 +57,27 @@ class Write extends Component {
       <section className="main">
         <div className="flexrow">
 
-          <section className="write">
-            <ConnectionState/>
+          <section className={styles.root}>
 
-            <div className="write__container">
-              <header className="write__header">
-                {/*<FormattedMessage id="modal.addContact.title" tagName="h1"/>*/}
+            <div className={styles.container}>
+              <header className={styles.header}>
                 <h1>Write</h1>
               </header>
 
-              <div className="write__type row">
-                <div className="write__type__title col-xs-12">
+              <div className={styles.section + ' row'}>
+                <div className="title col-xs-12">
                   Whould you like to:
                 </div>
                 <div className="col-xs-12">
                   <div className="row">
                     <div className="col-xs">
-                      <div className="radio">
+                      <div className={'radio ' + styles.radio}>
                         <input
                           type="radio"
                           name="sendByEnter"
                           id="sendByEnterEnabled"
                           value="true"
-                          defaultChecked={true}
+                          defaultChecked
                           onChange={this.toggleSendByEnter}/>
                         <label htmlFor="sendByEnterEnabled">
                           Send <strong>Direct message</strong>
@@ -86,13 +85,13 @@ class Write extends Component {
                       </div>
                     </div>
                     <div className="col-xs">
-                      <div className="radio">
+                      <div className={'radio ' + styles.radio}>
                         <input
                           type="radio"
                           name="sendByEnter"
                           id="sendByEnterEnabled"
                           value="true"
-                          defaultChecked={true}
+                          defaultChecked
                           onChange={this.toggleSendByEnter}/>
                         <label htmlFor="sendByEnterEnabled">
                           Start <strong>Group chat</strong>
@@ -100,13 +99,13 @@ class Write extends Component {
                       </div>
                     </div>
                     <div className="col-xs">
-                      <div className="radio">
+                      <div className={'radio ' + styles.radio}>
                         <input
                           type="radio"
                           name="sendByEnter"
                           id="sendByEnterEnabled"
                           value="true"
-                          defaultChecked={true}
+                          defaultChecked
                           onChange={this.toggleSendByEnter}/>
                         <label htmlFor="sendByEnterEnabled">
                           Create <strong>Public channel</strong>
@@ -118,8 +117,8 @@ class Write extends Component {
               </div>
 
 
-              <div className="write__contacts">
-                <div className="write__compose__title">
+              <div className={styles.section}>
+                <div className="title">
                   Select someone:
                 </div>
                 <Select
@@ -136,8 +135,8 @@ class Write extends Component {
                 />
               </div>
 
-              <div className="write__title">
-                <div className="write__title__title">
+              <div className={styles.section}>
+                <div className="title">
                   Type your chanel or group title:
                 </div>
                 <TextField
@@ -150,21 +149,22 @@ class Write extends Component {
                 />
               </div>
 
-              <div className="write__compose">
-                <div className="write__compose__title">
+              <div className={styles.section}>
+                <div className="title">
                   Type your message bellow:
                 </div>
                 <ComposeTextArea
-                  autoFocus
-                  value={this.state.text}
-                  sendByEnter={this.props.sendByEnter}
-                  onSubmit={this.onSubmit}
-                  onTyping={this.onTyping}
-                  onKeyDown={this.onKeyDown}
+                  autoFocus={false}
+                  className={styles.message}
+                  value={''}
+                  sendByEnter={false}
+                  onSubmit={() => {}}
+                  onTyping={() => {}}
+                  onKeyDown={() => {}}
                 />
               </div>
 
-              <footer className="write__footer">
+              <footer className={styles.footer}>
                 <div className="controls">
                   <button className="button button--rised">Send</button>
                 </div>
