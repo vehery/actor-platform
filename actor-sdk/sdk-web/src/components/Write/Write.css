@@ -44,9 +44,9 @@
 .radio {
   & label {
     font-size: 15px;
-    color: rgba(var(--textColor), .77);
+    color: color(var(--textColor) alpha(77%));
     & strong {
-      color: rgba(var(--textColor), .85);
+      color: color(var(--textColor) alpha(85%));
       font-weight: 500;
     }
   }
@@ -59,7 +59,7 @@
     line-height: 24px;
     display: block;
     margin-bottom: 4px;
-    color: rgba(black, .3);
+    color: color(black alpha(30%));
   }
 }
 

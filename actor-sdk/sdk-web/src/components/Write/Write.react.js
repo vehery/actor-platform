@@ -17,8 +17,15 @@ import ContactItem from '../common/ContactItem.react';
 import TextField from '../common/TextField.react';
 import ComposeTextArea from '../dialog/compose/ComposeTextArea.react';
 import WriteSection from './WriteSection.react';
+import WriteTarget from './WriteTarget.react';
 
 import styles from './Write.css';
+
+const WriteTargetTypes = {
+  DIRECT: 'direct',
+  GROUP: 'group',
+  CHANNEL: 'channel'
+}
 
 class Write extends Component {
   static getStores() {
@@ -36,10 +43,12 @@ class Write extends Component {
     super(props, context);
 
     this.state = {
-      selectedContacts: []
+      selectedContacts: [],
+      target: null
     }
 
     this.handleSelectChange = this.handleSelectChange.bind(this);
+    this.handleTargetChange = this.handleTargetChange.bind(this);
   }
 
   handleSelectChange(value) {
@@ -52,8 +61,25 @@ class Write extends Component {
     );
   }
 
+  getTargetValues() {
+    return [{
+      value: WriteTargetTypes.DIRECT,
+      label: <span>Send <strong>Direct message</strong></span>
+    },{
+      value: WriteTargetTypes.GROUP,
+      label: <span>Start <strong>Group chat</strong></span>
+    },{
+      value: WriteTargetTypes.CHANNEL,
+      label: <span>Create <strong>Public channel</strong></span>
+    }]
+  }
+
+  handleTargetChange(value) {
+    console.debug('handleTargetChange', value)
+    this.setState({ target: value });
+  }
+
   render() {
-    console.debug('this.state.selectedContacts', this.state.selectedContacts)
     return (
       <section className="main">
         <div className="flexrow">
@@ -66,50 +92,11 @@ class Write extends Component {
               </header>
 
               <WriteSection title="Whould you like to:">
-                <div className="row">
-                  <div className="col-xs">
-                    <div className={'radio ' + styles.radio}>
-                      <input
-                        type="radio"
-                        name="sendByEnter"
-                        id="sendByEnterEnabled"
-                        value="true"
-                        defaultChecked
-                        onChange={this.toggleSendByEnter}/>
-                      <label htmlFor="sendByEnterEnabled">
-                        Send <strong>Direct message</strong>
-                      </label>
-                    </div>
-                  </div>
-                  <div className="col-xs">
-                    <div className={'radio ' + styles.radio}>
-                      <input
-                        type="radio"
-                        name="sendByEnter"
-                        id="sendByEnterEnabled"
-                        value="true"
-                        defaultChecked
-                        onChange={this.toggleSendByEnter}/>
-                      <label htmlFor="sendByEnterEnabled">
-                        Start <strong>Group chat</strong>
-                      </label>
-                    </div>
-                  </div>
-                  <div className="col-xs">
-                    <div className={'radio ' + styles.radio}>
-                      <input
-                        type="radio"
-                        name="sendByEnter"
-                        id="sendByEnterEnabled"
-                        value="true"
-                        defaultChecked
-                        onChange={this.toggleSendByEnter}/>
-                      <label htmlFor="sendByEnterEnabled">
-                        Create <strong>Public channel</strong>
-                      </label>
-                    </div>
-                  </div>
-                </div>
+                <WriteTarget
+                  values={this.getTargetValues()}
+                  currentValue={this.state.target}
+                  onChange={this.handleTargetChange}
+                />
               </WriteSection>
 
 
