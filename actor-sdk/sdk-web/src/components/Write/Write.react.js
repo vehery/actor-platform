@@ -16,6 +16,7 @@ import ContactItem from '../common/ContactItem.react';
 // import AvatarItem from './common/AvatarItem.react';
 import TextField from '../common/TextField.react';
 import ComposeTextArea from '../dialog/compose/ComposeTextArea.react';
+import WriteSection from './WriteSection.react';
 
 import styles from './Write.css';
 
@@ -61,66 +62,58 @@ class Write extends Component {
 
             <div className={styles.container}>
               <header className={styles.header}>
-                <h1>Write</h1>
+                Write
               </header>
 
-              <div className={styles.section + ' row'}>
-                <div className="title col-xs-12">
-                  Whould you like to:
-                </div>
-                <div className="col-xs-12">
-                  <div className="row">
-                    <div className="col-xs">
-                      <div className={'radio ' + styles.radio}>
-                        <input
-                          type="radio"
-                          name="sendByEnter"
-                          id="sendByEnterEnabled"
-                          value="true"
-                          defaultChecked
-                          onChange={this.toggleSendByEnter}/>
-                        <label htmlFor="sendByEnterEnabled">
-                          Send <strong>Direct message</strong>
-                        </label>
-                      </div>
+              <WriteSection title="Whould you like to:">
+                <div className="row">
+                  <div className="col-xs">
+                    <div className={'radio ' + styles.radio}>
+                      <input
+                        type="radio"
+                        name="sendByEnter"
+                        id="sendByEnterEnabled"
+                        value="true"
+                        defaultChecked
+                        onChange={this.toggleSendByEnter}/>
+                      <label htmlFor="sendByEnterEnabled">
+                        Send <strong>Direct message</strong>
+                      </label>
                     </div>
-                    <div className="col-xs">
-                      <div className={'radio ' + styles.radio}>
-                        <input
-                          type="radio"
-                          name="sendByEnter"
-                          id="sendByEnterEnabled"
-                          value="true"
-                          defaultChecked
-                          onChange={this.toggleSendByEnter}/>
-                        <label htmlFor="sendByEnterEnabled">
-                          Start <strong>Group chat</strong>
-                        </label>
-                      </div>
+                  </div>
+                  <div className="col-xs">
+                    <div className={'radio ' + styles.radio}>
+                      <input
+                        type="radio"
+                        name="sendByEnter"
+                        id="sendByEnterEnabled"
+                        value="true"
+                        defaultChecked
+                        onChange={this.toggleSendByEnter}/>
+                      <label htmlFor="sendByEnterEnabled">
+                        Start <strong>Group chat</strong>
+                      </label>
                     </div>
-                    <div className="col-xs">
-                      <div className={'radio ' + styles.radio}>
-                        <input
-                          type="radio"
-                          name="sendByEnter"
-                          id="sendByEnterEnabled"
-                          value="true"
-                          defaultChecked
-                          onChange={this.toggleSendByEnter}/>
-                        <label htmlFor="sendByEnterEnabled">
-                          Create <strong>Public channel</strong>
-                        </label>
-                      </div>
+                  </div>
+                  <div className="col-xs">
+                    <div className={'radio ' + styles.radio}>
+                      <input
+                        type="radio"
+                        name="sendByEnter"
+                        id="sendByEnterEnabled"
+                        value="true"
+                        defaultChecked
+                        onChange={this.toggleSendByEnter}/>
+                      <label htmlFor="sendByEnterEnabled">
+                        Create <strong>Public channel</strong>
+                      </label>
                     </div>
                   </div>
                 </div>
-              </div>
+              </WriteSection>
 
 
-              <div className={styles.section}>
-                <div className="title">
-                  Select someone:
-                </div>
+              <WriteSection title="Select someone:">
                 <Select
                   multi
                   value={this.state.selectedContacts}
@@ -133,12 +126,9 @@ class Write extends Component {
                   optionRenderer={this.renderContact}
                   valueRenderer={this.renderContact}
                 />
-              </div>
+              </WriteSection>
 
-              <div className={styles.section}>
-                <div className="title">
-                  Type your chanel or group title:
-                </div>
+              <WriteSection title="Type your chanel or group title:">
                 <TextField
                   className="input__material--wide"
                   disabled={false}
@@ -147,12 +137,9 @@ class Write extends Component {
                   ref="name"
                   type="text"
                 />
-              </div>
+              </WriteSection>
 
-              <div className={styles.section}>
-                <div className="title">
-                  Type your message bellow:
-                </div>
+              <WriteSection title="Type your message bellow:">
                 <ComposeTextArea
                   autoFocus={false}
                   className={styles.message}
@@ -162,7 +149,7 @@ class Write extends Component {
                   onTyping={() => {}}
                   onKeyDown={() => {}}
                 />
-              </div>
+              </WriteSection>
 
               <footer className={styles.footer}>
                 <div className="controls">

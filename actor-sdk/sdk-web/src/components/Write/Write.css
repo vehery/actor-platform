@@ -23,14 +23,12 @@
 
 .header {
   margin-bottom: 32px;
-  & h1 {
-    font-size: 40px;
-    font-weight: 500;
-    line-height: 50px;
-    margin: 0;
-    padding: 0;
-    color: var(--headerColor);
-  }
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 50px;
+  margin: 0;
+  padding: 0;
+  color: var(--headerColor);
 }
 
 .footer {
