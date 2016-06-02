@@ -1,6 +1,5 @@
 :root {
   --headerColor: rgb(101, 101, 101);
-  --textColor: rgb(77, 77, 77);
 }
 
 .root {
@@ -33,34 +32,10 @@
 
 .footer {
   padding-top: 24px;
-  & .controls {
-    text-align: right;
-    & .button {
-      margin-left: 8px;
-    }
-  }
 }
 
-.radio {
-  & label {
-    font-size: 15px;
-    color: color(var(--textColor) alpha(77%));
-    & strong {
-      color: color(var(--textColor) alpha(85%));
-      font-weight: 500;
-    }
-  }
-}
-
-.section {
-  margin-top: 32px;
-  & .title {
-    font-size: 14px;
-    line-height: 24px;
-    display: block;
-    margin-bottom: 4px;
-    color: color(black alpha(30%));
-  }
+.controls {
+  text-align: right;
 }
 
 .message {

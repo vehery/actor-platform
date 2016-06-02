@@ -27,12 +27,18 @@ const WriteTargetTypes = {
   CHANNEL: 'channel'
 }
 
+const defaultState = {
+  contacts: [],
+  selectedContacts: [],
+  target: WriteTargetTypes.DIRECT
+}
+
 class Write extends Component {
   static getStores() {
     return [WriteStore, PeopleStore];
   }
 
-  static calculateState(prevState) {
+  static calculateState(prevState = defaultState) {
     return {
       ...prevState,
       contacts: PeopleStore.getState()
@@ -42,11 +48,6 @@ class Write extends Component {
   constructor(props, context) {
     super(props, context);
 
-    this.state = {
-      selectedContacts: [],
-      target: null
-    }
-
     this.handleSelectChange = this.handleSelectChange.bind(this);
     this.handleTargetChange = this.handleTargetChange.bind(this);
   }
@@ -55,10 +56,8 @@ class Write extends Component {
     this.setState({ selectedContacts: value });
   }
 
-  renderContact(contact) {
-    return (
-      <ContactItem {...contact}/>
-    );
+  handleTargetChange(value) {
+    this.setState({ target: value });
   }
 
   getTargetValues() {
@@ -74,9 +73,10 @@ class Write extends Component {
     }]
   }
 
-  handleTargetChange(value) {
-    console.debug('handleTargetChange', value)
-    this.setState({ target: value });
+  renderContact(contact) {
+    return (
+      <ContactItem {...contact}/>
+    );
   }
 
   render() {
@@ -139,7 +139,7 @@ class Write extends Component {
               </WriteSection>
 
               <footer className={styles.footer}>
-                <div className="controls">
+                <div className={styles.controls}>
                   <button className="button button--rised">Send</button>
                 </div>
               </footer>

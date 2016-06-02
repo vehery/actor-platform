@@ -1,0 +1,12 @@
+:root {
+  --textColor: rgb(77, 77, 77);
+}
+
+.label {
+  font-size: 15px;
+  color: color(var(--textColor) alpha(77%));
+  & strong {
+    color: color(var(--textColor) alpha(85%));
+    font-weight: 500;
+  }
+}

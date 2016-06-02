@@ -5,7 +5,7 @@
 import React, { Component, PropTypes } from 'react';
 import Radio from '../common/Radio';
 
-// import styles from './WriteTarget.css';
+import styles from './WriteTarget.css';
 
 class WriteTarget extends Component {
   static propTypes = {
@@ -23,6 +23,7 @@ class WriteTarget extends Component {
           <Radio
             key={index}
             id={`radio${index}`}
+            labelClassName={styles.label}
             checked={radio.value === currentValue}
             label={radio.label}
             onClick={() => this.props.onChange(radio.value)}
